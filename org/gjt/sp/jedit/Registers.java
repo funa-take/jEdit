@@ -241,37 +241,42 @@ public class Registers
 			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
-		Transferable transferable = reg.getTransferable();
-		Mode mode = null;
-		String selection = null;
-		if (transferable.isDataFlavorSupported(JEditDataFlavor.jEditRichTextDataFlavor))
-		{
-			try
-			{
-				JEditRichText data = (JEditRichText) transferable.getTransferData(JEditDataFlavor.jEditRichTextDataFlavor);
-				mode = data.getMode();
-				selection = data.getText();
-			}
-			catch (UnsupportedFlavorException e)
-			{
-				Log.log(Log.ERROR, Registers.class, e);
-			}
-			catch (IOException e)
-			{
-				Log.log(Log.ERROR, Registers.class, e);
-			}
-		}
-		else if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
-		{
-			selection = getTextFromTransferable(transferable, DataFlavor.stringFlavor);
-		}
+		// funa edit start
+		// Transferable transferable = reg.getTransferable();
+		// Mode mode = null;
+		// String selection = null;
+		// if (transferable.isDataFlavorSupported(JEditDataFlavor.jEditRichTextDataFlavor))
+		// {
+			// try
+			// {
+				// JEditRichText data = (JEditRichText) transferable.getTransferData(JEditDataFlavor.jEditRichTextDataFlavor);
+				// mode = data.getMode();
+				// selection = data.getText();
+			// }
+			// catch (UnsupportedFlavorException e)
+			// {
+				// Log.log(Log.ERROR, Registers.class, e);
+			// }
+			// catch (IOException e)
+			// {
+				// Log.log(Log.ERROR, Registers.class, e);
+			// }
+		// }
+		// else if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+		// {
+			// selection = getTextFromTransferable(transferable, DataFlavor.stringFlavor);
+		// }
+		//  funa edit end
+		String selection = reg.toString();
 		if(selection == null)
 		{
 			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 		JEditBuffer buffer = textArea.getBuffer();
-		applyMode(mode, buffer);
+		// funa edit
+		// applyMode(mode, buffer);
+		
 		_paste(textArea, vertical, selection, buffer);
 	}
 

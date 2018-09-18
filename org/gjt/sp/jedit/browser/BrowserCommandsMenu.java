@@ -124,6 +124,8 @@ public class BrowserCommandsMenu extends JPopupMenu
 				add(createMenuItem("delete", "22x22/actions/edit-delete.png"));
 
 			add(createMenuItem("copy-path", "22x22/actions/edit-copy.png"));
+			// funa edit
+			add(createMenuItem("copy-path2", "22x22/actions/edit-copy.png"));
 			add(createMenuItem("paste", "22x22/actions/edit-paste.png"));
 
 			if((files.length == 1) || (browser.getSelectedFiles().length != 0))

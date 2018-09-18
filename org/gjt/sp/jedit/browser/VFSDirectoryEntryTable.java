@@ -31,6 +31,7 @@ import java.awt.font.*;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.Hashtable;
 
 import org.gjt.sp.jedit.browser.VFSDirectoryEntryTableModel.Entry;
 import org.gjt.sp.jedit.io.VFS;
@@ -122,6 +123,34 @@ public class VFSDirectoryEntryTable extends JTable
 		return false;
 	} //}}}
 
+	// funa edit
+	//{{{ addSelectFiles() method
+	public void addSelectFiles(String[] selectedPaths)
+	{
+		
+		Hashtable<String, Integer> files = new Hashtable<String, Integer>();
+		for(int i = 0; i < getRowCount(); i++)
+		{
+			Entry entry = (Entry) getValueAt(i,1);
+			files.put(entry.dirEntry.getPath(), i);
+		}
+		
+		int showRow = -1;
+		for (int i = 0; i < selectedPaths.length; i++){
+			String selectedPath = selectedPaths[i];
+			if (files.containsKey(selectedPath)){
+				int row = files.get(selectedPath);
+				addRowSelectionInterval(row,row);
+				showRow = row;
+			}
+		}
+		
+		if (showRow >= 0){
+			scrollRectToVisible(getCellRect(showRow,0,true));
+		}
+	}
+	//}}}
+
 	//{{{ doTypeSelect() method
 	public void doTypeSelect(String str, boolean dirsOnly)
 	{
@@ -208,15 +237,35 @@ public class VFSDirectoryEntryTable extends JTable
 
 	} //}}}
 
+	// funa edit
 	//{{{ setDirectory() method
 	public void setDirectory(VFS vfs, Object node, java.util.List<VFSFile> list,
 		Set<String> tmpExpanded)
+	{
+		setDirectory(vfs, node, list, tmpExpanded, null);
+	}
+	// }}}
+	
+	// funa edit
+	//{{{ setDirectory() method
+	public void setDirectory(VFS vfs, Object node, java.util.List<VFSFile> list,
+		Set<String> tmpExpanded, String[] selectedPaths)
 	{
 		timer.stop();
 		typeSelectBuffer.setLength(0);
 
 		VFSDirectoryEntryTableModel model = (VFSDirectoryEntryTableModel)getModel();
 		int startIndex;
+		
+		// funa edit
+		if (selectedPaths == null){
+			VFSFile[] selectedFiles = getSelectedFiles();
+			selectedPaths = new String[selectedFiles.length];
+			for(int i = 0; i < selectedPaths.length; i++){
+				selectedPaths[i] = selectedFiles[i].getPath();
+			}
+		}
+		
 		if(node == null)
 		{
 			startIndex = 0;
@@ -232,13 +281,16 @@ public class VFSDirectoryEntryTable extends JTable
 			startIndex++;
 		}
 
+		// funa edit
+		addSelectFiles(selectedPaths);
+
 		for(int i = 0; i < list.size(); i++)
 		{
 			Entry e = model.files[startIndex + i];
 			String path = e.dirEntry.getPath();
 			if(tmpExpanded.contains(path))
 			{
-				browserView.loadDirectory(e,path,false);
+				browserView.loadDirectory(e,path,false, null, selectedPaths);
 				tmpExpanded.remove(path);
 			}
 		}
@@ -298,12 +350,49 @@ public class VFSDirectoryEntryTable extends JTable
 		super.scrollRectToVisible(rect);
 	} //}}}
 
+	// Funa Edit
+	public void valueChanged(javax.swing.event.ListSelectionEvent e) {
+		super.valueChanged(e);
+		int row = getSelectedRow();
+		if (row != -1) {
+			VFSFile currentFile = ((VFSDirectoryEntryTableModel)getModel()).files[row].dirEntry;
+			String name = currentFile.getName();
+			String modified = currentFile.getExtendedAttribute(VFS.EA_MODIFIED);
+			String size = currentFile.getExtendedAttribute(VFS.EA_SIZE);
+			
+			String message = name;
+			if (modified != null) {
+				message += "  [" + modified + "] "; 
+			}
+			
+			if (size != null) {
+				message += "  [" + size + "] "; 
+			}
+			org.gjt.sp.jedit.GUIUtilities.getView(this).getStatus().setMessage(message);
+			
+		}
+		
+	}
+	
 	//{{{ processKeyEvent() method
 	@Override
 	public void processKeyEvent(KeyEvent evt)
 	{
 		if(evt.getID() == KeyEvent.KEY_PRESSED)
 		{
+			// Funa Edit
+			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class") != null) {
+				org.gjt.sp.jedit.gui.UserKey.consume(evt,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					true);
+				if (evt.isConsumed()) {
+					return;
+				}
+			}
+			
 			VFSDirectoryEntryTableModel model =
 				(VFSDirectoryEntryTableModel)getModel();
 			int row = getSelectedRow();
@@ -321,6 +410,13 @@ public class VFSDirectoryEntryTable extends JTable
 				}
 				else 
 				{
+					// Funa Edit
+					if (evt.isShiftDown()) {
+						String dir = browserView.getBrowser()
+						.getDirectory();
+						dir = MiscUtilities.getParentOfPath(dir);
+						browserView.getBrowser().setDirectory(dir);
+					} else 
 					if(row != -1)
 					{
 						if(model.files[row].expanded)
@@ -340,10 +436,11 @@ public class VFSDirectoryEntryTable extends JTable
 						}
 					}
 
-					String dir = browserView.getBrowser()
-						.getDirectory();
-					dir = MiscUtilities.getParentOfPath(dir);
-					browserView.getBrowser().setDirectory(dir);
+					// funa edit
+					// String dir = browserView.getBrowser()
+						// .getDirectory();
+					// dir = MiscUtilities.getParentOfPath(dir);
+					// browserView.getBrowser().setDirectory(dir);
 				}
 				break;
 			case KeyEvent.VK_TAB:
@@ -409,17 +506,37 @@ public class VFSDirectoryEntryTable extends JTable
 				}
 				else if(row != -1)
 				{
-					if(!model.files[row].expanded)
+					// Funa Edit
+					// if(!model.files[row].expanded)
+						// toggleExpanded(row);
+						if (row != -1) {
+						if ((model.files[row].dirEntry.getType() == VFSFile.FILE || model.files[row].expanded) &&
+							row < model.getRowCount() - 1) {
+							setSelectedRow(row + 1);
+						} else if (!model.files[row].expanded)
 						toggleExpanded(row);
+					} else if (model.getRowCount() > 0) {
+						setSelectedRow(0);
+				}
 				}
 				break;
 			case KeyEvent.VK_ENTER:
 				evt.consume();
+				// Funa Edit
 				browserView.getBrowser().filesActivated(
-					evt.isShiftDown()
+					!evt.isAltDown() && evt.isShiftDown()
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN,false);
 
+				// Funa Edit
+				if (evt.isAltDown() && browserView.getBrowser().getMode() == VFSBrowser.BROWSER) {
+					SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								browserView.getBrowser().focusOnDefaultComponent();
+							}
+						}
+						);
+				}
 				break;
 			}
 		}
@@ -460,9 +577,14 @@ public class VFSDirectoryEntryTable extends JTable
 				evt.consume();
 				if(browser.getMode() == VFSBrowser.BROWSER)
 				{
+					// funa edit
 					browser.setDirectory(
 						browser.getView().getBuffer()
-						.getDirectory());
+						.getDirectory(), 
+						new String[] {
+							browser.getView().getBuffer().getPath()
+				}
+					);
 				}
 				break;
 			default:

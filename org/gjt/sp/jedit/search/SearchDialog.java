@@ -465,6 +465,11 @@ public class SearchDialog extends EnhancedDialog
 
 		stringReplace = new JRadioButton(jEdit.getProperty(
 			"search.string-replace-btn"));
+		// funa edit
+		String mnemonic = jEdit.getProperty("search.string-replace-btn.mnemonic");
+		if (mnemonic != null){
+			stringReplace.setMnemonic(mnemonic.charAt(0));
+		}
 		stringReplace.addActionListener(replaceActionHandler);
 		grp.add(stringReplace);
 		cons.gridwidth = 1;
@@ -474,6 +479,11 @@ public class SearchDialog extends EnhancedDialog
 		cons.insets = new Insets(0,12,0,0);
 		beanShellReplace = new JRadioButton(jEdit.getProperty(
 			"search.beanshell-replace-btn"));
+		// funa edit
+		mnemonic = jEdit.getProperty("search.beanshell-replace-btn.mnemonic");
+		if (mnemonic != null){
+			beanShellReplace.setMnemonic(mnemonic.charAt(0));
+		}
 		beanShellReplace.addActionListener(replaceActionHandler);
 		grp.add(beanShellReplace);
 		fieldPanel.add(beanShellReplace,cons);

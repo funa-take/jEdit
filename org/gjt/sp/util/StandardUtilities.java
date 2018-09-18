@@ -34,6 +34,9 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.Stack;
+
+// funa edit
+import org.gjt.sp.jedit.TextUtilities;
 //}}}
 
 /**
@@ -321,7 +324,9 @@ loop:		for(int i = 0; i < str.length(); i++)
 			}
 			else
 			{
-				++virtualPosition;
+				// funa edit
+				virtualPosition += TextUtilities.getCharWidth(ch);
+				// ++virtualPosition;
 			}
 		}
 
@@ -362,11 +367,14 @@ loop:		for(int i = 0; i < str.length(); i++)
 			}
 			else
 			{
-				if(virtualPosition >= column)
+				if(virtualPosition >= column) {
 					return i;
-				else
-					++virtualPosition;
+				} else {
+					// funa edit
+					virtualPosition += TextUtilities.getCharWidth(ch);
+					// ++virtualPosition;
 			}
+		}
 		}
 
 		if(totalVirtualWidth != null)

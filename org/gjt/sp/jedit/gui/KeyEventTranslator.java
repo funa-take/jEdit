@@ -408,7 +408,42 @@ public class KeyEventTranslator
 			buf.append(getSymbolicModifierName(InputEvent.SHIFT_MASK));
 		return buf.length() == 0 ? null : buf.toString();
 	} //}}}
-
+	// funa edit
+	// {{{
+	public static int translateModifiers(int mod) {
+		int translateMod = 0;
+		if ((mod & c) != 0) {
+			translateMod |= InputEvent.CTRL_MASK;
+		}
+		if ((mod & a) != 0) {
+			translateMod |= InputEvent.ALT_MASK;
+		}
+		if ((mod & m) != 0) {
+			translateMod |= InputEvent.META_MASK;
+		}
+		if ((mod & s) != 0) {
+			translateMod |= InputEvent.SHIFT_MASK;
+		}
+		return translateMod;
+	}
+	
+	public static int getModifierBeforeTranslate(int mod) {
+		int translateMod = 0;
+		if ((mod & InputEvent.CTRL_MASK) != 0) {
+			translateMod |= c;
+		}
+		if ((mod & InputEvent.ALT_MASK) != 0) {
+			translateMod |= a;
+		}
+		if ((mod & InputEvent.META_MASK) != 0) {
+			translateMod |= m;
+		}
+		if ((mod & InputEvent.SHIFT_MASK) != 0) {
+			translateMod |= s;
+		}
+		return translateMod;
+	}
+	// }}}
 	static int c, a, m, s;
 
 	//{{{ Private members

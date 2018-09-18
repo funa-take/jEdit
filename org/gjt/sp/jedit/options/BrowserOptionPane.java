@@ -129,6 +129,15 @@ public class BrowserOptionPane extends AbstractOptionPane
 		useDefaultIcons = new JCheckBox(jEdit.getProperty("options.browser.general.useDefaultIcons"));
 		useDefaultIcons.setSelected(jEdit.getBooleanProperty("vfs.browser.useDefaultIcons"));
 		addComponent(useDefaultIcons);
+		
+		// funa add
+		maxWidth = new JTextField(jEdit.getProperty("vfs.browser.parentDir.maxWidth","0"));
+		addComponent(jEdit.getProperty("options.browser.general.parentDir.maxWidth"),
+			maxWidth);
+		maxHeight = new JTextField(jEdit.getProperty("vfs.browser.parentDir.maxHeight","0"));
+		addComponent(jEdit.getProperty("options.browser.general.parentDir.maxHeight"),
+			maxHeight);
+
 	} //}}}
 
 	//{{{ _save() method
@@ -155,6 +164,11 @@ public class BrowserOptionPane extends AbstractOptionPane
 			currentBufferFilter.isSelected());
 		jEdit.setBooleanProperty("vfs.browser.useDefaultIcons",
 			useDefaultIcons.isSelected());
+		// funa edit
+		jEdit.setProperty("vfs.browser.parentDir.maxWidth",
+			maxWidth.getText());
+		jEdit.setProperty("vfs.browser.parentDir.maxHeight",
+			maxHeight.getText());
 	} //}}}
 
 	//{{{ Private members
@@ -168,5 +182,8 @@ public class BrowserOptionPane extends AbstractOptionPane
 	private JCheckBox doubleClickClose;
 	private JCheckBox currentBufferFilter;
 	private JCheckBox useDefaultIcons;
+	// funa add
+	private JTextField maxWidth;
+	private JTextField maxHeight;
 	//}}}
 } //}}}

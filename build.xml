@@ -677,7 +677,7 @@
 		description="run jEdit">
 		<java jar="${jar.location}/${jar.filename}"
 		      fork="true"
-		      spawn="true">
+		      spawn="false">
 			<arg value="-settings=${build.dir}/settings"/>
 		</java>
 	</target>
@@ -859,6 +859,7 @@
 					<compilerarg line="${config.build.compilerarg}"/>
 				</javac>
 				<javadoc locale="en"
+					 additionalparam="-J-Duser.language=en "
 					 sourcepath="${basedir}"
 					 destdir="${classes.dir}/javadoc/api"
 					 packagenames="org.*"

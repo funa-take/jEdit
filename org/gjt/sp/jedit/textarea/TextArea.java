@@ -6002,7 +6002,10 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 			if(softWrap)
 			{
 				wrapToWidth = true;
-				wrapMargin = painter.getWidth() - charWidth * 3;
+				// funa edit
+				// wrapMargin = painter.getWidth() - charWidth * 3;
+				wrapMargin = (int)(getWidth() - gutter.getPreferredSize().getWidth() - verticalBox.getPreferredSize().getWidth()) - charWidth * 3;
+				
 			}
 			else
 			{
