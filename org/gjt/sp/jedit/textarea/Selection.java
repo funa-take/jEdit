@@ -28,6 +28,9 @@ import java.util.List;
 
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.util.StandardUtilities;
+
+// funa edit
+import org.gjt.sp.jedit.TextUtilities;
 //}}}
 
 /**
@@ -525,8 +528,11 @@ public abstract class Selection implements Cloneable
 					}
 					else if(ch == '\t')
 						currentWidth += tabSize - (currentWidth % tabSize);
-					else
-						currentWidth++;
+					else {
+						// funa edit
+						currentWidth += TextUtilities.getCharWidth(ch);
+						// currentWidth++;
+					}
 				}
 
 				if(lastNewline != text.length())
