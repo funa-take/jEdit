@@ -127,6 +127,18 @@ public class HistoryTextArea extends JTextArea
 
 		if(evt.getID() == KeyEvent.KEY_PRESSED)
 		{
+			// Funa add
+			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
+				org.gjt.sp.jedit.gui.UserKey.consume(evt, 
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					true, true, true, true, true);
+				if (evt.isConsumed()){
+					return;
+				}
+			}
 			switch(evt.getKeyCode())
 			{
 			case KeyEvent.VK_ENTER:
@@ -157,7 +169,16 @@ public class HistoryTextArea extends JTextArea
 					controller.historyNext();
 				evt.consume();
 				break;
-			case KeyEvent.VK_UP:
+				// Funa edit
+			// case KeyEvent.VK_UP:
+				// if(evt.isAltDown())
+				// {
+				// controller.showPopupMenu(
+				// evt.isShiftDown());
+				// evt.consume();
+				// }
+				// break;
+			case KeyEvent.VK_DOWN:
 				if(evt.isAltDown())
 				{
 					controller.showPopupMenu(

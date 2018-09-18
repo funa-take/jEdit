@@ -217,6 +217,10 @@ public class VFSBrowser extends JPanel implements DefaultFocusComponent,
 		pathField.setInstantPopups(true);
 		pathField.setEnterAddsToHistory(false);
 		pathField.setSelectAllOnFocus(true);
+		// Funa Edit
+		label.setDisplayedMnemonic(jEdit.getProperty(
+			"vfs.browser.path.mnemonic").charAt(0));
+		label.setLabelFor(pathField);
 
 
 		// because its preferred size can be quite wide, we
@@ -233,10 +237,21 @@ public class VFSBrowser extends JPanel implements DefaultFocusComponent,
 		layout.setConstraints(pathField,cons);
 		pathAndFilterPanel.add(pathField);
 
-		filterCheckbox = new JCheckBox(jEdit.getProperty("vfs.browser.filter"));
+		//  Funa edit start
+		// filterCheckbox = new JCheckBox(jEdit.getProperty("vfs.browser.filter"));
+		filterCheckbox = new JCheckBox();
+		JPanel checkPanel = new JPanel();
+		checkPanel.setLayout(new BorderLayout());
+		checkPanel.add(filterCheckbox, BorderLayout.WEST);
+		JLabel lblFilter = new JLabel(jEdit.getProperty("vfs.browser.filter"));
+		lblFilter.setDisplayedMnemonic(jEdit.getProperty(
+			"vfs.browser.filter.mnemonic").charAt(0));
+		checkPanel.add(lblFilter, BorderLayout.CENTER);
 		filterCheckbox.setMargin(new Insets(0,0,0,0));
-//		filterCheckbox.setRequestFocusEnabled(false);
-		filterCheckbox.setBorder(new EmptyBorder(0,0,0,12));
+		filterCheckbox.setRequestFocusEnabled(false);
+		// filterCheckbox.setBorder(new EmptyBorder(0,0,0,12));
+		checkPanel.setBorder(new EmptyBorder(0,0,0,12));
+		//  Funa edit end
 		filterCheckbox.setSelected(jEdit.getBooleanProperty(
 			"vfs.browser.filter-enabled"));
 
@@ -248,12 +263,18 @@ public class VFSBrowser extends JPanel implements DefaultFocusComponent,
 			cons.gridx = 0;
 			cons.weightx = 0.0;
 			cons.gridy = 1;
-			layout.setConstraints(filterCheckbox,cons);
-			pathAndFilterPanel.add(filterCheckbox);
+			// Funa edit start
+			// layout.setConstraints(filterCheckbox,cons);
+			// pathAndFilterPanel.add(filterCheckbox);
+			layout.setConstraints(checkPanel,cons);
+			pathAndFilterPanel.add(checkPanel);
+			// Funa edit end
 		}
 
 		filterField = new JComboBox();
 		filterEditor = new HistoryComboBoxEditor("vfs.browser.filter");
+		// funa add
+		lblFilter.setLabelFor(filterEditor);
 		filterEditor.setToolTipText(jEdit.getProperty("glob.tooltip"));
 		filterEditor.setInstantPopups(true);
 		filterEditor.setSelectAllOnFocus(true);
@@ -399,6 +420,7 @@ public class VFSBrowser extends JPanel implements DefaultFocusComponent,
 	public void focusOnDefaultComponent()
 	{
 		// pathField.requestFocus();
+		// Funa 今回は修正の必要なし		
 		defaultFocusComponent.requestFocus();
 	} //}}}
 
@@ -620,7 +642,8 @@ public class VFSBrowser extends JPanel implements DefaultFocusComponent,
 	} //}}}
 
 	//{{{ setDirectory() method
-	public void setDirectory(String path)
+	// funa edit
+	public void setDirectory(String path, String[] selectedPaths)
 	{
 		if(path.startsWith("file:"))
 			path = path.substring(5);
@@ -634,8 +657,13 @@ public class VFSBrowser extends JPanel implements DefaultFocusComponent,
 		browserView.saveExpansionState();
 
 		Runnable delayedAWTRequest = new DelayedEndRequest();
-		browserView.loadDirectory(null,path,true, delayedAWTRequest);
+		browserView.loadDirectory(null,path,true, delayedAWTRequest, selectedPaths);
 		this.path = path;
+	}
+	
+	public void setDirectory(String path)
+	{
+		setDirectory(path, null);
 	} //}}}
 
 	//{{{ getRootDirectory() method
@@ -1340,9 +1368,10 @@ check_selected:
 
 	boolean autoDetectEncoding;
 
+	// funa edit
 	//{{{ directoryLoaded() method
 	void directoryLoaded(Object node, Object[] loadInfo,
-		boolean addToHistory)
+		boolean addToHistory, String[] selectedPaths)
 	{
 		String path = (String)loadInfo[0];
 		if(path == null)
@@ -1419,7 +1448,7 @@ check_selected:
 		}
 
 		browserView.directoryLoaded(node,path,
-			directoryList);
+			directoryList, selectedPaths);
 
 		// to notify listeners that any existing
 		// selection has been deactivated

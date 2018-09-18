@@ -159,10 +159,19 @@ class BrowserView extends JPanel
 		loadDirectory(node, path, addToHistory, null);
 	} //}}}
 
-
+	// funa edit
 	//{{{ loadDirectory() method
 	public void loadDirectory(final Object node, String path,
 		final boolean addToHistory, final Runnable delayedAWTTask)
+	{
+		loadDirectory(node, path, addToHistory, delayedAWTTask, null);
+	} //}}}
+
+	// funa edit
+	//{{{ loadDirectory() method
+	public void loadDirectory(final Object node, String path,
+		final boolean addToHistory, final Runnable delayedAWTTask, 
+		final String[] selectedPaths)
 	{
 		path = MiscUtilities.constructPath(browser.getDirectory(),path);
 		VFS vfs = VFSManager.getVFSForPath(path);
@@ -186,7 +195,7 @@ class BrowserView extends JPanel
 		{
 			public void run()
 			{
-				browser.directoryLoaded(node,loadInfo,addToHistory);
+				browser.directoryLoaded(node,loadInfo,addToHistory, selectedPaths);
 				if (delayedAWTTask != null)
 					delayedAWTTask.run();
 			}
@@ -203,7 +212,8 @@ class BrowserView extends JPanel
 	 * @param path
 	 * @param directory  
 	 */
-	public void directoryLoaded(Object node, String path, java.util.List<VFSFile> directory)
+	 // funa edit
+	public void directoryLoaded(Object node, String path, java.util.List<VFSFile> directory, String[] selectedPaths)
 	{
 		//{{{ If reloading root, update parent directory list
 		if(node == null)
@@ -268,7 +278,7 @@ class BrowserView extends JPanel
 		} //}}}
 
 		table.setDirectory(VFSManager.getVFSForPath(path),
-			node,directory,tmpExpanded);
+			node,directory,tmpExpanded, selectedPaths);
 	} //}}}
 
 	//{{{ updateFileView() method
@@ -680,7 +690,9 @@ class BrowserView extends JPanel
 						evt.consume();
 						browser.previousDirectory();
 					}
-					else super.processEvent(evt);
+					//  Funa edit
+					// else super.processEvent(evt);
+					else evt.consume();
 					break;
 				case KeyEvent.VK_RIGHT:
 					if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
@@ -688,7 +700,9 @@ class BrowserView extends JPanel
 						evt.consume();
 						browser.nextDirectory();
 					}
-					else super.processEvent(evt);
+					// Funa edit
+					// else super.processEvent(evt);
+					else evt.consume();
 					break;
 				case KeyEvent.VK_TAB:
 					evt.consume();

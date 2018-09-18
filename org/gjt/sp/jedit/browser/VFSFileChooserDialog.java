@@ -165,6 +165,10 @@ public class VFSFileChooserDialog extends EnhancedDialog
 		{
 			filename = MiscUtilities.constructPath(
 				bufferDir,filename.substring(2));
+			} else if (filename.equals("/")) {
+				// Funa Edit
+				browser.rootDirectory();
+				return;
 		}
 
 		final int[] type = { -1 };

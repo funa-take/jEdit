@@ -1783,9 +1783,11 @@ loop:		while (true)
 						buffer = jEdit.getBuffer(path);
 						if (buffer == null)
 						{
-							buffer = jEdit.openTemporary(jEdit.getActiveView(), null,
-											    path, true, null);
-							jEdit.commitTemporary(buffer);
+							// funa edit
+							// buffer = jEdit.openTemporary(jEdit.getActiveView(), null,
+											    // path, true, null);
+							// jEdit.commitTemporary(buffer);
+							buffer = BufferSetManager.createUntitledBuffer();
 						}
 					}
 

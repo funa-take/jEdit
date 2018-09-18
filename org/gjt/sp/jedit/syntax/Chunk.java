@@ -445,30 +445,41 @@ public class Chunk extends Token
 		else
 		{
 			str = new String(lineText.array,lineText.offset + offset,length);
-			GlyphKey cacheKey = new GlyphKey(str,
-				style.getFont(), fontRenderContext);
-			GlyphCache cache = getGlyphCache();
-			GlyphVector[] cachedGlyphs = cache.get(cacheKey);
-			if (cachedGlyphs != null)
-			{
-				glyphs = cachedGlyphs;
+			
+			// funa edit start
+			// GlyphKey cacheKey = new GlyphKey(str,
+				// style.getFont(), fontRenderContext);
+			// GlyphCache cache = getGlyphCache();
+			// GlyphVector[] cachedGlyphs = cache.get(cacheKey);
+			// if (cachedGlyphs != null)
+			// {
+				// glyphs = cachedGlyphs;
+			// }
+			// else
+			// {
+				// int textStart = lineText.offset + offset;
+				// int textEnd = textStart + length;
+				// glyphs = layoutGlyphs(style.getFont(),
+					// fontRenderContext,
+					// lineText.array, textStart, textEnd);
+				// cache.put(cacheKey, glyphs);
+			// }
+			// float w = 0.0f;
+			// for (GlyphVector gv: glyphs)
+			// {
+				// w += (float)gv.getLogicalBounds().getWidth();
+			// }
+			// width = w;
+			
+			Rectangle2D logicalBounds;
+			GlyphVector gv = style.getFont().createGlyphVector(
+				fontRenderContext, str);
+			logicalBounds = gv.getLogicalBounds();
+			
+			width = (float)logicalBounds.getWidth();
+			glyphs = new GlyphVector[] {gv};
+			// funa edit end
 			}
-			else
-			{
-				int textStart = lineText.offset + offset;
-				int textEnd = textStart + length;
-				glyphs = layoutGlyphs(style.getFont(),
-					fontRenderContext,
-					lineText.array, textStart, textEnd);
-				cache.put(cacheKey, glyphs);
-			}
-			float w = 0.0f;
-			for (GlyphVector gv: glyphs)
-			{
-				w += (float)gv.getLogicalBounds().getWidth();
-			}
-			width = w;
-		}
 		assert isInitialized();
 	} //}}}
 

@@ -1444,12 +1444,60 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			{
 				gfx.setFont(defaultFont);
 				gfx.setColor(eolMarkerColor);
-				gfx.drawString(".",x,baseLine);
+				// gfx.drawString(".",x,baseLine);
+				if (physicalLine == textArea.getLineCount() - 1){
+					gfx.drawString("[EOF]",x,baseLine);	
+				} else {
+					String lineSep = buffer.getStringProperty(JEditBuffer.LINESEP);
+					if(lineSep == null)
+						lineSep = System.getProperty("line.separator");
+					float left = x;
+					float right = right = x + textArea.charWidth;
+					float top = y;
+					float bottom = top + fm.getLeading() + fm.getAscent() + fm.getDescent();
+					float xMargin = (right - left) * 0.3f;
+					float yMargin = (bottom - top) * 0.15f;
+					left += xMargin;
+					top += yMargin;
+					bottom -= yMargin;
+					float width = right - left;
+					float height = bottom - top;
+					
+					if("\n".equals(lineSep)){
+						float arrowX = left + (width / 2);
+						float arrowWidth = (width / 2);
+						float arrowLength = (height / 2);
+						
+						gfx.drawLine(Math.round(arrowX),Math.round(top),Math.round(arrowX),Math.round(bottom));
+						gfx.drawLine(Math.round(arrowX),Math.round(bottom),Math.round(arrowX-arrowWidth),Math.round(bottom-arrowLength));
+						gfx.drawLine(Math.round(arrowX),Math.round(bottom),Math.round(arrowX+arrowWidth),Math.round(bottom-arrowLength));
+					}  else if("\r\n".equals(lineSep)) {
+						float arrowX = right;
+						float arrowTop = top + (height / 4);
+						float arrowWidth = (height / 4);
+						float arrowLength = (width / 2);
+						float arrowY = bottom - arrowWidth;
+						
+						gfx.drawLine(Math.round(right),Math.round(arrowTop),Math.round(right),Math.round(arrowY));
+						gfx.drawLine(Math.round(right),Math.round(arrowY),Math.round(left),Math.round(arrowY));
+						gfx.drawLine(Math.round(left),Math.round(arrowY),Math.round(left+arrowLength),Math.round(arrowY-arrowWidth));
+						gfx.drawLine(Math.round(left),Math.round(arrowY),Math.round(left+arrowLength),Math.round(arrowY+arrowWidth));
+					} else if("\r".equals(lineSep)) {
+						float arrowY = top + (height / 2);
+						float arrowWidth = (height / 3);
+						float arrowLength = (width / 2);
+						
+						gfx.drawLine(Math.round(left),Math.round(arrowY),Math.round(right),Math.round(arrowY));
+						gfx.drawLine(Math.round(left),Math.round(arrowY),Math.round(left+arrowLength),Math.round(arrowY-arrowWidth));
+						gfx.drawLine(Math.round(left),Math.round(arrowY),Math.round(left+arrowLength),Math.round(arrowY+arrowWidth));
+					}
+				}
 				x += textArea.charWidth;
 			}
 
 			lineInfo.width = x - originalX;
 		}
+		
 	} //}}}
 
 	//{{{ PaintCaret class

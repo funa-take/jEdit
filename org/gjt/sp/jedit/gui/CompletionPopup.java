@@ -113,7 +113,8 @@ public class CompletionPopup extends JWindow
 		list.setCellRenderer(new CellRenderer());
 		list.addKeyListener(keyHandler);
 		list.addMouseListener(new MouseHandler());
-
+		// Funa Add
+		list.setFocusTraversalKeysEnabled(false);
 		JPanel content = new JPanel(new BorderLayout());
 		content.setFocusTraversalKeysEnabled(false);
 		// stupid scrollbar policy is an attempt to work around
@@ -387,6 +388,14 @@ public class CompletionPopup extends JWindow
 		@Override
 		public void keyPressed(KeyEvent e)
 		{
+			// Funa add
+			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
+				org.gjt.sp.jedit.gui.UserKey.consume(e,0,0,0,0,true);
+				if (e.isConsumed()){
+					return;
+				}
+			}
+			
 			CompletionPopup.this.keyPressed(e);
 
 			if (candidates == null || !candidates.isValid())
@@ -397,6 +406,17 @@ public class CompletionPopup extends JWindow
 			{
 				switch(e.getKeyCode())
 				{
+					// Funa add
+				case KeyEvent.VK_LEFT:
+				case KeyEvent.VK_RIGHT:
+				case KeyEvent.VK_HOME:
+				case KeyEvent.VK_END:
+					dispose();
+					// view.processKeyEvent(e);
+					// e.consume();
+					break;
+					
+					
 				case KeyEvent.VK_TAB:
 				case KeyEvent.VK_ENTER:
 					if (doSelectedCompletion())
@@ -443,13 +463,13 @@ public class CompletionPopup extends JWindow
 					e.consume();
 					break;
 				default:
-					if(e.isActionKey()
-						|| e.isAltDown()
-						|| e.isMetaDown()
-						|| e.isControlDown())
-					{
-						dispose();
-					}
+					// if(e.isActionKey()
+						// || e.isAltDown()
+						// || e.isMetaDown()
+						// || e.isControlDown())
+					// {
+						// dispose();
+					// }
 					break;
 				}
 			}
@@ -464,6 +484,10 @@ public class CompletionPopup extends JWindow
 		@Override
 		public void keyTyped(KeyEvent e)
 		{
+			// Funa edit
+			if (e.isAltDown()){
+				return;
+			}
 			if (e.isControlDown())
 			{
 				e.consume();

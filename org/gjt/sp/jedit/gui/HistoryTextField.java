@@ -238,6 +238,20 @@ public class HistoryTextField extends JTextField
 
 		if(evt.getID() == KeyEvent.KEY_PRESSED)
 		{
+			// Funa add
+			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
+				org.gjt.sp.jedit.gui.UserKey.consume(evt, 
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					true, true, true, true, true);
+				if (evt.isConsumed()){
+					return;
+				}
+			}
+			
+			
 			switch(evt.getKeyCode())
 			{
 			case KeyEvent.VK_ENTER:
@@ -258,12 +272,18 @@ public class HistoryTextField extends JTextField
 				evt.consume();
 				break;
 			case KeyEvent.VK_DOWN:
-				if(evt.isShiftDown())
-					controller.doForwardSearch();
-				else if(evt.isAltDown())
+				// Funa add
+				// if(evt.isShiftDown())
+					// controller.doForwardSearch();
+				// else if(evt.isAltDown())
+				if(evt.isAltDown())
 				{
 					controller.showPopupMenu(
 						evt.isShiftDown());
+				}
+				//  funa add
+				else if(evt.isShiftDown()) {
+					controller.doForwardSearch();
 				}
 				else
 					controller.historyNext();

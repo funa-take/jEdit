@@ -58,6 +58,18 @@ public class ParserRuleSet
 	//{{{ getModeName() method
 	public String getModeName()
 	{
+		// funa edit
+		// HTML内のJavascript等の対応
+		// まだ入れない。様子見。
+		// setNameが必ずしも mode と一致するわけじゃない。
+		// なので、この方法は完璧じゃないから見送りの方向。
+		// 各モードのxmlで対応しないとダメ。
+		
+		// org.gjt.sp.jedit.Mode mode = null;
+		// if (setName != null){
+			// mode = org.gjt.sp.jedit.jEdit.getMode(setName.toLowerCase());
+		// }
+		// return mode == null ? modeName : mode.getName();
 		return modeName;
 	} //}}}
 
@@ -117,6 +129,8 @@ public class ParserRuleSet
 				keywords.add(ruleset.keywords);
 			}
 		}
+		// funa
+		// このへんをいじったら、各モードの import句を処理できるじゃないかと思う
 		imports.clear();
 	} //}}}
 
