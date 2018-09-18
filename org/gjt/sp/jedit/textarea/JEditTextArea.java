@@ -44,6 +44,7 @@ import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.msg.PositionChanging;
 import org.gjt.sp.jedit.msg.PropertiesChanged;
 import org.gjt.sp.jedit.options.GlobalOptions;
+import org.gjt.sp.jedit.print.PageBreakExtension;
 //}}}
 
 /**
@@ -56,7 +57,7 @@ import org.gjt.sp.jedit.options.GlobalOptions;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: JEditTextArea.java 23536 2014-05-10 19:08:54Z ezust $
+ * @version $Id: JEditTextArea.java 24492 2016-08-10 21:34:50Z daleanson $
  */
 public class JEditTextArea extends TextArea
 {
@@ -72,6 +73,7 @@ public class JEditTextArea extends TextArea
 		this.view = view;
 		setRightClickPopupEnabled(true);
 		painter.setLineExtraSpacing(jEdit.getIntegerProperty("options.textarea.lineSpacing", 0));
+		new PageBreakExtension(this);
 		EditBus.addToBus(this);
 	} //}}}
 
@@ -237,7 +239,7 @@ public class JEditTextArea extends TextArea
 				return;
 			}
 		}
-		getToolkit().beep();
+		javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 	} //}}}
 
 
@@ -294,7 +296,7 @@ public class JEditTextArea extends TextArea
 		}
 		catch(Exception e)
 		{
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 		}
 	} //}}}
 
@@ -357,6 +359,7 @@ public class JEditTextArea extends TextArea
 	} //}}}
 
 	//{{{ doWordCount() method
+	@SuppressWarnings("fallthrough")
 	protected static void doWordCount(View view, String text)
 	{
 		char[] chars = text.toCharArray();
@@ -459,19 +462,7 @@ public class JEditTextArea extends TextArea
 			popup.setVisible(false);
 		else
 		{
-			// Rebuild popup menu every time the menu is requested.
-			createPopupMenu(evt);
-
-			int x = evt.getX();
-			int y = evt.getY();
-
-			int dragStart = xyToOffset(x,y,
-				!(painter.isBlockCaretEnabled()
-				|| isOverwriteEnabled()));
-
-			if(getSelectionCount() == 0 || multi)
-				moveCaretPosition(dragStart,false);
-			GUIUtilities.showPopupMenu(popup,painter,x,y);
+			super.handlePopupTrigger(evt);
 		}
 	} //}}}
 

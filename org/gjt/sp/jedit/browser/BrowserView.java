@@ -35,6 +35,7 @@ import java.util.*;
 import org.gjt.sp.jedit.gui.DockableWindowManager;
 import org.gjt.sp.jedit.io.*;
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.ThreadUtilities;
 //}}}
@@ -42,8 +43,9 @@ import org.gjt.sp.util.ThreadUtilities;
 /**
  * VFS browser tree view.
  * @author Slava Pestov
- * @version $Id: BrowserView.java 22045 2012-08-23 08:44:05Z kpouer $
+ * @version $Id: BrowserView.java 24428 2016-06-23 02:49:29Z daleanson $
  */
+@SuppressWarnings({"unchecked"})	// TODO: need to check on ParentDirectoryList and make it generic
 class BrowserView extends JPanel
 {
 	//{{{ BrowserView constructor
@@ -85,12 +87,6 @@ class BrowserView extends JPanel
 		{
 			public void run()
 			{
-				String prop = browser.isHorizontalLayout() ? "vfs.browser.horizontalSplitter" : "vfs.browser.splitter";
-				int loc = jEdit.getIntegerProperty(prop,-1);
-				if(loc == -1)
-					loc = parentScroller.getPreferredSize().height;
-
-				splitPane.setDividerLocation(loc);
 				parentDirectories.ensureIndexIsVisible(
 					parentDirectories.getModel()
 					.getSize());
@@ -115,16 +111,6 @@ class BrowserView extends JPanel
 	public void focusOnFileView()
 	{
 		table.requestFocus();
-	} //}}}
-
-	//{{{ removeNotify() method
-	@Override
-	public void removeNotify()
-	{
-		String prop = browser.isHorizontalLayout() ? "vfs.browser.horizontalSplitter" : "vfs.browser.splitter";
-		jEdit.setIntegerProperty(prop,splitPane.getDividerLocation());
-
-		super.removeNotify();
 	} //}}}
 
 	//{{{ getSelectedFiles() method
@@ -397,7 +383,7 @@ class BrowserView extends JPanel
 				});
 			}
 		});
-		GUIUtilities.showPopupMenu(popup,comp,point.x,point.y);
+		GenericGUIUtilities.showPopupMenu(popup,comp,point.x,point.y);
 	} //}}}
 
 	//}}}
@@ -430,7 +416,7 @@ class BrowserView extends JPanel
 				isSelected,cellHasFocus);
 
 			ParentDirectoryRenderer.this.setBorder(new EmptyBorder(
-				1,index * 5 + 1,1,1));
+				1, index * 5 + 1, 1, 1));
 
 			if(value instanceof LoadingPlaceholder)
 			{
@@ -469,7 +455,7 @@ class BrowserView extends JPanel
 				if(obj instanceof VFSFile)
 				{
 					VFSFile dirEntry = (VFSFile)obj;
-					if(GUIUtilities.isPopupTrigger(evt))
+					if(GenericGUIUtilities.isPopupTrigger(evt))
 					{
 						if(popup != null && popup.isVisible())
 						{
@@ -492,7 +478,7 @@ class BrowserView extends JPanel
 		public void mouseReleased(MouseEvent evt)
 		{
 			if(evt.getClickCount() % 2 != 0 &&
-				!GUIUtilities.isMiddleButton(evt.getModifiers()))
+				!GenericGUIUtilities.isMiddleButton(evt.getModifiers()))
 				return;
 
 			int row = parentDirectories.locationToIndex(evt.getPoint());
@@ -503,11 +489,11 @@ class BrowserView extends JPanel
 				if(obj instanceof VFSFile)
 				{
 					VFSFile dirEntry = (VFSFile)obj;
-					if(!GUIUtilities.isPopupTrigger(evt))
+					if(!GenericGUIUtilities.isPopupTrigger(evt))
 					{
 						browser.setDirectory(dirEntry.getPath());
 						if(browser.getMode() == VFSBrowser.BROWSER)
-						focusOnFileView();
+							focusOnFileView();
 					}
 				}
 			}
@@ -576,7 +562,7 @@ class BrowserView extends JPanel
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN,true);
 			}
-			else if(GUIUtilities.isMiddleButton(evt.getModifiers()))
+			else if(GenericGUIUtilities.isMiddleButton(evt.getModifiers()))
 			{
 				if(evt.isShiftDown())
 					table.getSelectionModel().addSelectionInterval(row,row);
@@ -614,16 +600,16 @@ class BrowserView extends JPanel
 				}
 			}
 
-			if(GUIUtilities.isMiddleButton(evt.getModifiers()))
+			if(GenericGUIUtilities.isMiddleButton(evt.getModifiers()))
 			{
 				if(row == -1)
-					/* nothing */;
+					return;
 				else if(evt.isShiftDown())
 					table.getSelectionModel().addSelectionInterval(row,row);
 				else
 					table.getSelectionModel().setSelectionInterval(row,row);
 			}
-			else if(GUIUtilities.isPopupTrigger(evt))
+			else if(GenericGUIUtilities.isPopupTrigger(evt))
 			{
 				if(popup != null && popup.isVisible())
 				{
@@ -647,7 +633,7 @@ class BrowserView extends JPanel
 		@Override
 		public void mouseReleased(MouseEvent evt)
 		{
-			if(!GUIUtilities.isPopupTrigger(evt)
+			if(!GenericGUIUtilities.isPopupTrigger(evt)
 				&& table.getSelectedRow() != -1)
 			{
 				browser.filesSelected();
@@ -660,6 +646,13 @@ class BrowserView extends JPanel
 	
 	class ParentDirectoryList extends JList
 	{
+		@Override
+		public Dimension getPreferredSize() {
+			Dimension d = super.getPreferredSize();
+			splitPane.setDividerLocation(browser.isHorizontalLayout() ? d.width + 3 : d.height + 3);
+			return d;
+		}
+		
 		@Override
 		protected void processKeyEvent(KeyEvent evt)
 		{

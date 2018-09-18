@@ -1,10 +1,9 @@
-<?xml version="1.0"?>
 <project name="jedit"
 	 default="build"
 	 xmlns:mod="antlib:de.masters_of_disaster.ant.tasks"
 	 xmlns:contrib="antlib:net.sf.antcontrib"
 	 xmlns:launch4j="antlib:net.sf.launch4j.ant"
-	 xmlns:jarbundler="antlib:net.sourceforge.jarbundler"
+	 xmlns:jarbundler="antlib:com.ultramixer.jarbundler"
 	 xmlns:fop="antlib:org.apache.fop.tools.anttasks"
 	 xmlns:ivy="antlib:org.apache.ivy.ant">
 	<description>
@@ -16,12 +15,12 @@
 
 	<!-- Target Java Versions -->
 	<property name="target.java.version"
-		  value="1.7"/>
+		  value="1.8"/>
 	<property name="mac.target.java.version"
-		  value="1.7+"/>
+		  value="1.8+"/>
 	<!-- based on http://packages.slackverse.org/?v=1&p=92 -->
 	<property name="slackware.target.java.version"
-		  value="1_7_0"/>
+		  value="1_8_0"/>
 
 	<!-- Various Paths -->
 	<property name="config.lib.dir"
@@ -63,16 +62,23 @@
 	<property name="config.build.deprecation"
 		  value="true"/>
 	<property name="config.build.compilerarg"
-		  value="-Xlint:unchecked"/>
+		  value="-Xlint:unchecked -Xlint:finally -Xlint:fallthrough -Xmaxwarns 1000"/>
 
 	<target name="init"
 		unless="init.done">
 		<echo message="Buildfile for ${ant.project.name} (${ant.file})"
 		      level="info"/>
-		<fail message="Ant 1.8.2 or newer is needed for jEdit to build, please install it and rerun">
+		<fail message="Ant 1.9.0 or newer is needed for jEdit to build, please install it and rerun (found Ant version: '${ant.version}')">
 			<condition>
 				<not>
-					<antversion atleast="1.8.2"/>
+					<antversion atleast="1.9.0"/>
+				</not>
+			</condition>
+		</fail>
+		<fail message="Java 1.8 is needed for jEdit to build, please install it and rerun (found Java version: '${ant.java.version}')">
+			<condition>
+				<not>
+					<equals arg1="1.8" arg2="${ant.java.version}"/>
 				</not>
 			</condition>
 		</fail>
@@ -109,13 +115,44 @@
 	<target name="init-ivy"
 		depends="init,download-ivy"
 		unless="ivy.done">
+		<script language="javascript">
+			<![CDATA[
+				try {
+					var dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+					dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+					var document = dbf.newDocumentBuilder().parse('http://plugins.jedit.org/export/mirror_list.php')
+					var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath()
+					var mirrors = xpath.evaluate('/MIRRORS/MIRROR/@ID', document, javax.xml.xpath.XPathConstants.NODESET)
+					var artifactPatterns = ''
+					for (i = 0; i < mirrors.getLength(); i++) {
+						artifactPatterns += '<artifact pattern="jar:http://'
+								    + mirrors.item(i).getTextContent()
+								    + '.dl.sourceforge.net/project/jedit-plugins/[artifact]/[revision]/[artifact]-[revision]-bin.zip!/[artifact].jar" />\n'
+					}
+					project.setUserProperty('jedit.plugins.artifact.patterns', artifactPatterns)
+				} catch(e) {
+					self.log('Error while retrieving mirror list, if plugins are not in Ivy cache, they will not be resolvable: ' + e, e, project.MSG_WARN)
+				}
+			]]>
+		</script>
+
+		<copy todir="${build.dir}"
+		      encoding="UTF-8"
+		      overwrite="true">
+			<fileset file="ivysettings.xml"/>
+			<filterset>
+				<filter token="jedit.plugins.artifact.patterns"
+					value="${jedit.plugins.artifact.patterns}"/>
+			</filterset>
+		</copy>
+
 		<property name="ivy.retrieve.pattern"
 			  value="${lib.dir}/[conf]/[artifact](-[classifier]).[ext]"/>
 		<taskdef resource="org/apache/ivy/ant/antlib.xml"
 			 classpath="${ivy.jar.file}"
 			 loaderref="ivy.loader"
 			 uri="antlib:org.apache.ivy.ant"/>
-		<ivy:settings file="ivysettings.xml"/>
+		<ivy:settings file="${build.dir}/ivysettings.xml"/>
 	</target>
 
 	<target name="retrieve"
@@ -205,6 +242,16 @@
 			<fileset dir="${dist.dir}"
 				 defaultexcludes="false"/>
 			<fileset dir="${textAreaPackage}/build"
+				 defaultexcludes="false"/>
+		</delete>
+	</target>
+
+	<target name="clean-jenkins"
+		depends="init,clean-all"
+		description="clean-all, also clean up ivy cache">
+		<delete includeemptydirs="true"
+			failonerror="false">
+			<fileset dir="${user.home}/.ivy2/cache"
 				 defaultexcludes="false"/>
 		</delete>
 	</target>
@@ -386,6 +433,7 @@
 				<include name="org/gjt/sp/jedit/actions.dtd"/>
 				<include name="org/gjt/sp/jedit/jedit.props"/>
 				<include name="modes/*"/>
+				<include name="org/gjt/sp/util/GenericGUIUtilities.java"/>
 				<include name="org/gjt/sp/util/Log*.java"/>
 				<include name="org/gjt/sp/util/IntegerArray.java"/>
 				<include name="org/gjt/sp/util/IOUtilities.java"/>
@@ -418,22 +466,30 @@
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="false">
-			<classpath refid="classpath.compile"/>
+			<classpath id="classpath.compile">
+				<fileset dir="${lib.dir}/compile" includes="*.jar"/>
+			</classpath>
 			<compilerarg line="${config.build.compilerarg}"/>
 		</javac>
 	</target>
 
 	<target name="test"
 		depends="init,retrieve,compile,compile-test"
-		description="run unit tests"
-		unless="skip.tests">
+		description="run unit tests">
 		<delete dir="${build.dir}/test/raw-reports"/>
 		<mkdir dir="${build.dir}/test/raw-reports"/>
-		<junit printsummary="true"
+		<junit fork="true"
+		       forkmode="once"
+		       printsummary="true"
 		       failureproperty="tests.failed"
+		       includeantruntime="false"
+		       showoutput="true"
 		       enabletestlistenerevents="true">
 			<classpath refid="classpath.test"/>
 			<classpath location="${classes.dir}/test"/>
+			<classpath location="${ant.library.dir}/ant.jar"/>
+			<classpath location="${ant.library.dir}/ant-junit.jar"/>
+			<classpath location="${ant.library.dir}/ant-junit4.jar"/>
 			<formatter type="xml"/>
 			<batchtest todir="${build.dir}/test/raw-reports">
 				<fileset dir="test"/>
@@ -449,7 +505,7 @@
 	</target>
 
 	<target name="build"
-		depends="init,retrieve,setup,compile"
+		depends="init,retrieve,setup,compile,test"
 		description="build the jEdit JAR-file with full debug-information">
 		<mkdir dir="${jar.location}"/>
 		<jar destfile="${jar.location}/${jar.filename}"
@@ -504,7 +560,6 @@
 				</copy>
 			</contrib:then>
 		</contrib:if>
-		<antcall target="test" />
 	</target>
 
 	<target name="build-exe-launcher"
@@ -525,10 +580,17 @@
 			</contrib:then>
 		</contrib:if>
 		<contrib:if>
-			<os family="unix"/>
+			<os family="unix" arch="amd64"/>
 			<contrib:then>
 				<property name="osfamily"
-					  value="unix"/>
+					  value="unix-x64"/>
+			</contrib:then>
+		</contrib:if>
+		<contrib:if>
+			<os family="unix" arch="x86"/>
+			<contrib:then>
+				<property name="osfamily"
+					  value="unix-x32"/>
 			</contrib:then>
 		</contrib:if>
 		<contrib:switch value="${osfamily}">
@@ -536,14 +598,24 @@
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-win32.jar"
 				       dest="${build.dir}/launch4j"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.5.0-workdir-win32/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.11-workdir-win32/"/>
 				</copy>
+			</contrib:case>
+			<contrib:case value="unix-x64">
+				<unjar src="${lib.dir}/launch4j/launch4j-workdir-linux64.jar"
+				       dest="${build.dir}/launch4j/"/>
+				<copy todir="${lib.dir}/launch4j">
+					<fileset dir="${build.dir}/launch4j/launch4j-3.11-workdir-linux64/"/>
+				</copy>
+				<chmod dir="${lib.dir}/launch4j/bin"
+				       perm="+x"
+				       includes="**"/>
 			</contrib:case>
 			<contrib:case value="unix">
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-linux.jar"
 				       dest="${build.dir}/launch4j/"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.5.0-workdir-linux/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.11-workdir-linux/"/>
 				</copy>
 				<chmod dir="${lib.dir}/launch4j/bin"
 				       perm="+x"
@@ -571,7 +643,7 @@
 				<fileset dir="${lib.dir}/launch4j"
 					 includes="*.jar"/>
 			</classpath>
-		 </taskdef>
+		</taskdef>
 		<launch4j:create configFile="${classes.dir}/package-files/windows/jedit.launch4j.xml"
 				 outfile="${jar.location}/jedit.exe"/>
 	</target>
@@ -833,21 +905,12 @@
 				 includes="api/**/*.html"/>
 			<filterchain>
 				<tokenfilter>
-					<replacestring
-						from="&lt;TD BGCOLOR=&quot;#FFFFFF&quot; CLASS=&quot;NavBarCell1Rev&quot;&gt;"
-						to="&lt;TD BGCOLOR=&quot;#00008B&quot; CLASS=&quot;NavBarCell1Rev&quot;&gt;"/>
-				</tokenfilter>
-				<tokenfilter>
 					<filetokenizer/>
-					<replaceregex
-						pattern="(&lt;SCRIPT type=&quot;text/javascript&quot;&gt;.*?&lt;/SCRIPT&gt;|onload=&quot;.*?&quot;)"
-						flags="gs"/>
+					<replaceregex pattern="&lt;noscript&gt;.*?JavaScript is disabled on your browser\..*?&lt;/noscript&gt;"
+						      flags="gs"/>
 				</tokenfilter>
 			</filterchain>
 		</copy>
-		<copy file="${basedir}/doc/stylesheet.css"
-		      todir="${jar.location}/doc/api"
-		      overwrite="true"/>
 	</target>
 
 	<target name="generate-pdf-users-guide"
@@ -959,6 +1022,8 @@
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
 		       deprecation="${config.build.deprecation}"
+		       source="${target.java.version}"
+		       target="${target.java.version}"
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="false">
@@ -1165,7 +1230,7 @@
 		</dependset>
 		<javac srcdir="${basedir}"
 		       destdir="${classes.dir}/jarbundler"
-		       includes="net/**"
+		       includes="com/**"
 		       debug="true"
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
@@ -1190,9 +1255,9 @@
 			</condition>
 		</fail>
 		<taskdef name="create"
-			 classname="net.sourceforge.jarbundler.JarBundler"
+			 classname="com.ultramixer.jarbundler.JarBundler"
 			 classpath="${dist.dir}/classes/jarbundler"
-			 uri="antlib:net.sourceforge.jarbundler">
+			 uri="antlib:com.ultramixer.jarbundler">
 		</taskdef>
 		<tstamp>
 			<format property="current.year"
@@ -1209,7 +1274,6 @@
 				   developmentregion="English"
 				   extraclasspath="/System/Library/Java"
 				   icon="icons/icon.icns"
-				   infostring="jEdit ${jedit.version}, Copyright &#169; 1998-${current.year} Contributors"
 				   copyright="Copyright &#169; 1998-${current.year} Contributors"
 				   jvmversion="${mac.target.java.version}"
 				   shortname="jEdit"
@@ -1218,7 +1282,9 @@
 				   version="${jedit.version}"
 				   antialiasedgraphics="true"
 				   antialiasedtext="true"
-				   screenmenu="true">
+				   screenmenu="true"
+				   lsapplicationcategorytype="public.app-category.developer-tools"
+				   highresolutioncapable="true">
 			<javafileset dir="${dist.dir}"
 				     includes="doc/**
 					       jars/**
@@ -1265,9 +1331,9 @@
 		</exec>
 		<exec executable="ln"
 		      failonerror="true">
-			<arg value="-sF" />
-			<arg file="/Applications" />
-			<arg file="/Volumes/jEdit/ " />
+			<arg value="-sF"/>
+			<arg file="/Applications"/>
+			<arg file="/Volumes/jEdit/"/>
 		</exec>
 		<copy file="package-files/osx/DS_Store"
 		      tofile="/Volumes/jEdit/.DS_Store"
@@ -1636,7 +1702,7 @@
 					   properties/**
 					   startup/**
 					   ${jar.filename}"
-				excludes="jars/MacOSX.jar"/>
+				 excludes="jars/MacOSX.jar"/>
 		</mod:calculatesize>
 		<copy todir="${dist.dir}/classes/package-files/linux/deb"
 		      encoding="UTF-8"
@@ -1922,7 +1988,7 @@ Press Return key to continue...
 				fIn = new BufferedInputStream(new FileInputStream(new File (project.getProperty("dist.dir"), "Release")));
 				while ((ch = fIn.read()) >= 0)
 				{
-				    sGen.update((byte)ch);
+					sGen.update((byte)ch);
 				}
 				out = new BCPGOutputStream(new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(new File (project.getProperty("dist.dir"), "Release.gpg")))));
 				sGen.generate().encode(out);

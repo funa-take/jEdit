@@ -36,7 +36,7 @@ import java.nio.charset.UnsupportedCharsetException;
 /**
  * A buffer save request.
  * @author Slava Pestov
- * @version $Id: BufferSaveRequest.java 22357 2012-10-13 04:58:01Z ezust $
+ * @version $Id: BufferSaveRequest.java 24222 2015-12-11 23:27:42Z daleanson $
  */
 public class BufferSaveRequest extends BufferIORequest
 {
@@ -82,6 +82,7 @@ public class BufferSaveRequest extends BufferIORequest
 			// the entire save operation can be aborted...
 			setCancellable(true);
 
+			String originalPath = path;
 			path = vfs._canonPath(session,path,view);
 			if(!MiscUtilities.isURL(path))
 				path = MiscUtilities.resolveSymlinks(path);
@@ -158,7 +159,8 @@ public class BufferSaveRequest extends BufferIORequest
 			}
 
 			if(!twoStageSave)
-				VFSManager.sendVFSUpdate(vfs,path,true);
+				// send the original path, let the receiver resolve symlinks if necessary
+				VFSManager.sendVFSUpdate(vfs, originalPath, true);
 		}
 		catch (FileNotFoundException e)
 		{

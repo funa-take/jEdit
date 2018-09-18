@@ -38,6 +38,7 @@ common.clearAll=Clear All
 common.selectAll=Select All
 common.selectNone=Select None
 common.loading=Loading...
+common.reset=Reset
 
 lineSep.unix=Unix (\\n)
 lineSep.windows=DOS/Windows (\\r\\n)
@@ -53,7 +54,6 @@ action-set.macros=Macros
 action-set.plugin=Plugin: {0}
 
 macro-handler.beanshell.label=BeanShell script
-macro-handler.beanshell.glob=*.bsh
 
 save-layout-failed.message=Failed to save the docking layout.
 load-layout.title=Load Docking Layout
@@ -110,6 +110,7 @@ save-a-copy-as.label=Save a Cop$y As...
 save-a-copy-as.tooltip=Does not change the current buffer's path
 save-all.label=Save A$ll...
 print.label=$Print...
+print-preview.label=Print Pre$view...
 page-setup.label=Pa$ge Setup...
 # Print selection not yet implemented
 #print-selection.label=Prin$t Selection...
@@ -566,6 +567,8 @@ view.status.wrap-tooltip=<html>Word wrap mode is {0} (click to change)</html>
 view.status.indent-tooltip=Automatic indentation indicator (click to change)
 view.status.autoindent-changed=Automatic indentation status is now "{0}"
 view.status.bufferset-tooltip=BufferSet scope is {0}
+view.status.locked-changed=Buffer is {0,choice,0#unlocked|1#locked}
+view.status.locked-tooltip=Buffer is {0,choice,0#unlocked|1#locked} (click to change)
 wrap.none=disabled
 wrap.hard=hard
 wrap.soft=soft
@@ -583,8 +586,175 @@ print.headerText=jEdit - {0}
 print.footerText={0} :: page {1}
 
 print-error.title=Print Error
-print-error.message=An error occurred while trying to print:\n\
-	{0}
+print-error.message=An error occurred while trying to print:\n{0}
+
+print.dialog.title=Print
+print.dialog.pageSetupTitle=Page Setup
+print.dialog.Advanced=Advanced
+print.dialog.All_pages=All pages
+print.dialog.All_sheets=All sheets
+print.dialog.At=At
+print.dialog.Automatic-Feeder=Automatic Feeder
+print.dialog.Bottom=Bottom
+print.dialog.Cassette=Cassette
+print.dialog.Collate=Collate
+print.dialog.Color=Color
+print.dialog.Copies=Copies
+print.dialog.Current_page=Current page
+print.dialog.Draft=Draft
+print.dialog.Even_sheets=Even sheets
+print.dialog.Finishing=Finishing
+print.dialog.Form-Source=Form Source
+print.dialog.General=General
+print.dialog.High=High
+print.dialog.Ink=Ink
+print.dialog.Job=Job
+print.dialog.Job_Details=Job Details
+print.dialog.Large-Format=Large Format
+print.dialog.Layout=Layout
+print.dialog.Left=Left
+print.dialog.Low=Low
+print.dialog.Manual-Envelope=Manual Envelope
+print.dialog.Margins=Margins
+print.dialog.Medium=Medium
+print.dialog.Monochrome=Monochrome
+print.dialog.Normal=Normal
+print.dialog.Now=Now
+print.dialog.Odd_sheets=Odd sheets
+print.dialog.On_Hold=On Hold
+print.dialog.Only_print=Only print
+print.dialog.Orientation=Orientation
+print.dialog.Output_tray=Output tray
+print.dialog.Page_Setup=Page Setup
+print.dialog.Page_ordering=Page ordering
+print.dialog.Pages=Pages
+print.dialog.Pages_per_side=Pages per side
+print.dialog.Paper=Paper
+print.dialog.Paper_size=Paper size
+print.dialog.Paper_source=Paper source
+print.dialog.Print_Document=Print Document
+print.dialog.Priority=Priority
+print.dialog.Quality=Quality
+print.dialog.Range=Range
+print.dialog.Reverse=Reverse
+print.dialog.Right=Right
+print.dialog.Selection=Selection
+print.dialog.Small-Format=Small Format
+print.dialog.Top=Top
+print.dialog.Tractor-Feeder=Tractor Feeder
+print.dialog.Two-sided=Two-sided
+print.dialog.Urgent=Urgent
+print.dialog.a=Engineering A
+print.dialog.accepting-jobs=Accepting jobs
+print.dialog.auto-select=Automatically Select
+print.dialog.b=Engineering B
+print.dialog.c=Engineering C
+print.dialog.d=Engineering D
+print.dialog.e=Engineering E
+print.dialog.envelope=Envelope
+print.dialog.executive=Executive
+print.dialog.folio=Folio
+print.dialog.invite-envelope=Invitation Envelope
+print.dialog.invoice=Invoice
+print.dialog.iso-2a0=2A0 (ISO/DIN & JIS)
+print.dialog.iso-4a0=4A0 (ISO/DIN & JIS)
+print.dialog.iso-a0=A0 (ISO/DIN & JIS)
+print.dialog.iso-a1=A1 (ISO/DIN & JIS)
+print.dialog.iso-a2=A2 (ISO/DIN & JIS)
+print.dialog.iso-a3=A3 (ISO/DIN & JIS)
+print.dialog.iso-a4=A4 (ISO/DIN & JIS)
+print.dialog.iso-a5=A5 (ISO/DIN & JIS)
+print.dialog.iso-a6=A6 (ISO/DIN & JIS)
+print.dialog.iso-a7=A7 (ISO/DIN & JIS)
+print.dialog.iso-a8=A8 (ISO/DIN & JIS)
+print.dialog.iso-a9=A9 (ISO/DIN & JIS)
+print.dialog.iso-a10=A10 (ISO/DIN & JIS)
+print.dialog.iso-b0=B0 (ISO/DIN)
+print.dialog.iso-b1=B1 (ISO/DIN)
+print.dialog.iso-b2=B2 (ISO/DIN)
+print.dialog.iso-b3=B3 (ISO/DIN)
+print.dialog.iso-b4=B4 (ISO/DIN)
+print.dialog.iso-b5=B5 (ISO/DIN)
+print.dialog.iso-b6=B6 (ISO/DIN)
+print.dialog.iso-b7=B7 (ISO/DIN)
+print.dialog.iso-b8=B8 (ISO/DIN)
+print.dialog.iso-b9=B9 (ISO/DIN)
+print.dialog.iso-b10=B10 (ISO/DIN)
+print.dialog.iso-c0=C0 (ISO/DIN)
+print.dialog.iso-c1=C1 (ISO/DIN)
+print.dialog.iso-c2=C2 (ISO/DIN)
+print.dialog.iso-c3=C3 (ISO/DIN)
+print.dialog.iso-c4=C4 (ISO/DIN)
+print.dialog.iso-c5=C5 (ISO/DIN)
+print.dialog.iso-c6=C6 (ISO/DIN)
+print.dialog.iso-c7=C7 (ISO/DIN)
+print.dialog.iso-c8=C8 (ISO/DIN)
+print.dialog.iso-c9=C9 (ISO/DIN)
+print.dialog.iso-c10=C10 (ISO/DIN)
+print.dialog.iso-designated-long=ISO Designated Long
+print.dialog.italian-envelope=Italy Envelope
+print.dialog.italy-envelope=Italy Envelope
+print.dialog.japanese-postcard=Postcard (JIS)
+print.dialog.jis-b0=B0 (JIS)
+print.dialog.jis-b1=B1 (JIS)
+print.dialog.jis-b2=B2 (JIS)
+print.dialog.jis-b3=B3 (JIS)
+print.dialog.jis-b4=B4 (JIS)
+print.dialog.jis-b5=B5 (JIS)
+print.dialog.jis-b6=B6 (JIS)
+print.dialog.jis-b7=B7 (JIS)
+print.dialog.jis-b8=B8 (JIS)
+print.dialog.jis-b9=B9 (JIS)
+print.dialog.jis-b10=B10 (JIS)
+print.dialog.landscape=Landscape
+print.dialog.main=Main
+print.dialog.manual=Manual
+print.dialog.middle=Middle
+print.dialog.monarch-envelope=Monarch Envelope
+print.dialog.na-5x7=5\" x 7\" Paper
+print.dialog.na-6x9-envelope=6x9 Envelope
+print.dialog.na-7x9-envelope=6x7 Envelope
+print.dialog.na-8x10=8\" x 10\" Paper
+print.dialog.na-9x11-envelope=9x11 Envelope
+print.dialog.na-9x12-envelope=9x12 Envelope
+print.dialog.na-10x13-envelope=10x13 Envelope
+print.dialog.na-10x14-envelope=10x14 Envelope
+print.dialog.na-10x15-envelope=10x15 Envelope
+print.dialog.na-legal=Legal
+print.dialog.na-letter=Letter
+print.dialog.na-number-9-envelope=No. 9 Envelope
+print.dialog.na-number-10-envelope=No. 10 Envelope
+print.dialog.na-number-11-envelope=No. 11 Envelope
+print.dialog.na-number-12-envelope=No. 12 Envelope
+print.dialog.na-number-14-envelope=No. 14 Envelope
+print.dialog.not-accepting-jobs=Not accepting jobs
+print.dialog.one-sided=One sided
+print.dialog.oufuko-postcard=Double Postcard (JIS)
+print.dialog.personal-envelope=Personal Envelope
+print.dialog.portrait=Portrait
+print.dialog.quarto=Quarto
+print.dialog.reverse-landscape=Reverse Landscape
+print.dialog.reverse-portrait=Reverse Portrait
+print.dialog.side=Side
+print.dialog.tabloid=Tabloid
+print.dialog.top=Top
+print.dialog.two-sided-long-edge=Two Sided, Long Edge
+print.dialog.two-sided-short-edge=Two Sided, Short Edge
+print.dialog.error.Invalid_left_margin=Invalid left margin.
+print.dialog.error.Invalid_top_margin=Invalid top margin.
+print.dialog.error.Invalid_left_andor_right_margin=Invalid left and/or right margin.
+print.dialog.error.Invalid_top_andor_bottom_margin=Invalid top and/or bottom margin.
+print.dialog.preview=Preview
+
+print.toggle-show-page-breaks.label=Toggle Page Break Marker
+
+printpreview.dialog.title=Print Preview
+printpreview.dialog.nextPage=Next Page
+printpreview.dialog.prevPage=Previous Page
+printpreview.dialog.zoomin=Zoom In
+printpreview.dialog.zoomout=Zoom Out
+
+
 #}}}
 
 #{{{ Various dialog boxes
@@ -796,6 +966,13 @@ saveall.message=Are you sure you want to save all modified buffers?
 reload-all.title=Reload All Buffers
 reload-all.message=Are you sure you want to reload all buffers from disk?\n\
 	Unsaved changes in any open buffers WILL BE LOST!
+#}}}
+
+#{{{ File is backup alert
+file-is-backup.title=Opening Backup File
+file-is-backup.message=The file {0} is likely a jEdit backup file.
+file-is-backup.open=Open
+file-is-backup.open-locked=Open locked
 #}}}
 
 #{{{ Encoding prompt
@@ -1026,6 +1203,14 @@ close.discard=Discard Selected
 close.discard.mnemonic=d
 #}}}
 
+#{{{ Close all confirm dialog
+closeothers.title=Close All Other Buffers
+closeothers.message=Are you sure you want to close all other buffers?
+closeall.title=Close All Buffers
+closeall.message=Are you sure you want to close all buffers?
+#}}}
+
+
 #{{{ Files changed on disk dialog
 files-changed.title=Files Changed on Disk
 files-changed.caption=The following files were changed on disk by another program:
@@ -1215,6 +1400,7 @@ buffer-options.encoding=Character encoding:
 buffer-options.gzipped=GZIP (compress) file on disk
 buffer-options.editing=Editing
 buffer-options.mode=Edit mode:
+buffer-options.locked=Locked
 #}}}
 
 #{{{ Global options dialog
@@ -1247,6 +1433,8 @@ options.general.checkModStatusUpon.none=none
 options.general.recentFiles=Recent files to remember:
 options.general.hypersearch.maxWarningResults=Max Hypersearch Results:
 options.general.sortRecent=Sort recent file list
+options.general.hideOpen=Hide open files from recent file list
+options.general.closeAllConfirm="Close All" asks for confirmation
 options.general.saveCaret=Save caret positions in recent file list
 options.general.persistentMarkers=Save marker positions
 options.general.resetUndo=Reset undo history on save
@@ -1358,18 +1546,32 @@ options.editing.elasticTabstops=Indent using elastic tabstops
 options.editing.elasticTabstops.tooltip=Columns in lines above and below a "cell" are kept aligned on tab stops that can grow or shrink depending on the width of the cell.
 options.editing.deepIndent=Deep indent
 options.editing.autoIndent=Automatic indentation:
-options.editing.largefilemode.title=Large file mode
-options.editing.largefilemode=What should I do about very big files:
-options.editing.largefilemode.option.ask=<html><b>Ask</b> what to do when opening a large file</html>
-options.editing.largefilemode.option.full=<html><b>Keep Full syntax</b> : jEdit's syntax highlight will work as usual, jEdit \
-                                               	may become<br/><b>very slow, this is not recommended</b></html>
-options.editing.largefilemode.option.limited=<html><b>Context insensitive syntax highlight</b>: In this case jEdit will \
-		do fast highlighting, but the<br/>result may not be perfect. The \
-		buffer is highlighted line by line without taking care of the<br/>context \
-		of the previous line. It is possible that the syntax is not accurate \
-		if you have<br/>tokens on multiple lines (multiline comments, xml tags ...) \
-		Soft wrap is also deactivated<br/><b>(best choice)</b></html>
-options.editing.largefilemode.option.nohighlight=No syntax highlight, no soft wrap
+options.editing.deleteMode=Delete this mode
+options.editing.addMode=Add Mode
+options.editing.addMode.dialog.title=Add Mode
+options.editing.addMode.dialog.browse=Browse
+options.editing.addMode.dialog.modeName=Mode Name:
+options.editing.addMode.dialog.modeFile=Select Mode File:
+options.editing.addMode.dialog.filenameGlob=File Name Glob:
+options.editing.addMode.dialog.firstLineGlob=First Line Glob:
+options.editing.addMode.dialog.warning.title=Confirm Mode Replace:
+options.editing.addMode.dialog.warning.message=This mode already exists. Do you want to replace it?
+options.editing.addMode.dialog.warning.message1=Unable to copy mode file
+options.editing.addMode.dialog.Mode_name_may_not_be_empty.=Mode name may not be empty.
+options.editing.addMode.dialog.Mode_file_may_not_be_empty.=Mode file may not be empty.
+options.editing.addMode.dialog.Either_file_name_glob_or_first_line_glob_or_both_must_be_filled_in.=Either file name glob or first line glob or both must be filled in.
+options.editing.addMode.dialog.errorTitle=Error
+options.editing.deleteMode.dialog.title=Confirm Mode Delete
+options.editing.deleteMode.dialog.message=Are you sure you want to delete this mode? It cannot be undone.
+options.editing.deleteMode.dialog.message1=Unable to delete mode file
+options.editing.deleteMode.dialog.message2=for mode
+options.editing.modes.selectModes=Select the modes that should be shown in modes dialogs:
+options.editing.modes.available=Available mode(s)
+options.editing.modes.selected=Selected modes(s)
+options.editing.modes.available.tooltip=<html>Modes in this column will <b>not</b> be shown as choices in modes comboboxes. Drag them to the right column to show them. </html>
+options.editing.modes.selected.tooltip=<html>Modes in this column will be shown as choices in modes comboboxes of jEdit's GUI. Drag them to the left column to hide them.</html>
+options.editing.modes.deleteSelected=Delete Selected
+options.editing.modes.Delete_these_modes?=Delete these modes?
 #}}}
 
 #{{{ Encodings pane
@@ -1408,6 +1610,24 @@ options.gutter.foldStyleNames.Triangle=Triangle
 options.gutter.foldStyleNames.Square=Square
 options.gutter.foldStyleNames.Circle=Circle
 #}}}
+
+#{{{ Large files pane
+options.large-files.label=Large files
+options.editing.largefilemode.title=Large file mode
+options.editing.largefilemode=What should I do about very big files (> {0} chars, or line length > {1}):
+options.editing.largefilemode.tooltip=<html>Values can be changed via jEdit properties: <tt>largeBufferSize</tt> and <tt>longLineLimit</tt></html>
+options.editing.largefilemode.option.ask=<html><b>Ask</b> what to do when opening a large file</html>
+options.editing.largefilemode.option.full=<html><b>Keep Full syntax</b> : jEdit's syntax highlight will work as usual, jEdit \
+                                               	may become<br/><b>very slow, this is not recommended</b></html>
+options.editing.largefilemode.option.limited=<html><b>Context insensitive syntax highlight</b>: In this case jEdit will \
+		do fast highlighting, but the<br/>result may not be perfect. The \
+		buffer is highlighted line by line without taking care of the<br/>context \
+		of the previous line. It is possible that the syntax is not accurate \
+		if you have<br/>tokens on multiple lines (multiline comments, xml tags ...) \
+		Soft wrap is also deactivated<br/><b>(best choice)</b></html>
+options.editing.largefilemode.option.nohighlight=No syntax highlight, no soft wrap
+#}}}
+
 
 #{{{ Mouse pane
 options.mouse.label=Mouse
@@ -1451,10 +1671,11 @@ options.print.lineNumbers=Print line numbers
 options.print.color=Color printing
 options.print.tabSize=Tab width when printing:
 options.print.workarounds=Workarounds for Java bugs
-options.print.glyphVector=Print spacing workaround (increases spool file size)
+options.print.glyphVector=Print spacing workaround (recommended, but increases spool file size)
 options.print.force13=Use old printing API (enable this if jEdit hangs when \
 	printing)
 options.print.folds=Print folded regions
+options.print.useSystemDialog=Use system print dialog
 #}}}
 
 #{{{ Proxy pane
@@ -1471,11 +1692,16 @@ options.firewall.socks.port=SOCKS proxy port:
 #}}}
 
 #{{{ Save & Backup pane
+options.autosave=Autosave Options
+options.backup=Backup Options
 options.save-back.label=Saving & Backup
-
 options.save-back.autosave=Autosave frequency (secs):
+options.save-back.autosave.tooltip=to disable, set to 0
 options.save-back.backups=Max number of backups:
+options.save-back.backups.tooltip=to disable, set to 0
+options.save-back.autosaveDirectory=Autosave directory:
 options.save-back.backupDirectory=Backup directory:
+options.save-back.backupDirectory.tooltip=If blank, use buffer directory. $VARIABLE/prefixes allowed.
 options.save-back.backupPrefix=Backup filename prefix:
 options.save-back.backupSuffix=Backup filename suffix:
 options.save-back.backupEverySave=Backup on every save
@@ -1483,9 +1709,10 @@ options.save-back.twoStageSave=Two-stage save (safer but resets file permissions
 options.save-back.twoStageSave.tooltip=Stage 1: Create a temporary file and save to it. Stage 2: Rename the temporary file to the real name.
 options.save-back.confirmSaveAll="Save All Buffers" asks for confirmation
 options.save-back.autosaveUntitled=Autosave untitled buffers
-options.save-back.suppressNotSavedConfirmUntitled=Never mark Untitled buffers dirty.
-options.save-back.suppressNotSavedConfirmUntitled.tooltip=Checking this means untitled buffers get wiped out whenever a new one is created (it's a feature!)
-options.save-back.useMD5forDirtyCalculation=Never mark buffers dirty if contents are unchanged.
+options.save-back.autosaveUntitled.tooltip=Untitled buffers are saved and restored across jEdit sessions.
+options.save-back.suppressNotSavedConfirmUntitled=Close dirty Untitled buffers without confirmation
+options.save-back.suppressNotSavedConfirmUntitled.tooltip=Untitled dirty buffers are closed without confirmation
+options.save-back.useMD5forDirtyCalculation=Never mark buffers dirty if contents are unchanged
 options.save-back.useMD5forDirtyCalculation.tooltip=Compare with length and MD5 hash of  buffer at load time, to decide if an edited buffer is still dirty.
 options.save-back.saveAsUsesFSB="Save As" defaults to File System Browser directory
 #}}}
@@ -1501,10 +1728,11 @@ options.shortcuts.duplicatekeymap.dialog.title=keymap name
 options.shortcuts.resetkeymap.label=reset
 options.shortcuts.resetkeymap.dialog.label=Reset the keymap
 options.shortcuts.resetkeymap.dialog.title=reset keymap
-options.shortcuts.keymap.label=Choose keymap:
+options.shortcuts.keymap.label=Keymap:
+options.shortcuts.keymap.tooltip=A named set of customized keyboard shortcuts
 options.shortcuts.label=Shortcuts
-options.shortcuts.select.label=Edit Shortcuts:
-options.shortcuts.select.tooltip=You can select globals, macros, or plugin shortcuts
+options.shortcuts.select.label=Action Set:
+options.shortcuts.select.tooltip=You can select built-ins, macros, or plugin shortcuts
 options.shortcuts.name=Command
 options.shortcuts.actionset=Action set
 options.shortcuts.shortcut1=Primary shortcut
@@ -1599,6 +1827,7 @@ options.textarea.lineHighlight=Highlight current line:
 options.textarea.structureHighlight=Highlight matching elements:
 options.textarea.eolMarkers=End of line markers:
 options.textarea.wrapGuide=Wrap guide:
+options.textarea.pageBreaks=Page breaks:
 options.textarea.electricBorders=Electric (auto scroll) borders
 options.textarea.stdNextPrevWord=Go to next/previous word commands eat whitespace
 options.textarea.antiAlias=Anti Aliased smooth text
@@ -1646,6 +1875,8 @@ options.view.showFullPath=Show full path of buffer in title bar
 options.view.showSearchbar=Always show search bar
 options.view.beepOnSearchAutoWrap=Beep when searching automatically wraps
 options.view.showBufferSwitcher=Show buffer switcher
+options.view.bufferswitcher.sortBuffers=Sort Buffer Switcher
+options.view.bufferswitcher.sortByName=Sort Buffer Switcher by file name instead of path name
 options.view.bufferSwitcherMaxRowsCount=Visible rows in buffer switcher:
 options.view.sortBuffers=Sort buffer sets
 options.view.sortByName=Sort buffer sets by file name, instead of path name
@@ -1671,7 +1902,7 @@ options.browser.general.defaultPath=Default path:
 options.browser.general.defaultPath.favorites=Favorites
 options.browser.general.defaultPath.home=Home directory
 options.browser.general.defaultPath.last=Most recently visited directory
-options.browser.general.defaultPath.buffer=Parent directory of current buffer
+options.browser.general.defaultPath.buffer=Directory of current buffer
 options.browser.general.defaultPath.working=Working directory of jEdit process
 options.browser.general.showMenubar=Show menu bar
 options.browser.general.showToolbar=Show tool bar
@@ -1962,10 +2193,6 @@ plugin-manager.status.error=Error
 
 plugin-manager.list-download-connect=Connecting to plugins.jedit.org
 plugin-manager.list-download=Downloading plugin list from plugins.jedit.org
-plugin-manager.list-download.mirror-autoselect-error.title=Error selecting mirror
-plugin-manager.list-download.mirror-autoselect-error.message=Error auto-selecting mirror:\n\
-	{0}\n\
-	Choosing a specific mirror may work.
 plugin-manager.list-download.need-password.title=HTTP Proxy needs password
 plugin-manager.list-download.need-password.message=HTTP Proxy needs password.\n\
 Please configure a valid username/password in "Download Options".
@@ -2004,7 +2231,6 @@ install-plugins.info.category=Category
 install-plugins.info.author=Author
 install-plugins.info.released=Released
 install-plugins.info.depends=Depends on
-install-plugins.info.optionalDepends=Optionally depends on
 
 install-plugins.totalSize={0} plugin(s), total size: {1}
 install-plugins.select-all=Select All
@@ -2137,7 +2363,7 @@ macro.rs.GoToColumn.label=Column (between 1 and {0}):
 #}}}
 
 # Go To Offset
-macro.rs.GoToOffset.label=Offset (between 0 and {0}): 
+macro.rs.GoToOffset.label=Offset (between 0 and {0}):
 
 #{{{ Key Words to Uppercase
 macro.rs.KeywordsToUpperCase.ConvertedKeywords.message=Converted Keywords to Upper Case
@@ -2284,8 +2510,6 @@ macro.rs.DisplayShortcuts.Shortcut2.label=Shortcut - 2
 macro.rs.DisplayShortcuts.Close.label=Close
 macro.rs.DisplayShortcuts.WriteToBuffer.label=Write to buffer
 macro.rs.DisplayShortcuts.ShortcutList.label=Keyboard shortcut list
-macro.rs.DisplayShortcuts.Center.label=Center
-macro.rs.DisplayShortcuts.South.label=South
 #}}}
 
 #{{{ Hex Convert
@@ -2298,12 +2522,7 @@ macro.rs.HexConvert.ByteToString.label=Byte to String:
 #{{{ Make Bug Report
 macro.rs.MakeBugReport.OpeningActivityLog.error=Error opening Activity Log.
 macro.rs.MakeBugReport.UsefulEntriesForReport.label=Activity log entries that might be useful in a bug report:\n\n.
-macro.rs.MakeBugReport.MessagejEdit.label=[message] jEdit:
-macro.rs.MakeBugReport.NoticejEdit.label=[notice] jEdit:
-macro.rs.MakeBugReport.NoticeJarClassLoader.label=[notice] JARClassLoader:
-macro.rs.MakeBugReport.MessagejEditStartupComplete.label=[message] jEdit: Startup complete
-macro.rs.MakeBugReport.Error.label=[error]
-macro.rs.MakeBugReport.ReadingActivityLog.error=Error reading Activity Log
+macro.rs.MakeBugReport.ReadingActivityLog.error=Error reading Activity Log.
 #}}}
 
 #{{{ Run Script
@@ -2428,6 +2647,7 @@ macros.folder.Editing.label=Editing
 Editing/Duplicate_Lines_Above.label=Duplicate Lines Above
 Editing/Duplicate_Lines_Below.label=Duplicate Lines Below
 Editing/Go_to_Column.label=Go To Column
+Editing/Go_to_Offset.label=Go to Offset
 Editing/Greedy_Backspace.label=Greedy Backspace
 Editing/Greedy_Delete.label=Greedy Delete
 Editing/Greedy_Left.label=Greedy Left
@@ -2443,6 +2663,7 @@ Editing/Toggle_Fold.label=Toggle Fold
 
 #{{{ Emacs
 macros.folder.Emacs.label=Emacs
+
 Emacs/Emacs_Align_Decls.label=Emacs Align Decls
 Emacs/Emacs_Backward_Sentence.label=Emacs Backward Sentence
 Emacs/Emacs_Capitalize_Word.label=Emacs Capitalize Word
@@ -2461,10 +2682,11 @@ Emacs/Emacs_Next_Line.label=Emacs Next Line
 Emacs/Emacs_Open_Line.label=Emacs Open Line
 Emacs/Emacs_Previous_Line.label=Emacs Previous Line
 Emacs/Emacs_Set_Mark.label=Emacs Set Mark
-Emacs/Emacs_Set_Wrap=Emacs Set Wrap
+Emacs/Emacs_Set_Wrap.label=Emacs Set Wrap
 Emacs/Emacs_Transpose_Chars.label=Emacs Transpose Chars
 Emacs/Emacs_Transpose_Lines.label=Emacs Transpose Lines
 Emacs/Emacs_Upcase_Word.label=Emacs Upcase Word
+Emacs/EmacsUtil.label=EmacsUtil
 #}}}
 
 #{{{ Files
@@ -2473,7 +2695,6 @@ macros.folder.Files.label=Files
 Files/Browse_Buffer_Directory.label=Browse Buffer Directory
 Files/Browse_Directory.label=Browse Directory
 Files/Buffer_Switcher.label=Buffer Switcher
-Files/Close_All_Except_Active.label=Close All Except Active
 Files/Copy_Name_to_Clipboard.label=Copy Name to Clipboard
 Files/Copy_Path_to_Clipboard.label=Copy Path to Clipboard
 Files/Delete_Current.label=Delete Current
@@ -2483,6 +2704,7 @@ Files/Insert_Selection.label=Insert Selection
 Files/Next_Dirty_Buffer.label=Next Dirty Buffer
 Files/Open_Path.label=Open Path
 Files/Open_Selection.label=Open Selection
+Files/Open_Selection_In_Desktop.label=Open Selection In Desktop
 Files/Send_Buffer_To_Next_Split.label=Send Buffer To Next Split
 Files/Toggle_ReadOnly.label=Toggle ReadOnly
 #}}}
@@ -2522,8 +2744,11 @@ Misc/Display_Actions.label=Display Actions
 Misc/Display_Character_Code.label=Display Character Code
 Misc/Display_Shortcuts.label=Display Shortcuts
 Misc/Evaluate_Buffer_in_BeanShell.label=Evaluate Buffer in BeanShell
+Misc/Generate_Encodings_List.label=Generate Encodings List
+Misc/Generate_Modes_List.label=Generate Modes List
 Misc/Hex_Convert.label=Hex Convert
 Misc/HyperSearch_Results_to_Buffer.label=HyperSearch Results to Buffer
+Misc/Insert_Plugins_List.label=Insert Plugins List
 Misc/Make_Bug_Report.label=Make Bug Report
 Misc/Run_Script.label=Run Script
 Misc/Show_Threads.label=Show Threads
@@ -2551,6 +2776,7 @@ Text/Insert_Tag.label=Insert Tag
 Text/Line_Filter.label=Line Filter
 Text/Next_Char.label=Next Char
 Text/Reverse_Lines.label=Reverse Lines
+Text/Reverse_Selection.label=Reverse Selection
 Text/Single_Space_Buffer.label=Single Space Buffer
 #}}}
 

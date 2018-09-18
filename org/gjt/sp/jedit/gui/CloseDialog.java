@@ -33,6 +33,7 @@ import java.awt.*;
 import org.gjt.sp.jedit.bufferio.BufferIORequest;
 import org.gjt.sp.jedit.io.*;
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.TaskManager;
 //}}}
@@ -69,13 +70,16 @@ public class CloseDialog extends EnhancedDialog
 		label.setBorder(new EmptyBorder(0,0,6,0));
 		centerPanel.add(BorderLayout.NORTH,label);
 
-		bufferList = new JList(bufferModel = new DefaultListModel());
+		bufferList = new JList<String>(bufferModel = new DefaultListModel<String>());
 		bufferList.setVisibleRowCount(10);
 		bufferList.addListSelectionListener(new ListHandler());
 
+		boolean suppressNotSavedConfirmUntitled = jEdit.getBooleanProperty("suppressNotSavedConfirmUntitled");
+		suppressNotSavedConfirmUntitled = suppressNotSavedConfirmUntitled || jEdit.getBooleanProperty("autosaveUntitled");
+
 		for(Buffer buffer: buffers)
 		{
-			if(buffer.isDirty())
+			if(buffer.isDirty() && !( buffer.isUntitled() && suppressNotSavedConfirmUntitled ))
 				bufferModel.addElement(buffer.getPath());
 		}
 
@@ -105,7 +109,7 @@ public class CloseDialog extends EnhancedDialog
 		bufferList.setSelectedIndex(0);
 		content.add(BorderLayout.SOUTH,buttons);
 		content.getRootPane().setDefaultButton(cancel);
-		GUIUtilities.requestFocus(this,bufferList);
+		GenericGUIUtilities.requestFocus(this,bufferList);
 		pack();
 		setLocationRelativeTo(view);
 		setVisible(true);
@@ -133,8 +137,8 @@ public class CloseDialog extends EnhancedDialog
 
 	//{{{ Private members
 	private final View view;
-	private final JList bufferList;
-	private final DefaultListModel bufferModel;
+	private final JList<String> bufferList;
+	private final DefaultListModel<String> bufferModel;
 	private final JButton selectAll;
 	private final JButton save;
 	private final JButton discard;
@@ -176,11 +180,10 @@ public class CloseDialog extends EnhancedDialog
 			}
 			else if(source == save)
 			{
-				Object[] paths = bufferList.getSelectedValues();
+				java.util.List<String> paths = bufferList.getSelectedValuesList();
 
-				for (Object path1 : paths)
+				for (String path : paths)
 				{
-					String path = (String) path1;
 					Buffer buffer = jEdit.getBuffer(path);
 					if (!buffer.save(view, null, true, true)) return;
 					TaskManager.instance.waitForIoTasks();
@@ -202,11 +205,10 @@ public class CloseDialog extends EnhancedDialog
 			}
 			else if(source == discard)
 			{
-				Object[] paths = bufferList.getSelectedValues();
+				java.util.List<String> paths = bufferList.getSelectedValuesList();
 
-				for (Object path1 : paths)
+				for (String path : paths)
 				{
-					String path = (String) path1;
 					Buffer buffer = jEdit.getBuffer(path);
 					jEdit._closeBuffer(view, buffer);
 					bufferModel.removeElement(path);

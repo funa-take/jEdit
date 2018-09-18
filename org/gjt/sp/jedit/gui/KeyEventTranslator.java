@@ -38,7 +38,7 @@ import org.gjt.sp.util.Log;
  * warts in the AWT key event API.
  *
  * @author Slava Pestov
- * @version $Id: KeyEventTranslator.java 23381 2013-12-09 12:43:14Z kpouer $
+ * @version $Id: KeyEventTranslator.java 23981 2015-08-10 14:56:24Z daleanson $
  */
 public class KeyEventTranslator
 {
@@ -289,13 +289,13 @@ public class KeyEventTranslator
 	 *
 	 * You can map more than one Java modifier to a symobolic modifier, for
 	 * example :
-	 * <p><code><pre>
-	 *	setModifierMapping(
-	 *		InputEvent.CTRL_MASK,
-	 *		InputEvent.ALT_MASK | InputEvent.META_MASK,
-	 *		0,
-	 *		InputEvent.SHIFT_MASK);
-	 *<pre></code></p>
+	 * <p><code>
+	 	setModifierMapping(
+	 		InputEvent.CTRL_MASK,
+	 		InputEvent.ALT_MASK | InputEvent.META_MASK,
+	 		0,
+	 		InputEvent.SHIFT_MASK);
+	   </code></p>
 	 *
 	 * You cannot map a Java modifer to more than one symbolic modifier.
 	 *

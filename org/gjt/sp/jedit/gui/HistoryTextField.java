@@ -30,13 +30,13 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.event.MouseInputAdapter;
 import java.awt.*;
 import java.awt.event.*;
-import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 //}}}
 
 /** Text field with an arrow-key + drop-down accessable history.
  *
  * @author Slava Pestov
- * @version $Id: HistoryTextField.java 22467 2012-11-13 07:20:25Z ezust $
+ * @version $Id: HistoryTextField.java 24411 2016-06-19 11:02:53Z kerik-sf $
  */
 public class HistoryTextField extends JTextField
 {
@@ -300,7 +300,7 @@ public class HistoryTextField extends JTextField
 			Insets insets = border.getBorderInsets(HistoryTextField.this);
 
 			if(evt.getX() >= getWidth() - insets.right
-				|| GUIUtilities.isPopupTrigger(evt))
+				|| GenericGUIUtilities.isPopupTrigger(evt))
 			{
 				controller.showPopupMenu(evt.isShiftDown());
 			}

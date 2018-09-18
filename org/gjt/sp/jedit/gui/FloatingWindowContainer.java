@@ -42,12 +42,13 @@ import javax.swing.SwingUtilities;
 
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.util.GenericGUIUtilities;
 //}}}
 
 /**
  * A container for dockable windows. This class should never be used
  * directly.
- * @version $Id: FloatingWindowContainer.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: FloatingWindowContainer.java 24411 2016-06-19 11:02:53Z kerik-sf $
  * @since jEdit 4.0pre1
  */
 public class FloatingWindowContainer extends JFrame implements DockableWindowContainer,
@@ -200,7 +201,7 @@ public class FloatingWindowContainer extends JFrame implements DockableWindowCon
 				popup = dockableWindowManager.createPopupMenu(
 					FloatingWindowContainer.this,
 					entry.factory.name,clone);
-				GUIUtilities.showPopupMenu(popup,
+				GenericGUIUtilities.showPopupMenu(popup,
 					menu,menu.getX(),menu.getY() + menu.getHeight(),
 					false);
 			}

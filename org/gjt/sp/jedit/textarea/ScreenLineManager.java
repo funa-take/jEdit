@@ -33,7 +33,7 @@ import org.gjt.sp.util.Log;
  * 
  * @since jEdit 4.3pre1
  * @author Slava Pestov
- * @version $Id: ScreenLineManager.java 22629 2012-12-29 17:06:56Z thomasmey $
+ * @version $Id: ScreenLineManager.java 24252 2015-12-23 01:06:15Z daleanson $
  */
 class ScreenLineManager
 {
@@ -48,6 +48,8 @@ class ScreenLineManager
 	//{{{ isScreenLineCountValid() method
 	boolean isScreenLineCountValid(int line)
 	{
+		if (screenLines == null || line < 0 || line >= screenLines.length)
+			return false;
 		return screenLines[line] > 0;
 	} //}}}
 
@@ -85,6 +87,8 @@ class ScreenLineManager
 
 		if(Debug.SCREEN_LINES_DEBUG)
 			Log.log(Log.DEBUG,this,new Exception("setScreenLineCount(" + line + ',' + count + ')'));
+		if (screenLines == null) 
+			reset();
 		screenLines[line] = (char)count;
 	} //}}}
 

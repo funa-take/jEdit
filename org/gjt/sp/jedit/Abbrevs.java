@@ -33,7 +33,7 @@ import org.gjt.sp.util.Log;
 /**
  * Abbreviation manager.
  * @author Slava Pestov
- * @version $Id: Abbrevs.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: Abbrevs.java 24211 2015-12-10 03:33:28Z daleanson $
  */
 public class Abbrevs
 {
@@ -41,7 +41,7 @@ public class Abbrevs
 
 	//{{{ getExpandOnInput() method
 	/**
-	 * Returns if abbreviations should be expanded after the
+	 * @return if abbreviations should be expanded after the
 	 * user finishes typing a word.
 	 */
 	public static boolean getExpandOnInput()
@@ -68,6 +68,7 @@ public class Abbrevs
 	 * @param view The view
 	 * @param add If true and abbrev not found, will ask user if
 	 * it should be added
+	 * @return if expanded
 	 * @since jEdit 2.6pre4
 	 */
 	public static boolean expandAbbrev(View view, boolean add)
@@ -77,7 +78,7 @@ public class Abbrevs
 		JEditTextArea textArea = view.getTextArea();
 		if(!buffer.isEditable())
 		{
-			view.getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return false;
 		}
 
@@ -89,7 +90,7 @@ public class Abbrevs
 		if(lineText.length() == 0)
 		{
 			if(add)
-				view.getToolkit().beep();
+				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return false;
 		}
 
@@ -97,7 +98,7 @@ public class Abbrevs
 		if(pos == 0)
 		{
 			if(add)
-				view.getToolkit().beep();
+				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return false;
 		} //}}}
 
@@ -190,7 +191,7 @@ public class Abbrevs
 
 	//{{{ getGlobalAbbrevs() method
 	/**
-	 * Returns the global abbreviation set.
+	 * @return the global abbreviation set.
 	 * @since jEdit 2.3pre1
 	 */
 	public static Hashtable<String,String> getGlobalAbbrevs()
@@ -215,7 +216,7 @@ public class Abbrevs
 
 	//{{{ getModeAbbrevs() method
 	/**
-	 * Returns the mode-specific abbreviation set.
+	 * @return the mode-specific abbreviation set.
 	 * @since jEdit 2.3pre1
 	 */
 	public static Hashtable<String,Hashtable<String,String>> getModeAbbrevs()

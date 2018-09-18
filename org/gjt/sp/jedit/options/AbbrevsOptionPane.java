@@ -34,6 +34,7 @@ import java.util.List;
 
 import org.gjt.sp.jedit.gui.*;
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.StandardUtilities;
 //}}}
 
@@ -41,7 +42,7 @@ import org.gjt.sp.util.StandardUtilities;
 /**
  * Abbrev editor.
  * @author Slava Pestov
- * @version $Id: AbbrevsOptionPane.java 23221 2013-09-29 20:03:32Z shlomy $
+ * @version $Id: AbbrevsOptionPane.java 24425 2016-06-22 19:29:40Z daleanson $
  */
 public class AbbrevsOptionPane extends AbstractOptionPane
 {
@@ -85,7 +86,7 @@ public class AbbrevsOptionPane extends AbstractOptionPane
 			modeAbbrevs.put(name,new AbbrevsModel(_modeAbbrevs.get(name)));
 		}
 
-		setsComboBox = new JComboBox(sets);
+		setsComboBox = new JComboBox<String>(sets);
 		ActionHandler actionHandler = new ActionHandler();
 		setsComboBox.addActionListener(actionHandler);
 		panel2.add(setsComboBox);
@@ -96,6 +97,7 @@ public class AbbrevsOptionPane extends AbstractOptionPane
 
 		globalAbbrevs = new AbbrevsModel(Abbrevs.getGlobalAbbrevs());
 		abbrevsTable = new JTable(globalAbbrevs);
+		abbrevsTable.setRowHeight(GenericGUIUtilities.defaultRowHeight());
 		abbrevsTable.getColumnModel().getColumn(1).setCellRenderer(
 			new Renderer());
 		abbrevsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -158,7 +160,7 @@ public class AbbrevsOptionPane extends AbstractOptionPane
 	//{{{ Private members
 
 	//{{{ Instance variables
-	private JComboBox setsComboBox;
+	private JComboBox<String> setsComboBox;
 	private JCheckBox expandOnInput;
 	private JTable abbrevsTable;
 	private AbbrevsModel globalAbbrevs;
@@ -188,7 +190,7 @@ public class AbbrevsOptionPane extends AbstractOptionPane
 		String oldAbbrev = abbrev;
 
 		EditAbbrevDialog dialog = new EditAbbrevDialog(
-			GUIUtilities.getParentDialog(AbbrevsOptionPane.this),
+				GenericGUIUtilities.getParentDialog(AbbrevsOptionPane.this),
 			abbrev,expansion,abbrevsModel.toHashtable());
 		abbrev = dialog.getAbbrev();
 		expansion = dialog.getExpansion();
@@ -289,7 +291,7 @@ public class AbbrevsOptionPane extends AbstractOptionPane
 			else if(source == add)
 			{
 				EditAbbrevDialog dialog = new EditAbbrevDialog(
-					GUIUtilities.getParentDialog(AbbrevsOptionPane.this),
+					GenericGUIUtilities.getParentDialog(AbbrevsOptionPane.this),
 					null,null,abbrevsModel.toHashtable());
 				String abbrev = dialog.getAbbrev();
 				String expansion = dialog.getExpansion();
@@ -325,14 +327,14 @@ public class AbbrevsOptionPane extends AbstractOptionPane
 			int row,
 			int col)
 		{
-			String valueStr = value.toString();
+			StringBuilder valueStr = new StringBuilder(value.toString());
 
 			// workaround for Swing's annoying processing of
 			// labels starting with <html>, which often breaks
-			if(valueStr.toLowerCase().startsWith("<html>"))
-				valueStr = ' ' + valueStr;
-			return super.getTableCellRendererComponent(table,valueStr,
-				isSelected,cellHasFocus,row,col);
+			if(valueStr.toString().toLowerCase().startsWith("<html>"))
+				valueStr.insert(' ', 0);
+			return super.getTableCellRendererComponent(table, valueStr.toString(),
+				isSelected, cellHasFocus, row, col);
 		}
 	} //}}}
 

@@ -40,7 +40,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Plugin list downloaded from server.
  * @since jEdit 3.2pre2
- * @version $Id: PluginList.java 23224 2013-09-30 20:51:42Z shlomy $
+ * @version $Id: PluginList.java 24766 2017-10-19 00:12:44Z daleanson $
  */
 class PluginList
 {
@@ -49,11 +49,11 @@ class PluginList
 	 */
 	public static final int GZIP_MAGIC_1 = 0x1f;
 	public static final int GZIP_MAGIC_2 = 0x8b;
-	public static final long MILLISECONDS_PER_MINUTE = 60L * 1000;
+	public static final long MILLISECONDS_PER_MINUTE = 60L * 1000L;
 
-	final List<Plugin> plugins = new ArrayList<Plugin>();
-	final Map<String, Plugin> pluginHash = new HashMap<String, Plugin>();
-	final List<PluginSet> pluginSets = new ArrayList<PluginSet>();
+	final List<Plugin> plugins = new ArrayList<>();
+	final Map<String, Plugin> pluginHash = new HashMap<>();
+	final List<PluginSet> pluginSets = new ArrayList<>();
 
 	/**
 	 * The mirror id.
@@ -78,6 +78,7 @@ class PluginList
 			return;
 		gzipURL = jEdit.getProperty("plugin-manager.export-url");
 		gzipURL += "?mirror=" + mirror;
+		gzipURL += "&new_url_scheme";
 		String path = null;
 		if (jEdit.getSettingsDirectory() == null)
 		{
@@ -233,7 +234,6 @@ class PluginList
 	//{{{ addPlugin() method
 	void addPlugin(Plugin plugin)
 	{
-		plugin.checkIfInstalled();
 		plugins.add(plugin);
 		pluginHash.put(plugin.name,plugin);
 	} //}}}
@@ -289,7 +289,7 @@ class PluginList
 	static class PluginSet
 	{
 		String name;
-		final List<String> plugins = new ArrayList<String>();
+		final List<String> plugins = new ArrayList<>();
 
 		public String toString()
 		{
@@ -304,67 +304,54 @@ class PluginList
 		String name;
 		String description;
 		String author;
-		final List<Branch> branches = new ArrayList<Branch>();
-		//String installed;
-		//String installedVersion;
+		final List<Branch> branches = new ArrayList<>();
+		String installedVersion = null;
+		String installedPath = null;
+		boolean loaded = false;
 
-		void checkIfInstalled()
+		String getInstalledVersion()
 		{
-			/* // check if the plugin is already installed.
-			// this is a bit of hack
+			this.loaded = false;
 			PluginJAR[] jars = jEdit.getPluginJARs();
 			for(int i = 0; i < jars.length; i++)
 			{
 				String path = jars[i].getPath();
-				if(!new File(path).exists())
-					continue;
 
 				if(MiscUtilities.getFileName(path).equals(jar))
 				{
-					installed = path;
-
 					EditPlugin plugin = jars[i].getPlugin();
 					if(plugin != null)
 					{
 						installedVersion = jEdit.getProperty(
 							"plugin." + plugin.getClassName()
 							+ ".version");
-					}
-					break;
-				}
-			}
-
-			String[] notLoaded = jEdit.getNotLoadedPluginJARs();
-			for(int i = 0; i < notLoaded.length; i++)
-			{
-				String path = notLoaded[i];
-
-				if(MiscUtilities.getFileName(path).equals(jar))
-				{
-					installed = path;
-					break;
-				}
-			} */
-		}
-
-		String getInstalledVersion()
-		{
-			PluginJAR[] jars = jEdit.getPluginJARs();
-			for(int i = 0; i < jars.length; i++)
-			{
-				String path = jars[i].getPath();
-
-				if(MiscUtilities.getFileName(path).equals(jar))
-				{
-					EditPlugin plugin = jars[i].getPlugin();
-					if(plugin != null)
-					{
-						return jEdit.getProperty(
-							"plugin." + plugin.getClassName()
-							+ ".version");
+						this.loaded = true;
+						return installedVersion;
 					}
 					else
 						return null;
+				}
+			}
+			String[] notLoadedJars = jEdit.getNotLoadedPluginJARs();
+			for(String path: notLoadedJars){
+				if(MiscUtilities.getFileName(path).equals(jar))
+				{
+					try
+					{
+						PluginJAR.PluginCacheEntry cacheEntry = PluginJAR.getPluginCacheEntry(path);
+						if(cacheEntry != null)
+						{
+							String versionKey = "plugin." + cacheEntry.pluginClass + ".version";
+							installedVersion = cacheEntry.cachedProperties.getProperty(versionKey);
+							Log.log(Log.DEBUG, PluginList.class, "found installed but not loaded "+ jar + " version=" + installedVersion);
+							installedPath = path;
+							return installedVersion;
+						}
+					}
+					catch (IOException e)
+					{
+						Log.log(Log.WARNING, "Unable to access cache for "+jar, e);
+					}
 				}
 			}
 
@@ -373,6 +360,14 @@ class PluginList
 
 		String getInstalledPath()
 		{
+			if(installedPath != null){
+				if(new File(installedPath).exists()){
+					return installedPath;
+				}else{
+					installedPath = null;
+				}
+			}
+
 			PluginJAR[] jars = jEdit.getPluginJARs();
 			for(int i = 0; i < jars.length; i++)
 			{
@@ -406,7 +401,7 @@ class PluginList
 				&& branch.canSatisfyDependencies();
 		}
 
-		void install(Roster roster, String installDirectory, boolean downloadSource)
+		void install(Roster roster, String installDirectory, boolean downloadSource, boolean asDependency)
 		{
 			String installed = getInstalledPath();
 
@@ -420,6 +415,12 @@ class PluginList
 
 			//branch.satisfyDependencies(roster,installDirectory,
 			//	downloadSource);
+
+			if(installedVersion != null && installedPath!= null && !loaded && asDependency)
+			{
+				roster.addLoad(installedPath);
+				return;
+			}
 
 			if(installed != null)
 			{
@@ -451,7 +452,7 @@ class PluginList
 		int downloadSourceSize;
 		String downloadSource;
 		boolean obsolete;
-		final List<Dependency> deps = new ArrayList<Dependency>();
+		final List<Dependency> deps = new ArrayList<>();
 
 		boolean canSatisfyDependencies()
 		{
@@ -470,13 +471,13 @@ class PluginList
 			for (Dependency dep : deps)
 				dep.satisfy(roster, installDirectory, downloadSource);
 		}
-		
-		public String depsToString() 
+
+		public String depsToString()
 		{
 			StringBuilder sb = new StringBuilder();
-			for (Dependency dep : deps) 
+			for (Dependency dep : deps)
 			{
-				if ("plugin".equals(dep.what) && dep.pluginName != null) 
+				if ("plugin".equals(dep.what) && dep.pluginName != null)
 				{
 					sb.append(dep.pluginName).append('\n');
 				}
@@ -532,8 +533,9 @@ class PluginList
 			}
 			else if(what.equals("jdk"))
 			{
-				String javaVersion = System.getProperty("java.version").substring(0,3);
-
+				String javaVersion = System.getProperty("java.version");
+				// openjdk 9 returns just "9", not 1.X.X like previous versions
+				javaVersion = javaVersion.length() >= 3 ? javaVersion.substring(0, 3) : javaVersion;
 				if((from == null || StandardUtilities.compareStrings(
 					javaVersion,from,false) >= 0)
 					&&
@@ -593,7 +595,7 @@ class PluginList
 						      branch.version,to,false) <= 0))
 					{
 						plugin.install(roster,installDirectory,
-							downloadSource);
+							downloadSource, false);
 						return;
 					}
 				}
@@ -611,24 +613,10 @@ class PluginList
 
 	private static String buildMirror(String id)
 	{
-		if (id != null && !id.equals(MirrorList.Mirror.NONE))
-		{
-			return id;
-		}
-		try
-		{
-			return getAutoSelectedMirror();
-		}
-		catch (Exception e)
-		{
-			GUIUtilities.error(jEdit.getActiveView()
-				, "plugin-manager.list-download.mirror-autoselect-error"
-				, new Object[]{e});
-			Log.log(Log.DEBUG, PluginList.class, "Getting auto-selected mirror: error", e);
-		}
-		return null;
+		return ((id != null) && !id.equals(MirrorList.Mirror.NONE)) ? id : "default";
 	}
 
+	// TODO: this isn't used, should it be?
 	private static String getAutoSelectedMirror()
 		throws java.io.IOException
 	{

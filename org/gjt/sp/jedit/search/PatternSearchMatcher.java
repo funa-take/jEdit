@@ -31,7 +31,7 @@ import org.gjt.sp.util.ReverseCharSequence;
  * @see java.util.regex.Pattern
  *
  * @author Marcelo Vanzin
- * @version $Id: PatternSearchMatcher.java 19386 2011-02-24 11:06:57Z kpouer $
+ * @version $Id: PatternSearchMatcher.java 24166 2015-11-28 22:18:41Z daleanson $
  * @since jEdit 4.3pre5
  */
 public class PatternSearchMatcher extends SearchMatcher
@@ -122,8 +122,17 @@ public class PatternSearchMatcher extends SearchMatcher
 		}
 
 		Matcher match = re.matcher(text);
-		if (!match.find(matchStart))
-			return null;
+		if (!match.find(matchStart)) {
+			// Check for special constructs, groups starting with (? are either pure, 
+			// non-capturing groups that do not capture text and do not count towards 
+			// the group total, or named-capturing group. Either way, need to remove
+			// them and try again since they won't match because the selection doesn't
+			// necessarily include the non-capturing part.
+			Pattern p = removeNonCapturingGroups(re, flags);
+			match = p.matcher(text);
+			if (!match.matches())
+				return null;
+		}
 
 		// Special care for zero width matches. Without this care,
 		// the caller will fall into an infinite loop, for non-reverse
@@ -221,10 +230,73 @@ public class PatternSearchMatcher extends SearchMatcher
 			returnValue.start = text.length() - returnValue.end;
 			returnValue.end = returnValue.start + len;
 		}
-
 		return returnValue;
+
 	} //}}}
 
+	//{{{ removeNonCapturingGroups() method
+    public static Pattern removeNonCapturingGroups( Pattern re, int flags ) 
+    {
+        String p = re.pattern();
+        String ncgroups = "[(][?].+?[)]";
+        Pattern nc_pattern = Pattern.compile( ncgroups, flags );
+        Matcher nc_matcher = nc_pattern.matcher( p );
+        if ( nc_matcher.find() ) 
+        {
+        	int index = nc_matcher.start();
+        	int open_count = 0;
+        	for (int i = index; i < p.length(); i++) 
+        	{
+        		if (p.charAt(i) == '(' && (i == 0 || p.charAt(i - 1) != '\\')) 
+        		{
+        			++ open_count;	
+        		}
+        		if (p.charAt(i) == ')' && (i == 0 || p.charAt(i - 1) != '\\')) 
+        		{
+        			-- open_count;	
+        		}
+        		if (open_count == 0 && i < p.length() - 1) 
+        		{
+        		    int end = i + 1;
+        		    char c = p.charAt( end );
+        		    
+        		    // check for "{n,m}" quantifiers
+        		    if (c == '{')
+        		    {
+        		        while (c != '}' && end < p.length() - 1)
+        		        {
+        		            ++ end;
+        		            c = p.charAt(end);
+        		        }
+        		        ++ end;
+        		    }
+                    
+        		    // check for ?+* quanitifiers
+                    c = p.charAt(end);
+                    if ((c == '?' || c == '+' || c == '*') && end < p.length() - 1) 
+                    {
+                        ++ end;
+                    }
+                    
+                    // check for ?+ quantifier quantifiers
+                    c = p.charAt(end);
+                    if ((c == '?' || c == '+') && end < p.length() - 1) 
+                    {
+                        ++ end;
+                    }
+                    
+                    // delete the non-capturing group
+        			StringBuilder sb = new StringBuilder(p);
+        			sb.delete(index, end);
+        			
+        			// recurse to find any remaining non-capturing groups
+        			return removeNonCapturingGroups(Pattern.compile(sb.toString(), flags), flags);
+        		}
+        	}
+        } 
+        return re;
+    } //}}}
+    
 	//{{{ toString() method
 	@Override
 	public String toString()

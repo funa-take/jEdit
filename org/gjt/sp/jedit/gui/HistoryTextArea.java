@@ -24,20 +24,16 @@ package org.gjt.sp.jedit.gui;
 
 //{{{ Imports
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.AbstractBorder;
-import javax.swing.border.CompoundBorder;
-import javax.swing.event.MouseInputAdapter;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Collections;
-import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 //}}}
 
 /**
  * Text area with a history.
  * @author Slava Pestov
- * @version $Id: HistoryTextArea.java 22466 2012-11-13 07:11:13Z ezust $
+ * @version $Id: HistoryTextArea.java 24411 2016-06-19 11:02:53Z kerik-sf $
  */
 public class HistoryTextArea extends JTextArea
 {
@@ -185,7 +181,7 @@ public class HistoryTextArea extends JTextArea
 		switch(evt.getID())
 		{
 		case MouseEvent.MOUSE_PRESSED:
-			if(GUIUtilities.isPopupTrigger(evt))
+			if(GenericGUIUtilities.isPopupTrigger(evt))
 				controller.showPopupMenu(evt.isShiftDown());
 			else
 				super.processMouseEvent(evt);

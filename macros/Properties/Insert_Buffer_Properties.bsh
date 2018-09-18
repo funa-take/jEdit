@@ -24,12 +24,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Insert_Buffer_Properties.bsh 22807 2013-02-20 18:20:47Z kerik-sf $
+ * $Id: Insert_Buffer_Properties.bsh 24739 2017-09-17 11:23:42Z kerik-sf $
  */
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.util.Hashtable;
+import java.util.TreeMap;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.Box;
@@ -57,12 +57,14 @@ BufferLocalPropertiesDialog(View view){
 	mode = buffer.getMode().name;
 
 // removed non-valid BLPs and added missing ones
-	props = new Hashtable();
+	props = new TreeMap();
 	props.put("mode","");
 	props.put("indentSize","int");
 	props.put("tabSize","int");
 	props.put("noTabs","bool");
 	props.put("wrap","str");
+	props.put("indentSize", "int");
+	props.put("autoIndent", "str");
 	props.put("maxLineLen","int");
 	props.put("folding","str");
 	props.put("collapseFolds","int");
@@ -86,9 +88,7 @@ BufferLocalPropertiesDialog(View view){
 	content.add(new JLabel(PropertiesLabel), BorderLayout.NORTH);
 
 	_entries = new Vector();
-	names = props.keys();
-	while(names.hasMoreElements()){
-		name = names.nextElement();
+	for(name: props.keySet()){
 		checked = checkedProps.get(name);
 		entry = new JCheckBoxList.Entry(checked != null,name);
 		_entries.addElement(entry);
@@ -97,6 +97,7 @@ BufferLocalPropertiesDialog(View view){
 	_entries.copyInto(entries);
 
 	checkBox = new JCheckBoxList(entries);
+	checkBox.setRowHeight(GUIUtilities.defaultRowHeight());
 	checkBox.addKeyListener(this);
 	content.add(new JScrollPane(checkBox),
 		BorderLayout.CENTER);
@@ -203,15 +204,12 @@ BufferLocalPropertiesDialog(View view){
 
 	dialog.pack();
 // cosmetic size-correction
-	dialog.setSize(250,290);
+	dialog.setSize(250,350);
 	dialog.setLocationRelativeTo(view);
 	dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	dialog.setVisible(true);
 }
 
-if(buffer.isReadOnly())
-	Macros.error(view, NotEditableMessage);
-else
 	BufferLocalPropertiesDialog(view);
 
 /*

@@ -37,8 +37,8 @@ package org.gjt.sp.jedit.bsh;
 /**
 	Implement binary expressions...
 	Note: this is too complicated... need some cleanup and simplification.
-	@see Primitive.binaryOperation
 */
+@SuppressWarnings("fallthrough")
 class BSHBinaryExpression extends SimpleNode 
 	implements ParserConstants 
 {

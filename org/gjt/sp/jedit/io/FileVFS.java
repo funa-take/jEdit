@@ -43,7 +43,7 @@ import org.gjt.sp.util.Log;
 /**
  * Local filesystem VFS.
  * @author Slava Pestov
- * @version $Id: FileVFS.java 23336 2013-11-16 12:05:40Z ezust $
+ * @version $Id: FileVFS.java 24415 2016-06-19 11:07:55Z kerik-sf $
  */
 public class FileVFS extends VFS
 {
@@ -210,7 +210,7 @@ public class FileVFS extends VFS
 		private File file;
 
 		// use system default short format
-		public static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+		public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
 		private long modified;
 

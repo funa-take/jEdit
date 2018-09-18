@@ -25,6 +25,7 @@ package org.gjt.sp.jedit.options;
 //{{{ Imports
 import javax.swing.*;
 import org.gjt.sp.jedit.gui.FontSelector;
+import org.gjt.sp.jedit.gui.NumericTextField;
 import org.gjt.sp.jedit.*;
 //}}}
 
@@ -62,17 +63,21 @@ public class PrintOptionPane extends AbstractOptionPane
 		addComponent(printLineNumbers);
 
 		/* Color */
+		// NOTE: this is ignored when using BufferPrinter1_7 and BufferPrintable1_7.
 		color = new JCheckBox(jEdit.getProperty("options.print"
 			+ ".color"));
 		color.setSelected(jEdit.getBooleanProperty("print.color"));
 		addComponent(color);
 
 		/* Tab size */
+		// DONE: make sure this can only accept positive numbers, added
+		// NumericTextField as the combobox editor.
 		String[] tabSizes = { "2", "4", "8" };
-		tabSize = new JComboBox(tabSizes);
+		tabSize = new JComboBox<String>(tabSizes);
+		tabSize.setEditor(new NumericTextField("", true, true));
 		tabSize.setEditable(true);
 		tabSize.setSelectedItem(jEdit.getProperty("print.tabSize"));
-		addComponent(jEdit.getProperty("options.print.tabSize"),tabSize);
+		addComponent(jEdit.getProperty("options.print.tabSize"), tabSize);
 
 
 		/* Print Folds */
@@ -86,7 +91,7 @@ public class PrintOptionPane extends AbstractOptionPane
 		/* Spacing workaround */
 		glyphVector = new JCheckBox(jEdit.getProperty(
 			"options.print.glyphVector"));
-		glyphVector.setSelected(jEdit.getBooleanProperty("print.glyphVector"));
+		glyphVector.setSelected(jEdit.getBooleanProperty("print.glyphVector", true));
 		addComponent(glyphVector);
 
 		/* Force 1.3 print dialog */
@@ -94,20 +99,25 @@ public class PrintOptionPane extends AbstractOptionPane
 			"options.print.force13"));
 		force13.setSelected(jEdit.getBooleanProperty("print.force13"));
 		addComponent(force13);
+		
+		useSystemDialog = new JCheckBox(jEdit.getProperty("options.print.useSystemDialog"));
+		useSystemDialog.setSelected(jEdit.getBooleanProperty("print.useSystemDialog", false));
+		addComponent(useSystemDialog);
 	} //}}}
 
 	//{{{ _save() method
 	protected void _save()
 	{
-		jEdit.setFontProperty("print.font",font.getFont());
-		jEdit.setBooleanProperty("print.header",printHeader.isSelected());
-		jEdit.setBooleanProperty("print.footer",printFooter.isSelected());
-		jEdit.setBooleanProperty("print.lineNumbers",printLineNumbers.isSelected());
-		jEdit.setBooleanProperty("print.color",color.isSelected());
-		jEdit.setProperty("print.tabSize",(String)tabSize.getSelectedItem());
-		jEdit.setBooleanProperty("print.glyphVector",glyphVector.isSelected());
-		jEdit.setBooleanProperty("print.force13",force13.isSelected());
-		jEdit.setBooleanProperty("print.folds",printFolds.isSelected());
+		jEdit.setFontProperty("print.font", font.getFont());
+		jEdit.setBooleanProperty("print.header", printHeader.isSelected());
+		jEdit.setBooleanProperty("print.footer", printFooter.isSelected());
+		jEdit.setBooleanProperty("print.lineNumbers", printLineNumbers.isSelected());
+		jEdit.setBooleanProperty("print.color", color.isSelected());
+		jEdit.setProperty("print.tabSize", (String)tabSize.getSelectedItem());
+		jEdit.setBooleanProperty("print.glyphVector", glyphVector.isSelected());
+		jEdit.setBooleanProperty("print.force13", force13.isSelected());
+		jEdit.setBooleanProperty("print.folds", printFolds.isSelected());
+		jEdit.setBooleanProperty("print.useSystemDialog", useSystemDialog.isSelected());
 	} //}}}
 
 	//{{{ Private members
@@ -117,8 +127,9 @@ public class PrintOptionPane extends AbstractOptionPane
 	private JCheckBox printLineNumbers;
 	private JCheckBox printFolds;
 	private JCheckBox color;
-	private JComboBox tabSize;
+	private JComboBox<String> tabSize;
 	private JCheckBox glyphVector;
 	private JCheckBox force13;
+	private JCheckBox useSystemDialog;
 	//}}}
 }

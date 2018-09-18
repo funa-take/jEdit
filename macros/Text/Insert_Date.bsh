@@ -19,7 +19,7 @@
  * along with the jEdit program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Insert_Date.bsh 21353 2012-03-14 09:46:51Z jojaba_67 $
+ * $Id: Insert_Date.bsh 23971 2015-08-08 19:37:35Z daleanson $
  */
 
 // Inserts the current date and Internet Time at the caret position
@@ -60,9 +60,6 @@ void insertDate()
 		+ " @" + (int)swatch + " /" + InternetTimeLabel + "/");
 }
 
-if(buffer.isReadOnly())
-	Macros.error(view, NotEditableMessage);
-else
 	insertDate();
 
 /*

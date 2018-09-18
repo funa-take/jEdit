@@ -67,6 +67,7 @@ import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.help.*;
 
 import org.gjt.sp.util.Log;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.IOUtilities;
 import org.gjt.sp.util.XMLUtilities;
 import org.gjt.sp.util.StandardUtilities;
@@ -109,7 +110,7 @@ public class ManagePanel extends JPanel
 		table = new JTable(pluginModel = new PluginTableModel());
 		table.setShowGrid(false);
 		table.setIntercellSpacing(new Dimension(0,0));
-		table.setRowHeight(table.getRowHeight() + 2);
+		table.setRowHeight(GenericGUIUtilities.defaultRowHeight() + 2);
 		table.setPreferredScrollableViewportSize(new Dimension(500,300));
 		table.setDefaultRenderer(Object.class, new TextRenderer(
 			(DefaultTableCellRenderer)table.getDefaultRenderer(Object.class)));
@@ -142,6 +143,8 @@ public class ManagePanel extends JPanel
 
 		JTableHeader header = table.getTableHeader();
 		header.setReorderingAllowed(false);
+		header.setDefaultRenderer(new HeaderRenderer(
+				(DefaultTableCellRenderer)header.getDefaultRenderer()));
 		HeaderMouseHandler mouseHandler = new HeaderMouseHandler();
 		header.addMouseListener(mouseHandler);
 		table.addMouseListener(mouseHandler);
@@ -253,37 +256,17 @@ public class ManagePanel extends JPanel
 	 * If the plugin is loaded use {@link org.gjt.sp.jedit.PluginJAR#getRequiredJars()}
 	 * instead
 	 *
-	 * @param jarName the jar name of the plugin
+	 * @param jarPath the path to the jar of the plugin
 	 * @return a collection containing jars path
 	 * @throws IOException if jEdit cannot generate cache
 	 * @since jEdit 4.3pre12
 	 */
-	private static Collection<String> getDeclaredJars(String jarName) throws IOException
+	private static Collection<String> getDeclaredJars(String jarPath) throws IOException
 	{
 		Collection<String> jarList = new ArrayList<String>();
-		PluginJAR pluginJAR = new PluginJAR(new File(jarName));
-		PluginJAR.PluginCacheEntry pluginCacheEntry = PluginJAR.getPluginCache(pluginJAR);
-		if (pluginCacheEntry == null)
-		{
-			try
-			{
-				pluginCacheEntry = pluginJAR.generateCache();
-			}
-			finally
-			{
-				IOUtilities.closeQuietly(pluginJAR.getZipFile());
-			}
-		}
-		if(pluginCacheEntry == null)
-		{
-			// this happens when, for some reason, two versions
-			// of a plugin are installed, e.g when XSLT.jar and
-			// xslt.jar are both in $JEDIT_HOME/jars on Linux.
-			Log.log(Log.WARNING, ManagePanel.class,
-					"couldn't load plugin "+pluginJAR.getPath()
-					+" (most likely other version exists)");
-		}
-		else
+		PluginJAR pluginJAR = new PluginJAR(new File(jarPath));
+		PluginJAR.PluginCacheEntry pluginCacheEntry = PluginJAR.getPluginCacheEntry(jarPath);
+		if(pluginCacheEntry != null)
 		{
 			Properties cachedProperties = pluginCacheEntry.cachedProperties;
 
@@ -291,17 +274,15 @@ public class ManagePanel extends JPanel
 
 			if (jars != null)
 			{
-				String dir = MiscUtilities.getParentOfPath(pluginJAR.getPath());
-				StringTokenizer st = new StringTokenizer(jars);
-				while (st.hasMoreTokens())
+				Collection<String> jarsPaths = PluginJAR.parseJarsFilesString(pluginJAR.getPath(), jars);
+				for(String _jarPath: jarsPaths)
 				{
-					String _jarPath = MiscUtilities.constructPath(dir, st.nextToken());
 					if (new File(_jarPath).exists())
 						jarList.add(_jarPath);
 				}
 			}
 		}
-		jarList.add(jarName);
+		jarList.add(jarPath);
 		return jarList;
 	}//}}}
 
@@ -351,6 +332,26 @@ public class ManagePanel extends JPanel
 			if (jEdit.getBooleanProperty("plugin." + MiscUtilities.getFileName(jar) + ".disabled"))
 				status = DISABLED;
 			else status = NOT_LOADED;
+
+			PluginJAR.PluginCacheEntry cacheEntry;
+			try
+			{
+				cacheEntry = PluginJAR.getPluginCacheEntry(jar);
+				if(cacheEntry != null)
+				{
+					clazz = cacheEntry.pluginClass;
+					Properties props = cacheEntry.cachedProperties;
+					name = props.getProperty("plugin."+clazz+".name");
+					version = props.getProperty("plugin."+clazz+".version");
+					author = props.getProperty("plugin."+clazz+".author");
+					docs = props.getProperty("plugin."+clazz+".docs");
+					description = props.getProperty("plugin."+clazz+".description");
+				}
+			}
+			catch (IOException e)
+			{
+				Log.log(Log.WARNING, "Unable to load cache for "+jar, e);
+			}
 		}
 
 		/**
@@ -375,32 +376,8 @@ public class ManagePanel extends JPanel
 				author = jEdit.getProperty("plugin."+clazz+".author");
 				docs = jEdit.getProperty("plugin."+clazz+".docs");
 				description = jEdit.getProperty("plugin."+clazz+".description");
-				String jarsProp = jEdit.getProperty("plugin."+clazz+".jars");
-				if(jarsProp != null)
-				{
-					String directory = MiscUtilities.getParentOfPath(this.jar);
-
-					StringTokenizer st = new StringTokenizer(jarsProp);
-					while(st.hasMoreElements())
-					{
-						jars.add(MiscUtilities.constructPath(
-							directory,st.nextToken()));
-					}
-				}
-
-				String filesProp = jEdit.getProperty("plugin."+clazz+".files");
-
-				if(filesProp != null)
-				{
-					String directory = MiscUtilities.getParentOfPath(this.jar);
-
-					StringTokenizer st = new StringTokenizer(filesProp);
-					while(st.hasMoreElements())
-					{
-						jars.add(MiscUtilities.constructPath(
-							directory,st.nextToken()));
-					}
-				}
+				jars.addAll(jar.getJars());
+				jars.addAll(jar.getFiles());
 			}
 			else
 			{
@@ -440,6 +417,7 @@ public class ManagePanel extends JPanel
 		private int sortType = EntryCompare.NAME;
 		private ConcurrentHashMap<String, Object> unloaded;
 		// private HashSet<String> unloaded;
+		private int sortDirection = 1;
 
 		//{{{ Constructor
 		PluginTableModel()
@@ -575,41 +553,41 @@ public class ManagePanel extends JPanel
 
 		//{{{ setValueAt() method
 		@Override
-		public void setValueAt(Object value, int rowIndex,
-			int columnIndex)
+		public void setValueAt(final Object value, int rowIndex,
+			final int columnIndex)
 		{
-			Entry entry = entries.get(rowIndex);
-			if(columnIndex == 0)
+			final Entry entry = entries.get(rowIndex);
+			SwingUtilities.invokeLater(new Runnable()
 			{
-				PluginJAR jar = jEdit.getPluginJAR(entry.jar);
-				if(jar == null)
+				@Override
+				public void run()
 				{
-					if(value.equals(Boolean.FALSE))
-						return;
-
-					PluginJAR load = PluginJAR.load(entry.jar, true);
-					if (load == null)
+					if(columnIndex == 0)
 					{
-						GUIUtilities.error(ManagePanel.this, "plugin-load-error", null);
+						PluginJAR jar = jEdit.getPluginJAR(entry.jar);
+						if(jar == null)
+						{
+							if(value.equals(Boolean.FALSE))
+								return;
+
+							PluginJAR load = PluginJAR.load(entry.jar, true);
+							if (load == null)
+							{
+								GUIUtilities.error(ManagePanel.this, "plugin-load-error", null);
+							}
+						}
+						else
+						{
+							if(value.equals(Boolean.TRUE))
+								return;
+
+							unloadPluginJARWithDialog(jar);
+						}
 					}
+
+					update();
 				}
-				else
-				{
-					if(value.equals(Boolean.TRUE)) 
-						return;
-
-					unloadPluginJARWithDialog(jar);
-				}
-			}
-
-			update();
-		} //}}}
-
-		//{{{ setSortType() method
-		public void setSortType(int type)
-		{
-			sortType = type;
-			sort(type);
+			});
 		} //}}}
 
 		//{{{ sort() method
@@ -617,9 +595,17 @@ public class ManagePanel extends JPanel
 		{
 			List<String> savedSelection = new ArrayList<String>();
 			saveSelection(savedSelection);
-			Collections.sort(entries,new EntryCompare(type));
+
+			if (sortType != type)
+			{
+				sortDirection = 1;
+			}
+			sortType = type;
+
+			Collections.sort(entries, new EntryCompare(type, sortDirection));
 			fireTableChanged(new TableModelEvent(this));
 			restoreSelection(savedSelection);
+			table.getTableHeader().repaint();
 		}
 		//}}}
 
@@ -1004,13 +990,19 @@ public class ManagePanel extends JPanel
 
 			for (String jar : jarsToRemove)
 			{
-				listModel.add(jar);
-				roster.addRemove(jar);
+				if(new File(jar).exists())
+				{
+					listModel.add(jar);
+					roster.addRemove(jar);
+				}
 			}
+
+			Object[] sortedConfirm = listModel.toArray();
+			Arrays.sort(sortedConfirm);
 
 			int button = GUIUtilities.listConfirm(window,
 				"plugin-manager.remove-confirm",
-				null,listModel.toArray());
+				null, sortedConfirm);
 			if(button == JOptionPane.YES_OPTION)
 			{
 
@@ -1125,11 +1117,7 @@ public class ManagePanel extends JPanel
 
 					if (jars != null)
 					{
-						StringTokenizer st = new StringTokenizer(jars);
-						while (st.hasMoreTokens())
-						{
-							neededJars.add(st.nextToken());
-						}
+						neededJars.addAll(PluginJAR.parseJarsFilesStringNames(jars));
 					}
 				}
 				catch (IOException e1)
@@ -1240,27 +1228,41 @@ public class ManagePanel extends JPanel
 	private static class EntryCompare implements Comparator<Entry>
 	{
 		public static final int NAME = 1;
-		public static final int STATUS = 2;
+		public static final int VERSION = 2;
+		public static final int STATUS = 3;
+		public static final int DATA = 4;
 
 		private final int type;
+		private final int direction;
 
-		EntryCompare(int type)
+		EntryCompare(int type, int direction)
 		{
 			this.type = type;
+			this.direction = direction;
 		}
 
 		@Override
 		public int compare(Entry e1, Entry e2)
 		{
-			if (type == NAME)
-				return compareNames(e1,e2);
-			else
+			int result;
+			switch(type)
 			{
-				int result;
-				if ((result = e1.status.compareToIgnoreCase(e2.status)) == 0)
-					return compareNames(e1,e2);
-				return result;
+			case NAME:
+				result = compareNames(e1,e2);
+				break;
+			case VERSION:
+				result = StandardUtilities.compareStrings(e1.version, e2.version, true);
+				break;
+			case STATUS:
+				result = e1.status.compareToIgnoreCase(e2.status);
+				break;
+			case DATA:
+				result = StandardUtilities.compareStrings(e1.dataSize,e2.dataSize, false);
+				break;
+			default:
+				throw new IllegalStateException("Invalid sort type "+type);
 			}
+			return result * direction;
 		}
 
 		private static int compareNames(Entry e1, Entry e2)
@@ -1278,6 +1280,7 @@ public class ManagePanel extends JPanel
 
 			return s1.compareToIgnoreCase(s2);
 		}
+
 	} //}}}
 
 	//{{{ HeaderMouseHandler class
@@ -1288,21 +1291,13 @@ public class ManagePanel extends JPanel
 		{
 			if (evt.getSource() == table.getTableHeader())
 			{
-				switch(table.getTableHeader().columnAtPoint(evt.getPoint()))
-				{
-					case 1:
-						pluginModel.setSortType(EntryCompare.NAME);
-						break;
-					case 3:
-						pluginModel.setSortType(EntryCompare.STATUS);
-						break;
-					default:
-						break;
-				}
+				int column = table.getTableHeader().columnAtPoint(evt.getPoint());
+				pluginModel.sortDirection *= -1;
+				pluginModel.sort(column);
 			}
 			else
 			{
-				if (GUIUtilities.isPopupTrigger(evt))
+				if (GenericGUIUtilities.isPopupTrigger(evt))
 				{
 					int row = table.rowAtPoint(evt.getPoint());
 					if (row != -1 &&
@@ -1317,7 +1312,7 @@ public class ManagePanel extends JPanel
 						item.addActionListener(new CleanupActionListener());
 						popup.add(item);
 					}
-					GUIUtilities.showPopupMenu(popup, table, evt.getX(), evt.getY());
+					GenericGUIUtilities.showPopupMenu(popup, table, evt.getX(), evt.getY());
 				}
 			}
 		}
@@ -1418,6 +1413,31 @@ public class ManagePanel extends JPanel
 			{
 				table.setColumnSelectionInterval(0,0);
 			}
+		}
+	} //}}}
+
+	//{{{ HeaderRenderer
+	private static class HeaderRenderer extends DefaultTableCellRenderer
+	{
+		private final DefaultTableCellRenderer tcr;
+
+		HeaderRenderer(DefaultTableCellRenderer tcr)
+		{
+			this.tcr = tcr;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value,
+							       boolean isSelected, boolean hasFocus,
+							       int row, int column)
+		{
+			JLabel l = (JLabel)tcr.getTableCellRendererComponent(table,value,isSelected,hasFocus,row,column);
+			PluginTableModel model = (PluginTableModel) table.getModel();
+			Icon icon = (column == model.sortType)
+				? (model.sortDirection == 1) ? InstallPanel.ASC_ICON : InstallPanel.DESC_ICON
+				: null;
+			l.setIcon(icon);
+			return l;
 		}
 	} //}}}
 

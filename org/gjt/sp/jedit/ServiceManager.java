@@ -84,7 +84,7 @@ import org.gjt.sp.jedit.buffer.FoldHandler;
  * Plugins may define/provide more, so the only way to see a
  * complete list of service types currently in use is by calling
  * {@link #getServiceTypes()}.
- * <br />
+ * <br>
  * To use a service from a plugin, add a piece of code somewhere that calls
  * {@link #getServiceNames(String)} and  {@link #getService(String,String)}.
  *
@@ -94,7 +94,7 @@ import org.gjt.sp.jedit.buffer.FoldHandler;
  *
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: ServiceManager.java 23722 2014-11-09 16:26:59Z ezust $
+ * @version $Id: ServiceManager.java 24427 2016-06-22 22:29:03Z daleanson $
  */
 public class ServiceManager
 {
@@ -282,6 +282,7 @@ public class ServiceManager
      * @return the service instance
      * @since jEdit 4.4pre1
      */
+    @SuppressWarnings({"unchecked"}) 
 	public static <E> E getService(Class<E> clazz, String name)
 	{
 		return (E) getService(clazz.getName(), name);

@@ -24,6 +24,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 
 /** Dialog displayed when expanding an unknown abbreviation */
 public class AddAbbrevDialog extends JDialog
@@ -67,9 +68,9 @@ public class AddAbbrevDialog extends JDialog
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		if(abbrev == null)
-			GUIUtilities.requestFocus(this,editor.getAbbrevField());
+			GenericGUIUtilities.requestFocus(this,editor.getAbbrevField());
 		else
-			GUIUtilities.requestFocus(this,editor.getBeforeCaretTextArea());
+			GenericGUIUtilities.requestFocus(this,editor.getBeforeCaretTextArea());
 
 		pack();
 		setLocationRelativeTo(view);
@@ -93,7 +94,7 @@ public class AddAbbrevDialog extends JDialog
 				String _abbrev = editor.getAbbrev();
 				if(_abbrev == null || _abbrev.length() == 0)
 				{
-					getToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 					return;
 				}
 				Abbrevs.addGlobalAbbrev(_abbrev,editor.getExpansion());
@@ -104,7 +105,7 @@ public class AddAbbrevDialog extends JDialog
 				String _abbrev = editor.getAbbrev();
 				if(_abbrev == null || _abbrev.length() == 0)
 				{
-					getToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 					return;
 				}
 				Abbrevs.addModeAbbrev(view.getBuffer().getMode().getName(),

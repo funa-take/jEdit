@@ -46,7 +46,7 @@ import org.gjt.sp.util.*;
  * Wraps the VFS browser in a modal dialog.
  * Shows up when "File-Open" is used. 
  * @author Slava Pestov
- * @version $Id: VFSFileChooserDialog.java 23222 2013-09-29 20:43:34Z shlomy $
+ * @version $Id: VFSFileChooserDialog.java 24411 2016-06-19 11:02:53Z kerik-sf $
  */
 public class VFSFileChooserDialog extends EnhancedDialog
 {
@@ -152,7 +152,7 @@ public class VFSFileChooserDialog extends EnhancedDialog
 		}
 		else if(filename == null || filename.length() == 0)
 		{
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -196,14 +196,14 @@ public class VFSFileChooserDialog extends EnhancedDialog
 					isOK = true;
 					if(browser.getMode() == VFSBrowser.BROWSER_DIALOG)
 					{
-						Hashtable props = new Hashtable();
+						Hashtable<String, Object> props = new Hashtable<String, Object>();
 						if(browser.currentEncoding != null)
 						{
-							props.put(JEditBuffer.ENCODING,browser.currentEncoding);
+							props.put(JEditBuffer.ENCODING, browser.currentEncoding);
 						}
 						jEdit.openFile(browser.getView(),
 							browser.getDirectory(),
-							path,false,props);
+							path, false, props);
 					}
 					dispose();
 					break;
@@ -320,7 +320,7 @@ public class VFSFileChooserDialog extends EnhancedDialog
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
-		panel.setBorder(new EmptyBorder(12,12,12,12));
+		panel.setBorder(new EmptyBorder(12, 12, 12, 12));
 		
 		filenameField = new VFSFileNameField(browser,null);
 		filenameField.setText(name);
@@ -365,13 +365,16 @@ public class VFSFileChooserDialog extends EnhancedDialog
 		}
 
 		ok.addActionListener(new ActionHandler());
-		panel.add(ok);
-		panel.add(Box.createHorizontalStrut(6));
 		cancel = new JButton(jEdit.getProperty("common.cancel"));
 		cancel.setName("cancel");
 		cancel.addActionListener(new ActionHandler());
+		GenericGUIUtilities.makeSameSize(ok, cancel);
+		
+		panel.add(Box.createHorizontalStrut(6));
+		panel.add(ok);
+		panel.add(Box.createHorizontalStrut(6));
 		panel.add(cancel);
-
+		
 		content.add(BorderLayout.SOUTH,panel);
 
 		TaskManager.instance.addTaskListener(
@@ -379,7 +382,7 @@ public class VFSFileChooserDialog extends EnhancedDialog
 
 		pack();
 		GUIUtilities.loadGeometry(this,"vfs.browser.dialog");
-		GUIUtilities.requestFocus(this,filenameField);
+		GenericGUIUtilities.requestFocus(this,filenameField);
 		if (autoshow)
 			setVisible(true);
 	} //}}}

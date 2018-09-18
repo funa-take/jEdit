@@ -34,7 +34,7 @@ package org.gjt.sp.jedit;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: EBMessage.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: EBMessage.java 23981 2015-08-10 14:56:24Z daleanson $
  *
  * @since jEdit 2.2pre6
  */
@@ -63,7 +63,7 @@ public abstract class EBMessage
 
 	//{{{ getSource() method
 	/**
-	 * Returns the sender of this message.
+	 * @return the sender of this message.
 	 * @since jEdit 4.2pre1
 	 */
 	public Object getSource()
@@ -86,7 +86,7 @@ public abstract class EBMessage
 
 	//{{{ paramString() method
 	/**
-	 * Returns a string representation of this message's parameters.
+	 * @return a string representation of this message's parameters.
 	 */
 	public String paramString()
 	{

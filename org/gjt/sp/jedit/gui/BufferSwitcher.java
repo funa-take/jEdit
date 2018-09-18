@@ -21,28 +21,34 @@ package org.gjt.sp.jedit.gui;
 
 //{{{ Imports
 import javax.swing.event.*;
-import javax.swing.plaf.ComboBoxUI;
-import javax.swing.plaf.basic.BasicComboBoxUI;
-import java.lang.reflect.Field;
+import javax.accessibility.Accessible;
 
 import javax.swing.*;
+import javax.swing.plaf.*;
+import javax.swing.plaf.basic.*;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.bufferset.BufferSet;
 import org.gjt.sp.jedit.bufferset.BufferSetManager;
+import org.gjt.sp.jedit.msg.PropertiesChanged;
 import org.gjt.sp.util.ThreadUtilities;
 //}}}
 
 /** BufferSwitcher class
-   @version $Id: BufferSwitcher.java 23712 2014-11-01 23:45:33Z ezust $
+   @version $Id: BufferSwitcher.java 24820 2018-01-25 20:19:28Z daleanson $
 */
-public class BufferSwitcher extends JComboBox
+public class BufferSwitcher extends JComboBox<Buffer>
 {
 	// private members
 	private final EditPane editPane;
@@ -50,6 +56,11 @@ public class BufferSwitcher extends JComboBox
 	// item that was selected before popup menu was opened
 	private Object itemSelectedBefore;
 	public static final DataFlavor BufferDataFlavor = new DataFlavor(BufferTransferableData.class, DataFlavor.javaJVMLocalObjectMimeType);
+
+	// actual colors will be set in constructor, here are just fallback values
+	static Color defaultColor   = Color.BLACK;
+	static Color defaultBGColor = Color.LIGHT_GRAY;
+
 
 	public BufferSwitcher(final EditPane editPane)
 	{
@@ -87,7 +98,65 @@ public class BufferSwitcher extends JComboBox
 				setSelectedItem(itemSelectedBefore);
 			}
 		});
+		EditBus.addToBus(this);
+
+
+		addItemListener(new ItemListener() 
+		{
+			@Override
+			public void itemStateChanged(ItemEvent evt) 
+			{
+				if (evt.getStateChange() == ItemEvent.SELECTED) 
+				{
+					Buffer buffer = (Buffer) evt.getItem();
+					updateStyle(buffer);
+				}
+			}
+		});
+
+		defaultColor   = getForeground();
+		defaultBGColor = getBackground();
+
+		updateStyle(editPane.getBuffer());
 	}
+
+	static void updateStyle(JComponent target, boolean isBackup, String path)
+	{
+		String styleName = isBackup ? "backup" : "normal";
+
+		switch (styleName)
+		{
+			case "backup":
+				target.setForeground(new Color(230,207,93));
+				break;
+
+			case "normal":
+			default:
+				target.setForeground(defaultColor);
+				break;
+		}
+
+		target.setToolTipText(path != null ? makeToolTipText(path, isBackup) : null);
+	}
+
+	static String makeToolTipText(String path, Boolean isBackup)
+	{
+		String text = path;
+
+		if (isBackup) text = String.format("(backup file?) %s", text);
+
+		return text;
+	}
+
+
+	public void updateStyle(Buffer buffer)
+	{
+		String path = buffer.getPath();
+		Boolean isBackup = buffer.isBackup();
+
+		updateStyle(this, isBackup, path);
+	}
+
 
 	public void updateBufferList()
 	{
@@ -104,15 +173,40 @@ public class BufferSwitcher extends JComboBox
 			{
 				updating = true;
 				setMaximumRowCount(jEdit.getIntegerProperty("bufferSwitcher.maxRowCount",10));
-				setModel(new DefaultComboBoxModel(bufferSet.getAllBuffers()));
+				Buffer[] buffers = bufferSet.getAllBuffers();
+				if (jEdit.getBooleanProperty("bufferswitcher.sortBuffers", true)) 
+				{
+					Arrays.sort(buffers, new Comparator<Buffer>()
+					{
+						public int compare(Buffer a, Buffer b) 
+						{
+							if (jEdit.getBooleanProperty("bufferswitcher.sortByName", true)) 
+								return a.getName().toLowerCase().compareTo(b.getName().toLowerCase());		
+							else
+								return a.getPath().toLowerCase().compareTo(b.getPath().toLowerCase());	
+						}
+					});
+				}
+				setModel(new DefaultComboBoxModel<Buffer>(buffers));
+				// FIXME: editPane.getBuffer() returns wrong buffer (old buffer) after last non-untitled buffer close.
+				// When the only non-untitled (last) buffer is closed a new untitled buffer is added to BufferSet
+				// directly from BufferSetManager (@see BufferSetManager.bufferRemoved() and BufferSetManager.addBuffer())
+				// This triggers EditPane.bufferAdded() -> bufferSwitcher.updateBufferList() bypassing setting EditPane's
+				// buffer object reference to a new created untitled buffer.
+				// This is why here editPane.getBuffer() returns wrong previous already closed buffer in that case.
 				setSelectedItem(editPane.getBuffer());
-				setToolTipText(editPane.getBuffer().getPath(true));
 				addDnD();
 				updating = false;
 			}
 		};
 		ThreadUtilities.runInDispatchThread(runnable);
 	}
+
+	@EBHandler
+	public void handlePropertiesChanged(PropertiesChanged msg)
+	{
+		updateBufferList();
+	} 
 
 	static class BufferCellRenderer extends DefaultListCellRenderer
 	{
@@ -126,11 +220,14 @@ public class BufferSwitcher extends JComboBox
 			Buffer buffer = (Buffer)value;
 			
 			if(buffer == null)
+			{
 				setIcon(null);
+				updateStyle(this, false, null);
+			}
 			else
 			{
 				setIcon(buffer.getIcon());
-				setToolTipText(buffer.getPath());
+				updateStyle(this, buffer.isBackup(), buffer.getPath());
 			}
 			return this;
 		}
@@ -141,35 +238,14 @@ public class BufferSwitcher extends JComboBox
 		ComboBoxUI ui = getUI();
 		if (ui instanceof BasicComboBoxUI)
 		{
-			try
+			Accessible acc = ui.getAccessibleChild(null, 0);
+			if (acc instanceof BasicComboPopup) 
 			{
-				Field listBoxField = getField(ui.getClass(), "listBox");
-				listBoxField.setAccessible(true);
-				JList list = (JList)listBoxField.get(ui);
+				JList list = ((BasicComboPopup)acc).getList();
 				list.setDragEnabled(true);
 				list.setDropMode(DropMode.INSERT);
 				list.setTransferHandler(new BufferSwitcherTransferHandler());
 			}
-			catch (Exception ignored) // NOPMD
-			{
-				// don't do anything if the above fails, it just means dnd won't work.
-			}
-		}
-	}
-	
-	/**
-	 * Return the named field from the given class.
-	 */
-	private Field getField( Class aClass, String fieldName ) throws NoSuchFieldException {
-		if ( aClass == null )
-			throw new NoSuchFieldException( "Invalid field : " + fieldName );
-		try 
-		{
-			return aClass.getDeclaredField( fieldName );
-		}
-		catch ( NoSuchFieldException e ) 
-		{
-			return getField( aClass.getSuperclass(), fieldName );
 		}
 	}
 	
@@ -212,7 +288,7 @@ public class BufferSwitcher extends JComboBox
 		@Override
 		public DataFlavor[] getTransferDataFlavors()
 		{
-			return supportedDataFlavor;
+			return Arrays.copyOf(supportedDataFlavor, supportedDataFlavor.length);
 		}
 
 		@Override

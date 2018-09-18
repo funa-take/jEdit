@@ -41,7 +41,7 @@ import org.gjt.sp.util.Log;
 
 /** An abstract options dialog box.
  * @author Slava Pestov
- * @version $Id: OptionsDialog.java 23516 2014-04-24 03:50:48Z ezust $
+ * @version $Id: OptionsDialog.java 24464 2016-07-19 14:47:33Z ezust $
  * @todo refactor to use OptionGroupPane
  */
 public abstract class OptionsDialog extends EnhancedDialog
@@ -90,7 +90,7 @@ public abstract class OptionsDialog extends EnhancedDialog
 	{
 		getDefaultGroup().addOptionPane(pane);
 	} //}}}
-	
+
 	//{{{ ok() method
 	@Override
 	public void ok()
@@ -112,8 +112,8 @@ public abstract class OptionsDialog extends EnhancedDialog
 	{
 		if(currentPane != null)
 			jEdit.setProperty(name + ".last",currentPane.getName());
-	
-		OptionTreeModel m = (OptionTreeModel) paneTree
+
+		org.jedit.options.OptionTreeModel m = (org.jedit.options.OptionTreeModel) paneTree
 			.getModel();
 		save(m.getRoot());
 
@@ -273,6 +273,7 @@ public abstract class OptionsDialog extends EnhancedDialog
 	/**
 	 * Creates the tree model that goes on the left of the option pane,
 	 * loading all the items that are needed.
+	 * @return OptionTreeModel for binary compatibility of plugins (e.g. SideKick)
 	 */
 	protected abstract OptionTreeModel createOptionTreeModel();
 	// }}}
@@ -297,15 +298,16 @@ public abstract class OptionsDialog extends EnhancedDialog
 		this.name = name;
 		deferredOptionPanes = new HashMap<Object, OptionPane>();
 
-		if (pane == null) 
-			pane = jEdit.getProperty(name + ".last");		
-		
+		if (pane == null)
+			pane = jEdit.getProperty(name + ".last");
+
 		JPanel content = new JPanel(new BorderLayout(12,12));
 		content.setBorder(new EmptyBorder(12,12,12,12));
 		setContentPane(content);
 		stage = new JScrollPane();
 
 		paneTree = new JTree(createOptionTreeModel());
+		paneTree.setRowHeight(0);
 		paneTree.setVisibleRowCount(1);
 		paneTree.setCellRenderer(new PaneNameRenderer());
 
@@ -556,177 +558,20 @@ public abstract class OptionsDialog extends EnhancedDialog
 	} //}}}
 
 	//{{{ OptionTreeModel class
-	public class OptionTreeModel implements TreeModel
-	{
+	/**
+	 * deprecated use {@link OptionTreeModel}
+	 * Undeprecating until the GlobalOptions, PluginOptions and/or CombinedOptions
+	 * are fixed.
+	 **/
+	public class OptionTreeModel extends org.jedit.options.OptionTreeModel {
 		public OptionTreeModel()
 		{
-			this(new OptionGroup(null));
+			super();
 		}
 
 		public OptionTreeModel(OptionGroup root)
 		{
-			this.root = root;
+			super(root);
 		}
-
-		@Override
-		public void addTreeModelListener(TreeModelListener l)
-		{
-			listenerList.add(TreeModelListener.class, l);
-		}
-
-		@Override
-		public void removeTreeModelListener(TreeModelListener l)
-		{
-			listenerList.remove(TreeModelListener.class, l);
-		}
-
-		@Override
-		public Object getChild(Object parent, int index)
-		{
-			if (parent instanceof OptionGroup)
-			{
-				return ((OptionGroup)parent).getMember(index);
-			}
-			else
-			{
-				return null;
-			}
-		}
-
-		@Override
-		public int getChildCount(Object parent)
-		{
-			if (parent instanceof OptionGroup)
-			{
-				return ((OptionGroup)parent).getMemberCount();
-			}
-			else
-			{
-				return 0;
-			}
-		}
-
-		@Override
-		public int getIndexOfChild(Object parent, Object child)
-		{
-			if (parent instanceof OptionGroup)
-			{
-				return ((OptionGroup)parent)
-					.getMemberIndex(child);
-			}
-			else
-			{
-				return -1;
-			}
-		}
-
-		@Override
-		public Object getRoot()
-		{
-			return root;
-		}
-
-		@Override
-		public boolean isLeaf(Object node)
-		{
-			return !(node instanceof OptionGroup);
-		}
-
-		@Override
-		public void valueForPathChanged(TreePath path, Object newValue)
-		{
-			// this model may not be changed by the TableCellEditor
-		}
-
-		protected void fireNodesChanged(Object source, Object[] path,
-			int[] childIndices, Object[] children)
-		{
-			Object[] listeners = listenerList.getListenerList();
-
-			TreeModelEvent modelEvent = null;
-			for (int i = listeners.length - 2; i >= 0; i -= 2)
-			{
-				if (listeners[i] != TreeModelListener.class)
-					continue;
-
-				if (modelEvent == null)
-				{
-					modelEvent = new TreeModelEvent(source,
-						path, childIndices, children);
-				}
-
-				((TreeModelListener)listeners[i + 1])
-					.treeNodesChanged(modelEvent);
-			}
-		}
-
-		protected void fireNodesInserted(Object source, Object[] path,
-			int[] childIndices, Object[] children)
-		{
-			Object[] listeners = listenerList.getListenerList();
-
-			TreeModelEvent modelEvent = null;
-			for (int i = listeners.length - 2; i >= 0; i -= 2)
-			{
-				if (listeners[i] != TreeModelListener.class)
-					continue;
-
-				if (modelEvent == null)
-				{
-					modelEvent = new TreeModelEvent(source,
-						path, childIndices, children);
-				}
-
-				((TreeModelListener)listeners[i + 1])
-					.treeNodesInserted(modelEvent);
-			}
-		}
-
-		protected void fireNodesRemoved(Object source, Object[] path,
-			int[] childIndices, Object[] children)
-		{
-			Object[] listeners = listenerList.getListenerList();
-
-			TreeModelEvent modelEvent = null;
-			for (int i = listeners.length - 2; i >= 0; i -= 2)
-			{
-				if (listeners[i] != TreeModelListener.class)
-					continue;
-
-				if (modelEvent == null)
-				{
-					modelEvent = new TreeModelEvent(source,
-						path, childIndices, children);
-				}
-
-				((TreeModelListener)listeners[i + 1])
-					.treeNodesRemoved(modelEvent);
-			}
-		}
-
-		protected void fireTreeStructureChanged(Object source,
-			Object[] path, int[] childIndices, Object[] children)
-		{
-			Object[] listeners = listenerList.getListenerList();
-
-			TreeModelEvent modelEvent = null;
-			for (int i = listeners.length - 2; i >= 0; i -= 2)
-			{
-				if (listeners[i] != TreeModelListener.class)
-					continue;
-
-				if (modelEvent == null)
-				{
-					modelEvent = new TreeModelEvent(source,
-						path, childIndices, children);
-				}
-
-				((TreeModelListener)listeners[i + 1])
-					.treeStructureChanged(modelEvent);
-			}
-		}
-
-		private final OptionGroup root;
-		private final EventListenerList listenerList = new EventListenerList();
 	} //}}}
 }

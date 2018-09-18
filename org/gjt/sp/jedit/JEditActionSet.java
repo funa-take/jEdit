@@ -152,7 +152,7 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 	 */
 	protected JEditActionSet()
 	{
-		actions = new Hashtable<String, Object>();
+		actions = new HashMap<String, JEditAbstractEditAction>();
 		loaded = true;
 	} //}}}
 	
@@ -181,13 +181,14 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 	 * @param action The action
 	 * @since jEdit 4.0pre1
 	 */
+	@SuppressWarnings({"unchecked"}) 
 	public void addAction(E action)
 	{
-		actions.put(action.getName(),action);
+		actions.put(action.getName(), action);
 		if(context != null)
 		{
 			context.actionNames = null;
-			context.actionHash.put(action.getName(),this);
+			context.actionHash.put(action.getName(), this);
 		}
 	} //}}}
 
@@ -226,16 +227,17 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 
 	//{{{ getAction() method
 	/**
-	 * Returns an action with the specified name.<p>
+	 * @return an action with the specified name.<p>
 	 *
 	 * <b>Deferred loading:</b> this will load the action set if necessary.
 	 *
 	 * @param name The action name
 	 * @since jEdit 4.0pre1
 	 */
+	@SuppressWarnings({"unchecked"}) 
 	public E getAction(String name)
 	{
-		Object obj = actions.get(name);
+		JEditAbstractEditAction obj = actions.get(name);
 		if(obj == placeholder)
 		{
 			load();
@@ -252,7 +254,7 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 
 	//{{{ getActionCount() method
 	/**
-	 * Returns the number of actions in the set.
+	 * @return the number of actions in the set.
 	 * @since jEdit 4.0pre1
 	 */
 	public int getActionCount()
@@ -262,7 +264,7 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 
 	//{{{ getActionNames() method
 	/**
-	 * Returns an array of all action names in this action set.
+	 * @return an array of all action names in this action set.
 	 * @since jEdit 4.2pre1
 	 */
 	public String[] getActionNames()
@@ -279,7 +281,7 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 
 	//{{{ getCacheableActionNames() method
 	/**
-	 * Returns an array of all action names in this action set that should
+	 * @return an array of all action names in this action set that should
 	 * be cached; namely, <code>BeanShellAction</code>s.
 	 * @since jEdit 4.2pre1
 	 */
@@ -314,19 +316,20 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 
 	//{{{ getActions() method
 	/**
-	 * Returns an array of all actions in this action set.<p>
+	 * @return an array of all actions in this action set.<p>
 	 *
 	 * <b>Deferred loading:</b> this will load the action set if necessary.
 	 *
 	 * @since jEdit 4.0pre1
 	 */
+	@SuppressWarnings({"unchecked"}) 
 	public E[] getActions()
 	{
 		load();
 		E[] retVal = getArray(actions.size());
-		Collection<Object> values = actions.values();
+		Collection<JEditAbstractEditAction> values = actions.values();
 		int i = 0;
-		for (Object value : values)
+		for (JEditAbstractEditAction value : values)
 		{
 			retVal[i++] = (E) value;
 		}
@@ -335,7 +338,7 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 
 	//{{{ contains() method
 	/**
-	 * Returns if this action set contains the specified action.
+	 * @return if this action set contains the specified action.
 	 * @param action The action
 	 * @since jEdit 4.2pre1
 	 */
@@ -348,7 +351,7 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 
 	//{{{ size() method
 	/**
-	 * Returns the number of actions in this action set.
+	 * @return the number of actions in this action set.
 	 * @since jEdit 4.2pre2
 	 */
 	public int size()
@@ -375,7 +378,7 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 		try
 		{
 			Log.log(Log.DEBUG,this,"Loading actions from " + uri);
-			ActionListHandler ah = new ActionListHandler(uri.toString(),this);
+			ActionListHandler ah = new ActionListHandler(uri.toString(), this);
 			InputStream in;
 			try
 			{
@@ -407,6 +410,13 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 	/**
 	 * This method should be implemented to return an action that will execute
 	 * the given code
+	 * @param actionName the action name
+	 * @param code the code
+	 * @param selected selected
+	 * @param noRepeat noRepeat
+	 * @param noRecord noRecord
+	 * @param noRememberLast noRememberLast
+	 * @return an action
 	 * @since 4.3pre13
 	 */
 	protected abstract JEditAbstractEditAction createBeanShellAction(String actionName,
@@ -432,8 +442,8 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 	{
 		AbstractInputHandler inputHandler = getInputHandler();
 
-		Set<Map.Entry<String, Object>> entries = actions.entrySet();
-		for (Map.Entry<String, Object> entry : entries)
+		Set<Map.Entry<String, JEditAbstractEditAction>> entries = actions.entrySet();
+		for (Map.Entry<String, JEditAbstractEditAction> entry : entries)
 		{
 			String name = entry.getKey();
 
@@ -471,11 +481,14 @@ public abstract class JEditActionSet<E extends JEditAbstractEditAction> implemen
 	//}}}
 
 	//{{{ Private members
-	protected Hashtable<String,Object> actions;
+	protected HashMap<String, JEditAbstractEditAction> actions;
 	protected URL uri;
 	protected boolean loaded;
 
-	protected static final Object placeholder = new Object();
+	// TODO: to complete the conversion to generics, this really needs to be an E
+	protected static final JEditAbstractEditAction placeholder = new JEditAbstractEditAction("__PLACEHOLDER__"){
+		public void invoke(Object arg) {}
+	};
 
 	//}}}
 }

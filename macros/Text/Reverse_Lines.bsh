@@ -9,7 +9,7 @@
  * :mode=beanshell:tabSize=4:indentSize=4:maxLineLen=0:noTabs=false:
  * :indentOnTab=true:indentOnEnter=true:folding=explicit:collapseFolds=1:
  *
- * $Id: Reverse_Lines.bsh 21353 2012-03-14 09:46:51Z jojaba_67 $
+ * $Id: Reverse_Lines.bsh 23971 2015-08-08 19:37:35Z daleanson $
  */
 
 // Localization
@@ -80,9 +80,6 @@ void reverseLines(textArea)
 	}
 }
 
-if(buffer.isReadOnly())
-	Macros.error(view, NotEditableMessage);
-else
 	reverseLines(textArea);
 
 /*

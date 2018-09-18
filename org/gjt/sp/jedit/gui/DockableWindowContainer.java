@@ -23,7 +23,7 @@ package org.gjt.sp.jedit.gui;
  *
  * This class should never be used directly, and is not public.
  * @author Slava Pestov
- * @version $Id: DockableWindowContainer.java 23665 2014-08-22 05:12:35Z ezust $
+ * @version $Id: DockableWindowContainer.java 23664 2014-08-22 05:11:25Z ezust $
  * @since jEdit 2.6pre3
  */
 public interface DockableWindowContainer

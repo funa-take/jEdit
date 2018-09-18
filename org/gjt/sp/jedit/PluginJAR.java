@@ -144,7 +144,7 @@ import static org.gjt.sp.jedit.EditBus.EBHandler;
  * @see ServiceManager
  *
  * @author Slava Pestov
- * @version $Id: PluginJAR.java 23224 2013-09-30 20:51:42Z shlomy $
+ * @version $Id: PluginJAR.java 24110 2015-10-19 16:23:13Z vampire0 $
  * @since jEdit 4.2pre1
  */
 public class PluginJAR
@@ -228,19 +228,13 @@ public class PluginJAR
 		}
 		
 		// Load extra jars that are part of this plugin
-		String jars = jEdit.getProperty("plugin." + className + ".jars");
-		if(jars != null)
+		Collection<String> jarsPaths = jar.getJars();
+		for(String _jarPath: jarsPaths)
 		{
-			String dir = MiscUtilities.getParentOfPath(path);
-			StringTokenizer st = new StringTokenizer(jars);
-			while(st.hasMoreTokens())
+			PluginJAR _jar = jEdit.getPluginJAR(_jarPath);
+			if(_jar == null)
 			{
-				String _jarPath = MiscUtilities.constructPath(dir,st.nextToken());
-				PluginJAR _jar = jEdit.getPluginJAR(_jarPath);
-				if(_jar == null)
-				{
-					jEdit.addPluginJAR(_jarPath);
-				}
+				jEdit.addPluginJAR(_jarPath);
 			}
 		}
 		jar.checkDependencies();
@@ -276,6 +270,85 @@ public class PluginJAR
 		return jar;
 	} // }}}
 	
+	//{{{ parseJarsFilesString(String path, String jarsString) method
+	/**
+	 * parse the files listed in plugin.CLASSNAME.jars or plugin.CLASSNAME.files
+	 * and return full paths to each file of the list.
+	 * @since jEdit 5.3pre1
+	 */
+	public static Collection<String> parseJarsFilesString(String path, String jarsString)
+	{
+		String dir = MiscUtilities.getParentOfPath(path);
+		StringTokenizer st = new StringTokenizer(jarsString);
+		Collection<String> jarPaths = new LinkedList<String>();
+		while(st.hasMoreTokens())
+		{
+			String _jarPath = MiscUtilities.constructPath(dir,st.nextToken());
+			jarPaths.add(_jarPath);
+		}
+		return jarPaths;
+	}
+	// }}}
+	//{{{ parseJarsFilesStringNames(String path, String jarsString) method
+	/**
+	 * parse the files listed in plugin.CLASSNAME.jars or plugin.CLASSNAME.files
+	 * and return them as a collection
+	 * @since jEdit 5.3pre1
+	 */
+	public static Collection<String> parseJarsFilesStringNames(String jarsString)
+	{
+		StringTokenizer st = new StringTokenizer(jarsString);
+		Collection<String> jarPaths = new LinkedList<String>();
+		while(st.hasMoreTokens())
+		{
+			jarPaths.add(st.nextToken());
+		}
+		return jarPaths;
+	}
+	// }}}
+
+	//{{{ getJars() method
+	/**
+	 * Get the jars listed in this plugin and return full paths to them
+	 *
+	 * @return jars full paths or empty collection if plugin is null
+	 * @since jEdit 5.3pre1
+	 */
+	public Collection<String> getJars()
+	{
+		if(plugin != null)
+		{
+			String jars = jEdit.getProperty("plugin." + plugin.getClassName() + ".jars");
+			if(jars != null)
+			{
+				return parseJarsFilesString(path, jars);
+			}
+		}
+		return Collections.emptyList();
+	}
+	// }}}
+
+	// {{{ getFiles() method
+	/**
+	 * Get the files listed in this plugin and return full paths to them
+	 *
+	 * @return files full paths or empty collection if plugin is null
+	 * @since jEdit 5.3pre1
+	 */
+	public Collection<String> getFiles()
+	{
+		if(plugin != null)
+		{
+			String files = jEdit.getProperty("plugin." + plugin.getClassName() + ".files");
+			if(files != null)
+			{
+				return parseJarsFilesString(path, files);
+			}
+		}
+		return Collections.emptyList();
+	}
+	// }}}
+
 	//{{{ getPath() method
 	/**
 	 * Returns the full path name of this plugin's JAR file.
@@ -598,29 +671,21 @@ public class PluginJAR
 
 		// each JAR file listed in the plugin's jars property
 		// needs to know that we need them
-		String jars = jEdit.getProperty("plugin."
-			+ plugin.getClassName() + ".jars");
-		if(jars != null)
-		{
-			String dir = MiscUtilities.getParentOfPath(path);
+		Collection<String> jarsPaths = getJars();
 
-			StringTokenizer st = new StringTokenizer(jars);
-			while(st.hasMoreTokens())
+		for(String jarPath: jarsPaths)
+		{
+			PluginJAR jar = jEdit.getPluginJAR(jarPath);
+			if(jar == null)
 			{
-				String jarPath = MiscUtilities.constructPath(
-					dir,st.nextToken());
-				PluginJAR jar = jEdit.getPluginJAR(jarPath);
-				if(jar == null)
-				{
-					String[] args = { jarPath };
-					jEdit.pluginError(path, "plugin-error.missing-jar",args);
-					ok = false;
-				}
-				else
-				{
-					weRequireThese.add(jarPath);
-					jar.theseRequireMe.add(path);
-				}
+				String[] args = { jarPath };
+				jEdit.pluginError(path, "plugin-error.missing-jar",args);
+				ok = false;
+			}
+			else
+			{
+				weRequireThese.add(jarPath);
+				jar.theseRequireMe.add(path);
 			}
 		}
 		
@@ -796,7 +861,7 @@ public class PluginJAR
 	//{{{ getAllDependentPlugins() method
 	/**
 	* @return an array of plugin names that have a dependency or an optional dependency on this plugin,
-	* this returns a combination of <code>getDependentPlugins</code> and getOptionallyDependentPlugins</code>.
+	* this returns a combination of <code>getDependentPlugins</code> and <code>getOptionallyDependentPlugins</code>.
 	*/
 	public String[] getAllDependentPlugins()
 	{
@@ -980,8 +1045,7 @@ public class PluginJAR
 			Buffer buffer = jEdit.getFirstBuffer();
 			while(buffer != null)
 			{
-				if(buffer.getFoldHandler() != null
-					&& buffer.getFoldHandler().getClass()
+				if(buffer.getFoldHandler().getClass()
 					.getClassLoader() == classLoader)
 				{
 					buffer.setFoldHandler(
@@ -1133,6 +1197,43 @@ public class PluginJAR
 			new File(jarCachePath).delete();
 		}
 	} //}}}
+
+	//{{{ getPluginCacheEntry() method
+	/**
+	 * Returns the cache entry for an installed but not loaded plugin.
+	 * There is no need to use this method if the plugin is loaded.
+	 *
+	 * @param path path to the the plugin jar
+	 * @return cache entry or null
+	 * @throws IOException if jEdit cannot generate cache
+	 * @since jEdit 5.3pre1
+	 */
+	public static PluginJAR.PluginCacheEntry getPluginCacheEntry(String path) throws IOException
+	{
+		PluginJAR pluginJAR = new PluginJAR(new File(path));
+		PluginJAR.PluginCacheEntry pluginCacheEntry = PluginJAR.getPluginCache(pluginJAR);
+		if (pluginCacheEntry == null)
+		{
+			try
+			{
+				pluginCacheEntry = pluginJAR.generateCache();
+			}
+			finally
+			{
+				IOUtilities.closeQuietly(pluginJAR.getZipFile());
+			}
+		}
+		if(pluginCacheEntry == null)
+		{
+			// this happens when, for some reason, two versions
+			// of a plugin are installed, e.g when XSLT.jar and
+			// xslt.jar are both in $JEDIT_HOME/jars on Linux.
+			Log.log(Log.WARNING, PluginJAR.class,
+					"couldn't load plugin "+pluginJAR.getPath()
+					+" (most likely other version exists)");
+		}
+		return pluginCacheEntry;
+	}//}}}
 
 	//}}}
 
@@ -1674,9 +1775,7 @@ public class PluginJAR
 				FoldHandler.getFoldHandler(
 				buffer.getStringProperty("folding"));
 			// == null before loaded
-			if(buffer.getFoldHandler() != null
-				&& handler != null
-				&& handler != buffer.getFoldHandler())
+			if(handler != null && handler != buffer.getFoldHandler())
 			{
 				buffer.setFoldHandler(handler);
 			}

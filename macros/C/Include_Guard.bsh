@@ -21,7 +21,7 @@
  * along with the jEdit program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Include_Guard.bsh 10301 2007-08-03 20:18:54Z blueyed $
+ * $Id: Include_Guard.bsh 23971 2015-08-08 19:37:35Z daleanson $
  *
  * Notes on use:
  *
@@ -68,7 +68,4 @@ void includeGuard()
     textArea.setCaretPosition(pos + pos1);
 }
 
-if( buffer.isReadOnly() ) 
-    Macros.error(view, "Buffer is read-only.");
-else 
     includeGuard();

@@ -32,7 +32,7 @@ import org.gjt.sp.jedit.*;
 //{{{ BrowserOptionPane class
 /**
  * @author Slava Pestov
- * @version $Id: BrowserOptionPane.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: BrowserOptionPane.java 24425 2016-06-22 19:29:40Z daleanson $
  */
 public class BrowserOptionPane extends AbstractOptionPane
 {
@@ -54,7 +54,7 @@ public class BrowserOptionPane extends AbstractOptionPane
 			jEdit.getProperty("options.browser.general.defaultPath.working")
 		};
 
-		defaultDirectory = new JComboBox(dirs);
+		defaultDirectory = new JComboBox<String>(dirs);
 		String defaultDir = jEdit.getProperty("vfs.browser.defaultPath");
 		if("favorites".equals(defaultDir))
 			defaultDirectory.setSelectedIndex(0);
@@ -158,7 +158,7 @@ public class BrowserOptionPane extends AbstractOptionPane
 	} //}}}
 
 	//{{{ Private members
-	private JComboBox defaultDirectory;
+	private JComboBox<String> defaultDirectory;
 	private JCheckBox showToolbar;
 	private JCheckBox showMenubar;
 	private JCheckBox showIcons;

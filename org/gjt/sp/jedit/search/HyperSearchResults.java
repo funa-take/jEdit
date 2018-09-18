@@ -42,6 +42,7 @@ import org.gjt.sp.jedit.search.SearchMatcher.Match;
 import org.gjt.sp.jedit.syntax.SyntaxStyle;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.util.EnhancedTreeCellRenderer;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.HtmlUtilities;
 import org.gjt.sp.util.SyntaxUtilities;
 import org.gjt.sp.util.TaskManager;
@@ -50,7 +51,7 @@ import org.gjt.sp.util.TaskManager;
 /**
  * HyperSearch results window.
  * @author Slava Pestov
- * @version $Id: HyperSearchResults.java 22942 2013-04-22 11:27:52Z thomasmey $
+ * @version $Id: HyperSearchResults.java 24420 2016-06-19 15:24:43Z kerik-sf $
  */
 public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 {
@@ -104,6 +105,7 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 		resultTreeRoot = new DefaultMutableTreeNode();
 		resultTreeModel = new DefaultTreeModel(resultTreeRoot);
 		resultTree = new HighlightingTree(resultTreeModel);
+		resultTree.setRowHeight(0);
 		resultTree.setToolTipText(null);
 		resultTree.setCellRenderer(new ResultCellRenderer());
 		resultTree.setVisibleRowCount(16);
@@ -477,17 +479,7 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 	{
 		Font f = (resultTree != null) ? resultTree.getFont() :
 			UIManager.getFont("Tree.font");
-		SyntaxStyle s;
-		try
-		{
-			s = SyntaxUtilities.parseStyle(style, f.getFamily(), f.getSize(), true, null);
-		}
-		catch (Exception e)
-		{
-			style = "color:#000000";
-			s = SyntaxUtilities.parseStyle(style, f.getFamily(), f.getSize(), true);
-		}
-		return s;
+		return HtmlUtilities.parseHighlightStyle(style, f);
 	} //}}}
 
 	//}}}
@@ -663,7 +655,7 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 				return;
 
 			resultTree.setSelectionPath(path1);
-			if (GUIUtilities.isPopupTrigger(evt))
+			if (GenericGUIUtilities.isPopupTrigger(evt))
 				showPopupMenu(evt);
 			else
 			{
@@ -682,8 +674,7 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 
 			popupMenu = new JPopupMenu();
 			Object userObj = node.getUserObject();
-			if (userObj instanceof HyperSearchFileNode
-					|| userObj instanceof HyperSearchResult)
+			if (userObj instanceof HyperSearchNode)
 			{
 				popupMenu.add(new GoToNodeAction(
 					"hypersearch-results.open",
@@ -700,29 +691,33 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 			}
 			if (!(userObj instanceof HyperSearchFolderNode))
 				popupMenu.add(new RemoveTreeNodeAction());
-			popupMenu.add(new ExpandChildTreeNodesAction());
+			if(!(userObj instanceof HyperSearchResult))
+				popupMenu.add(new ExpandChildTreeNodesAction());
 			if (userObj instanceof HyperSearchFolderNode
 					|| userObj instanceof HyperSearchOperationNode)
 			{
 				popupMenu.add(new CollapseChildTreeNodesAction());
 				if (userObj instanceof HyperSearchFolderNode)
+				{
 					popupMenu.add(new NewSearchAction());
-			}
-			if (userObj instanceof HyperSearchOperationNode)
-			{
-				popupMenu.add(new JPopupMenu.Separator());
-				HyperSearchOperationNode resultNode = (HyperSearchOperationNode)userObj;
-				JCheckBoxMenuItem chkItem =
-					new JCheckBoxMenuItem(jEdit.getProperty("hypersearch-results.tree-view"),
-							resultNode.isTreeViewDisplayed());
-				chkItem.addActionListener(new TreeDisplayAction());
-				popupMenu.add(chkItem);
+				}
+				else
+				{
+					popupMenu.add(new JPopupMenu.Separator());
+					HyperSearchOperationNode resultNode = (HyperSearchOperationNode)userObj;
+					JCheckBoxMenuItem chkItem =
+						new JCheckBoxMenuItem(jEdit.getProperty("hypersearch-results.tree-view"),
+								resultNode.isTreeViewDisplayed());
+					chkItem.addActionListener(new TreeDisplayAction());
+					popupMenu.add(chkItem);
 
-				popupMenu.add(new RedoSearchAction((HyperSearchOperationNode)userObj));
+					popupMenu.add(new RedoSearchAction((HyperSearchOperationNode)userObj));
+				}
+
 			}
 			popupMenu.add(new CopyToClipboardAction());
 
-			GUIUtilities.showPopupMenu(popupMenu,evt.getComponent(),
+			GenericGUIUtilities.showPopupMenu(popupMenu,evt.getComponent(),
 				evt.getX(),evt.getY());
 			evt.consume();
 		} //}}}

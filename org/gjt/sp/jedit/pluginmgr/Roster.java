@@ -27,6 +27,8 @@ import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.io.*;
 import java.net.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.*;
 import java.util.*;
 import org.gjt.sp.jedit.*;
@@ -38,10 +40,12 @@ import static org.gjt.sp.jedit.io.FileVFS.recursiveDelete;
 //}}}
 
 /**
- * @author $Id: Roster.java 23222 2013-09-29 20:43:34Z shlomy $
+ * @author $Id: Roster.java 24599 2017-01-30 00:40:31Z vampire0 $
  */
 class Roster
 {
+	private static final Pattern HOST_REGEX = Pattern.compile("(?<=/)\\w++(?=\\.dl\\.sourceforge\\.net)");
+
 	//{{{ Roster constructor
 	Roster()
 	{
@@ -64,6 +68,12 @@ class Roster
 		int size)
 	{
 		addOperation(new Install(installed,url,installDirectory,size));
+	} //}}}
+
+	//{{{ addLoad() method
+	void addLoad(String path)
+	{
+		toLoad.add(path);
 	} //}}}
 
 	//{{{ getOperation() method
@@ -203,27 +213,29 @@ class Roster
 
 			toLoad.remove(this.jar);
 
-			// move JAR first
 			File jarFile = new File(this.jar);
 			File srcFile = new File(this.jar.substring(0, this.jar.length() - 4));
 
-			Log.log(Log.NOTICE,this,"Deleting " + jarFile);
-
-			boolean ok = jarFile.delete();
-			if (ok) 
+			if(jarFile.exists())
 			{
-				EditBus.send(new PluginUpdate(jarFile, PluginUpdate.REMOVED, false));	
-			}
+				Log.log(Log.NOTICE,this,"Deleting " + jarFile);
 
-			if(srcFile.exists())
-			{
-				ok &= recursiveDelete(srcFile);
-			}
+				boolean ok = jarFile.delete();
+				if (ok)
+				{
+					EditBus.send(new PluginUpdate(jarFile, PluginUpdate.REMOVED, false));
+				}
 
-			if(!ok)
-			{
-				String[] args = {this.jar};
-				GUIUtilities.error(comp,"plugin-manager.remove-failed",args);
+				if(srcFile.exists())
+				{
+					ok &= recursiveDelete(srcFile);
+				}
+
+				if(!ok)
+				{
+					String[] args = {this.jar};
+					GUIUtilities.error(comp,"plugin-manager.remove-failed",args);
+				}
 			}
 		} //}}}
 
@@ -287,9 +299,7 @@ class Roster
 		//{{{ runInWorkThread() method
 		public void runInWorkThread(PluginManagerProgress progress)
 		{
-			String fileName = MiscUtilities.getFileName(url);
-
-			path = download(progress,fileName,url);
+			path = download(progress,url);
 		} //}}}
 
 		//{{{ runInAWTThread() method
@@ -299,9 +309,29 @@ class Roster
 			if(path == null)
 				return;
 
-			// if download OK, remove existing version
+			/* if download OK, remove existing version
+			 * and bundled jars and files */
 			if(installed != null)
-				new Remove(installed).runInAWTThread(comp);
+			{
+				PluginJAR pluginJar = jEdit.getPluginJAR(installed);
+				Collection<String> libs = new LinkedList<>();
+				libs.add(installed);
+				if(pluginJar == null)
+				{
+					Log.log(Log.ERROR, Roster.Remove.class,
+						 "unable to get PluginJAR for "+installed);
+				}
+				else
+				{
+					 libs.addAll(pluginJar.getJars());
+					 libs.addAll(pluginJar.getFiles());
+				}
+
+				for(String lib: libs)
+				{
+					new Remove(lib).runInAWTThread(comp);
+				}
+			}
 
 			ZipFile zipFile = null;
 
@@ -402,8 +432,7 @@ class Roster
 		private String path;
 
 		//{{{ download() method
-		private String download(PluginManagerProgress progress,
-			String fileName, String url)
+		private String download(PluginManagerProgress progress, String url)
 		{
 			try
 			{
@@ -411,22 +440,38 @@ class Roster
 				if (host == null || host.equals(MirrorList.Mirror.NONE))
 					host = "default";
 
-				String path = MiscUtilities.constructPath(getDownloadDir(),fileName);
-				URLConnection conn = new URL(url).openConnection();
-				progress.setStatus(jEdit.getProperty("plugin-manager.progress",new String[] {fileName, host}));
-				InputStream in = null;
-				FileOutputStream out = null;
-				try
+				// follow HTTP redirects
+				boolean finalUrlFound = false;
+				String finalUrl = url;
+				URLConnection conn = null;
+				while (!finalUrlFound)
 				{
-					in = conn.getInputStream();
-					out = new FileOutputStream(path);
-					if(!IOUtilities.copyStream(progress,in,out,true))
-						return null;
+					Log.log(Log.DEBUG, this, String.format("Trying URL '%s'", finalUrl));
+					conn = new URL(finalUrl).openConnection();
+					HttpURLConnection httpConn = (HttpURLConnection) conn;
+					httpConn.setInstanceFollowRedirects(false);
+					httpConn.connect();
+					int responseCode = httpConn.getResponseCode();
+					String locationHeader = httpConn.getHeaderField("Location");
+					if ((responseCode >= 300) && (responseCode < 400) && (locationHeader != null))
+						finalUrl = locationHeader.replaceFirst("^https:", "http:");
+					else
+						finalUrlFound = true;
 				}
-				finally
+				Log.log(Log.DEBUG, this, String.format("Final URL '%s' found", finalUrl));
+
+				String fileName = MiscUtilities.getFileName(finalUrl);
+				String path = MiscUtilities.constructPath(getDownloadDir(),fileName);
+				Matcher hostMatcher = HOST_REGEX.matcher(finalUrl);
+				if (hostMatcher.find())
+					host = hostMatcher.group();
+				String progressMessage = jEdit.getProperty("plugin-manager.progress", new String[]{fileName, host});
+				progress.setStatus(progressMessage);
+				try (InputStream in = conn.getInputStream();
+				     FileOutputStream out = new FileOutputStream(path))
 				{
-					IOUtilities.closeQuietly((Closeable)in);
-					IOUtilities.closeQuietly((Closeable)out);
+					if(!IOUtilities.copyStream(progress,progressMessage,in,out,true))
+						return null;
 				}
 
 				return path;

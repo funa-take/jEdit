@@ -36,7 +36,7 @@ import org.gjt.sp.util.TaskManager;
 
 /**
  * @author Slava Pestov
- * @version $Id: VFSFileNameField.java 22851 2013-03-17 11:03:48Z thomasmey $
+ * @version $Id: VFSFileNameField.java 23549 2014-05-17 18:44:55Z ezust $
  * @since jEdit 4.2pre1 (public since 4.5pre1)
  */
 public class VFSFileNameField extends HistoryTextField

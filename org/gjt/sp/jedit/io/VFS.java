@@ -88,7 +88,7 @@ import org.gjt.sp.util.ThreadUtilities;
  * <li>{@link #createVFSSession(String,Component)} - unless
  *     <code>NON_AWT_SESSION_CAP</code> capability is set</li>
  * <li>{@link #insert(View,Buffer,String)}</li>
- * <li>{@link #load(View,Buffer,String)}</li>
+ * <li>{@link #load(View,Buffer,String,boolean)}</li>
  * <li>{@link #save(View,Buffer,String)}</li>
  * </ul>
  *
@@ -104,7 +104,7 @@ import org.gjt.sp.util.ThreadUtilities;
  * @see VFSManager#getVFSForProtocol(String)
  *
  * @author Slava Pestov
- * @author $Id: VFS.java 23222 2013-09-29 20:43:34Z shlomy $
+ * @author $Id: VFS.java 24832 2018-02-22 01:27:36Z vampire0 $
  */
 public abstract class VFS
 {
@@ -205,7 +205,7 @@ public abstract class VFS
 	public static final String EA_MODIFIED = "modified";
 	//}}}
 
-	public static int IOBUFSIZE = 32678;
+	public static final int IOBUFSIZE = 32678;
 
 	//{{{ VFS constructors
 	/**
@@ -311,7 +311,7 @@ public abstract class VFS
 	 * and the protocol separator character and then delegates
 	 * to eventually present sub-VFS-paths present in the VFS path
 	 * like "jode:archive:/test.zip!/test.txt".
-	 * <p/>
+	 * <p>
 	 * If a VFS implementation can have additional
 	 * information in the VFS path like username / password / host / port
 	 * for FTP VFS or archive filename for archive VFS, this
@@ -473,8 +473,9 @@ public abstract class VFS
 	 * @param view The view
 	 * @param buffer The buffer
 	 * @param path The path
+	 * @param untitled is the buffer untitled
 	 */
-	public boolean load(View view, Buffer buffer, String path)
+	public boolean load(View view, Buffer buffer, String path, boolean untitled)
 	{
 		if((getCapabilities() & READ_CAP) == 0)
 		{
@@ -489,7 +490,7 @@ public abstract class VFS
 		if((getCapabilities() & WRITE_CAP) == 0)
 			buffer.setReadOnly(true);
 
-		Task request = new BufferLoadRequest(view, buffer, session, this, path);
+		Task request = new BufferLoadRequest(view, buffer, session, this, path, untitled);
 		if(buffer.isTemporary())
 			// this makes HyperSearch much faster
 			request.run();

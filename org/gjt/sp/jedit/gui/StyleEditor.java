@@ -30,6 +30,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -38,7 +39,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.JOptionPane;
 
 import org.gjt.sp.jedit.jEdit;
@@ -47,6 +47,8 @@ import org.gjt.sp.jedit.syntax.SyntaxStyle;
 import org.gjt.sp.jedit.syntax.DefaultTokenHandler;
 import org.gjt.sp.jedit.syntax.Token;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
+import org.gjt.sp.util.GenericGUIUtilities;
+import org.gjt.sp.util.SyntaxUtilities;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 
 //{{{ StyleEditor class
@@ -79,7 +81,7 @@ public class StyleEditor extends EnhancedDialog implements ActionListener
 			start = next;
 			token = token.next;
 		}
-		if (token.id == Token.END || token.id == Token.NULL)
+		if (token.id == Token.END || (token.id % Token.ID_COUNT) == Token.NULL)
 		{
 			JOptionPane.showMessageDialog(textArea.getView(),
 				jEdit.getProperty("syntax-style-no-token.message"),
@@ -89,8 +91,9 @@ public class StyleEditor extends EnhancedDialog implements ActionListener
 		}
 		String typeName = Token.tokenToString(token.id);
 		String property = "view.style." + typeName.toLowerCase();
-		SyntaxStyle currentStyle = GUIUtilities.parseStyle(
-				jEdit.getProperty(property), "Dialog",12);
+		Font font = new JLabel().getFont();
+		SyntaxStyle currentStyle = SyntaxUtilities.parseStyle(
+				jEdit.getProperty(property), font.getFamily(), font.getSize(), true);
 		SyntaxStyle style = new StyleEditor(textArea.getView(),
 				currentStyle, typeName).getStyle();
 		if(style != null)
@@ -113,11 +116,11 @@ public class StyleEditor extends EnhancedDialog implements ActionListener
 	}
 	private void initialize(Component comp, SyntaxStyle style, String styleName)
 	{
-		JPanel content = new JPanel(new BorderLayout(12,12));
-		content.setBorder(new EmptyBorder(12,12,12,12));
+		JPanel content = new JPanel(new BorderLayout(12, 12));
+		content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 		setContentPane(content);
 
-		JPanel panel = new JPanel(new GridLayout(5,2,12,12));
+		JPanel panel = new JPanel(new GridLayout(5, 2, 12, 12));
 
 		panel.add(new JLabel(jEdit.getProperty("style-editor.tokenType")));
 		panel.add(new JLabel(styleName));
@@ -133,7 +136,10 @@ public class StyleEditor extends EnhancedDialog implements ActionListener
 		panel.add(new JLabel());
 
 		Color fg = style.getForegroundColor();
-
+		if (fg == null) 
+		{
+			fg = jEdit.getActiveView().getForeground();	
+		}
 		fgColorCheckBox = new JCheckBox(jEdit.getProperty("style-editor.fgColor"));
 		fgColorCheckBox.setSelected(fg != null);
 		fgColorCheckBox.addActionListener(this);
@@ -144,6 +150,10 @@ public class StyleEditor extends EnhancedDialog implements ActionListener
 		panel.add(fgColor);
 
 		Color bg = style.getBackgroundColor();
+		if (bg == null) 
+		{
+			bg = jEdit.getActiveView().getBackground();	
+		}
 		bgColorCheckBox = new JCheckBox(jEdit.getProperty("style-editor.bgColor"));
 		bgColorCheckBox.setSelected(bg != null);
 		bgColorCheckBox.addActionListener(this);
@@ -156,15 +166,20 @@ public class StyleEditor extends EnhancedDialog implements ActionListener
 		content.add(BorderLayout.CENTER,panel);
 
 		Box box = new Box(BoxLayout.X_AXIS);
-		box.add(Box.createGlue());
-		box.add(ok = new JButton(jEdit.getProperty("common.ok")));
+		box.setBorder(BorderFactory.createEmptyBorder(17, 0, 0, 0));
+		ok = new JButton(jEdit.getProperty("common.ok"));
 		getRootPane().setDefaultButton(ok);
 		ok.addActionListener(this);
-		box.add(Box.createHorizontalStrut(6));
-		box.add(cancel = new JButton(jEdit.getProperty("common.cancel")));
+		cancel = new JButton(jEdit.getProperty("common.cancel"));
 		cancel.addActionListener(this);
+		
+		GenericGUIUtilities.makeSameSize(ok, cancel);
+		
 		box.add(Box.createGlue());
-
+		box.add(ok);
+		box.add(Box.createHorizontalStrut(6));
+		box.add(cancel);
+		
 		content.add(BorderLayout.SOUTH,box);
 
 		pack();
@@ -215,11 +230,12 @@ public class StyleEditor extends EnhancedDialog implements ActionListener
 			? bgColor.getSelectedColor()
 			: null);
 
+		Font font = new JLabel().getFont();
 		return new SyntaxStyle(foreground,background,
-				new Font("Dialog",
+				new Font(font.getFamily(),
 				(italics.isSelected() ? Font.ITALIC : 0)
 				| (bold.isSelected() ? Font.BOLD : 0),
-				12));
+				font.getSize()));
 	} //}}}
 
 	//{{{ Private members

@@ -32,6 +32,7 @@ import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.Registers.Register;
 import org.gjt.sp.jedit.msg.RegisterChanged;
+import org.gjt.sp.util.GenericGUIUtilities;
 //}}}
 
 /** Dockable view of register contents */
@@ -53,7 +54,7 @@ public class RegisterViewer extends JPanel
 
 		RolloverButton pasteRegister = new RolloverButton(
 			GUIUtilities.loadIcon("Paste.png"));
-		pasteRegister.setToolTipText(GUIUtilities.prettifyMenuLabel(
+		pasteRegister.setToolTipText(GenericGUIUtilities.prettifyMenuLabel(
 			jEdit.getProperty("paste-string-register.label")));
 		pasteRegister.addActionListener(new InsertHandler());
 		pasteRegister.setActionCommand("paste-string-register");
@@ -61,7 +62,7 @@ public class RegisterViewer extends JPanel
 
 		RolloverButton clearRegister = new RolloverButton(
 			GUIUtilities.loadIcon("Clear.png"));
-		clearRegister.setToolTipText(GUIUtilities.prettifyMenuLabel(
+		clearRegister.setToolTipText(GenericGUIUtilities.prettifyMenuLabel(
 			jEdit.getProperty("clear-string-register.label")));
 		clearRegister.addActionListener(new ClearHandler());
 		clearRegister.setActionCommand("clear-string-register");
@@ -69,8 +70,8 @@ public class RegisterViewer extends JPanel
 
 		add(BorderLayout.NORTH,toolBar);
 
-		DefaultListModel registerModel = new DefaultListModel();
-		registerList = new JList(registerModel);
+		DefaultListModel<String> registerModel = new DefaultListModel<String>();
+		registerList = new JList<String>(registerModel);
 		registerList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		registerList.setCellRenderer(new Renderer());
 		registerList.addListSelectionListener(new ListHandler());
@@ -158,8 +159,12 @@ public class RegisterViewer extends JPanel
 	 *                   "view-registers.none") or
 	 *  - Character objects ("name" of the register; char value must be between 0 and 255,
 	 *                       see Registers.java)
+	 * changed so this can use generics, the registerList now can contain only Strings,
+	 * either "view-registers.none" or a single character string, where the single
+	 * char must have a value between 0 and 255. (More realisticly, it should be a
+	 * character than can actually be typed from a keyboard.)
 	 */
-	private JList registerList;
+	private JList<String> registerList;
 	private JTextArea contentTextArea;
 	private DocumentHandler documentHandler;
 	private View view;
@@ -171,11 +176,11 @@ public class RegisterViewer extends JPanel
 	//{{{ refreshList
 	private void refreshList()
 	{
-		DefaultListModel registerModel = (DefaultListModel)registerList.getModel();
-		Object o = registerList.getSelectedValue();
+		DefaultListModel<String> registerModel = (DefaultListModel<String>)registerList.getModel();
+		String o = registerList.getSelectedValue();
 		int selected = -1;
-		if (o != null && o instanceof Character)
-			selected = ((Character)o).charValue();
+		if (o != null && o.length() == 1)
+			selected = o.charAt(0);
 
 		registerModel.removeAllElements();
 		Registers.Register[] registers = Registers.getRegisters();
@@ -194,7 +199,7 @@ public class RegisterViewer extends JPanel
 				continue;
 			if (i == selected)
 				index = registerModel.size();
-			registerModel.addElement(Character.valueOf((char)i));
+			registerModel.addElement(String.valueOf((char)i));
 		}
 
 		if(registerModel.getSize() == 0)
@@ -210,10 +215,10 @@ public class RegisterViewer extends JPanel
 	//{{{ insertRegister
 	private void insertRegister()
 	{
-		Object o = registerList.getSelectedValue();
-		if (o == null || !(o instanceof Character))
+		String o = registerList.getSelectedValue();
+		if (o == null || o.length() > 1)
 			return;
-		Registers.Register reg = Registers.getRegister(((Character)o).charValue());
+		Registers.Register reg = Registers.getRegister(o.charAt(0));
 		view.getTextArea().setSelectedText(reg.toString());
 		// can't use requestFocusInWindow() here, otherwise we'll stay
 		// in RegisterViewer when it is a floating window
@@ -229,10 +234,10 @@ public class RegisterViewer extends JPanel
 	//{{{ clearSelectedIndex() method
 	private void clearSelectedIndex()
 	{
-		Object o = registerList.getSelectedValue();
-		if (o != null && o instanceof Character)
+		String o = registerList.getSelectedValue();
+		if (o != null && o.length() == 1)
 		{
-			Registers.clearRegister(((Character)o).charValue());
+			Registers.clearRegister(o.charAt(0));
 			refreshList();
 		}
 	} //}}}
@@ -252,9 +257,9 @@ public class RegisterViewer extends JPanel
 			super.getListCellRendererComponent(list,value,
 			index,isSelected,cellHasFocus);
 
-			if(value instanceof Character)
+			if(!jEdit.getProperty("view-registers.none").equals(value))
 			{
-				char name = ((Character)value).charValue();
+				char name = value.toString().charAt(0);
 
 				String label;
 
@@ -297,8 +302,8 @@ public class RegisterViewer extends JPanel
 	{
 		public void valueChanged(ListSelectionEvent evt)
 		{
-			Object value = registerList.getSelectedValue();
-			if(!(value instanceof Character))
+			String value = registerList.getSelectedValue();
+			if (value == null || value.length() < 1)
 			{
 				if (!editing)
 				{
@@ -308,7 +313,7 @@ public class RegisterViewer extends JPanel
 				return;
 			}
 
-			char name = ((Character)value).charValue();
+			char name = value.charAt(0);
 
 			Registers.Register reg = Registers.getRegister(name);
 			if(reg == null)
@@ -320,7 +325,6 @@ public class RegisterViewer extends JPanel
 				}
 				return;
 			}
-
 
 			if (!editing)
 			{
@@ -340,7 +344,7 @@ public class RegisterViewer extends JPanel
 			int i = registerList.locationToIndex(evt.getPoint());
 			if (i != -1)
 				registerList.setSelectedIndex(i);
-			if (GUIUtilities.isPopupTrigger(evt))
+			if (GenericGUIUtilities.isPopupTrigger(evt))
 			{
 				if (popup == null)
 				{
@@ -351,7 +355,7 @@ public class RegisterViewer extends JPanel
 					item.addActionListener(new ClearHandler());
 					popup.add(item);
 				}
-				GUIUtilities.showPopupMenu(popup, registerList, evt.getX(), evt.getY(), false);
+				GenericGUIUtilities.showPopupMenu(popup, registerList, evt.getX(), evt.getY(), false);
 			}
 			else if (evt.getClickCount() % 2 == 0)
 				insertRegister();
@@ -391,10 +395,10 @@ public class RegisterViewer extends JPanel
 
 		private void updateRegister()
 		{
-			Object value = registerList.getSelectedValue();
-			if(!(value instanceof Character))
+			String value = registerList.getSelectedValue();
+			if(value == null || value.length() < 1)
 				return;
-			char name = ((Character)value).charValue();
+			char name = value.charAt(0);
 			Registers.setRegister(name,contentTextArea.getText());
 		}
 	} //}}}

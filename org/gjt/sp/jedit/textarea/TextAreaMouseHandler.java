@@ -33,7 +33,7 @@ import java.awt.*;
 /** Standalone TextArea MouseHandler.
  *
  * @author Matthieu Casanova
- * @version $Id: TextAreaMouseHandler.java 22883 2013-03-23 17:58:56Z thomasmey $
+ * @version $Id: TextAreaMouseHandler.java 24095 2015-09-25 21:31:41Z daleanson $
  */
 public class TextAreaMouseHandler extends MouseInputAdapter
 {
@@ -131,8 +131,7 @@ public class TextAreaMouseHandler extends MouseInputAdapter
 		int x = evt.getX();
 
 		int extraEndVirt = 0;
-		if(textArea.chunkCache.getLineInfo(
-			textArea.getLastScreenLine()).lastSubregion)
+		if(textArea.chunkCache.getLineInfo(textArea.getLastScreenLine()).lastSubregion)
 		{
 			int dragStart = textArea.xyToOffset(x,evt.getY(),
 				!textArea.getPainter().isBlockCaretEnabled()
@@ -346,9 +345,7 @@ public class TextAreaMouseHandler extends MouseInputAdapter
 		int dotLine = textArea.getLineOfOffset(dot);
 		int extraEndVirt = 0;
 
-		if(textArea.chunkCache.getLineInfo(
-			textArea.getLastScreenLine())
-			.lastSubregion)
+		if(textArea.chunkCache.getLineInfo(	textArea.getLastScreenLine()).lastSubregion)
 		{
 			int screenLine = textArea.getScreenLineOfOffset(dot);
 			ChunkCache.LineInfo lineInfo = textArea.chunkCache.getLineInfo(screenLine);

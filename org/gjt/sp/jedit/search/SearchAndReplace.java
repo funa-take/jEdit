@@ -63,7 +63,7 @@ import org.gjt.sp.util.*;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: SearchAndReplace.java 23222 2013-09-29 20:43:34Z shlomy $
+ * @version $Id: SearchAndReplace.java 24211 2015-12-10 03:33:28Z daleanson $
  */
 public class SearchAndReplace
 {
@@ -416,7 +416,7 @@ public class SearchAndReplace
 			SearchMatcher matcher = getSearchMatcher();
 			if(matcher == null)
 			{
-				view.getToolkit().beep();
+				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				results.searchFailed();
 				return false;
 			}
@@ -473,7 +473,7 @@ public class SearchAndReplace
 			SearchMatcher matcher = getSearchMatcher();
 			if(matcher == null)
 			{
-				view.getToolkit().beep();
+				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				return false;
 			}
 
@@ -541,7 +541,7 @@ loop:		for(;;)
 						view.getStatus().setMessageAndClear(
 							jEdit.getProperty("view.status.search-not-found"));
 
-						view.getToolkit().beep();
+						javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 					}
 					return false;
 				}
@@ -561,7 +561,7 @@ loop:		for(;;)
 						// beep if beep property set
 						if(jEdit.getBooleanProperty("search.beepOnSearchAutoWrap"))
 						{
-							view.getToolkit().beep();
+							javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 						}
 					}
 					restart = true;
@@ -635,7 +635,7 @@ loop:		for(;;)
 		SearchMatcher matcher = getSearchMatcher();
 		if(matcher == null)
 		{
-			view.getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return false;
 		}
 
@@ -719,7 +719,7 @@ loop:		for(;;)
 		Selection[] selection = textArea.getSelection();
 		if (selection.length == 0)
 		{
-			view.getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return false;
 		}
 
@@ -774,7 +774,7 @@ loop:		for(;;)
 
 			if(retVal == 0)
 			{
-				view.getToolkit().beep();
+				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				return false;
 			}
 
@@ -967,7 +967,7 @@ loop:		while(path != null)
 			view.getStatus().setMessageAndClear(jEdit.getProperty(
 				"view.status.replace-all",args));
 			if(occurCount == 0)
-				view.getToolkit().beep();
+				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 		}
 
 		return (fileCount != 0);

@@ -17,7 +17,7 @@
  * along with the jEdit application; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Color_Picker.bsh 21353 2012-03-14 09:46:51Z jojaba_67 $
+ * $Id: Color_Picker.bsh 23971 2015-08-08 19:37:35Z daleanson $
  */
 
 // Localization
@@ -34,9 +34,6 @@ else
 color = JColorChooser.showDialog(view, ColorPickerLabel, color);
 
 if (color != null){
-	if(buffer.isReadOnly())
-		Macros.error(view, NotEditableMessage);
-	else
 		textArea.setSelectedText(SyntaxUtilities.getColorHexString(color));
 }
 

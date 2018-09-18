@@ -28,8 +28,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.EditBus.EBHandler;
-import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.jedit.msg.BufferUpdate;
 import org.gjt.sp.jedit.msg.EditPaneUpdate;
 import org.gjt.sp.jedit.msg.ViewUpdate;
@@ -44,35 +44,35 @@ public class MarkerViewer extends JPanel implements ActionListener
 		this.view = view;
 		Box toolBar = new Box(BoxLayout.X_AXIS);
 
-		toolBar.add(new JLabel(GUIUtilities.prettifyMenuLabel(
+		toolBar.add(new JLabel(GenericGUIUtilities.prettifyMenuLabel(
 			jEdit.getProperty("markers.label"))));
 
 		toolBar.add(Box.createGlue());
 
 		RolloverButton addMarker = new RolloverButton(
 			GUIUtilities.loadIcon("Plus.png"));
-		addMarker.setToolTipText(GUIUtilities.prettifyMenuLabel(
+		addMarker.setToolTipText(GenericGUIUtilities.prettifyMenuLabel(
 			jEdit.getProperty("add-marker.label")));
 		addMarker.addActionListener(this);
 		addMarker.setActionCommand("add-marker");
 		toolBar.add(addMarker);
 
 		previous = new RolloverButton(GUIUtilities.loadIcon("ArrowL.png"));
-		previous.setToolTipText(GUIUtilities.prettifyMenuLabel(
+		previous.setToolTipText(GenericGUIUtilities.prettifyMenuLabel(
 			jEdit.getProperty("prev-marker.label")));
 		previous.addActionListener(this);
 		previous.setActionCommand("prev-marker");
 		toolBar.add(previous);
 
 		next = new RolloverButton(GUIUtilities.loadIcon("ArrowR.png"));
-		next.setToolTipText(GUIUtilities.prettifyMenuLabel(
+		next.setToolTipText(GenericGUIUtilities.prettifyMenuLabel(
 			jEdit.getProperty("next-marker.label")));
 		next.addActionListener(this);
 		next.setActionCommand("next-marker");
 		toolBar.add(next);
 
 		clear = new RolloverButton(GUIUtilities.loadIcon("Clear.png"));
-		clear.setToolTipText(GUIUtilities.prettifyMenuLabel(
+		clear.setToolTipText(GenericGUIUtilities.prettifyMenuLabel(
 			jEdit.getProperty("remove-all-markers.label")));
 		clear.addActionListener(this);
 		clear.setActionCommand("clear");
@@ -81,18 +81,20 @@ public class MarkerViewer extends JPanel implements ActionListener
 
 		add(BorderLayout.NORTH, toolBar);
 
-		markerList = new JList();
+		markerList = new JList<Marker>();
 		markerList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		markerList.setCellRenderer(new Renderer());
 		markerList.addMouseListener(new MouseHandler());
 		markerList.addKeyListener(new KeyHandler());
+		markerListScroller = new JScrollPane(markerList);
 
-		add(BorderLayout.CENTER,new JScrollPane(markerList));
+		add(BorderLayout.CENTER, markerListScroller);
 
 		refreshList();
 	} //}}}
 
 	//{{{ requestDefaultFocus() method
+	@SuppressWarnings("deprecation")
 	public boolean requestDefaultFocus()
 	{
 		markerList.requestFocus();
@@ -169,7 +171,8 @@ public class MarkerViewer extends JPanel implements ActionListener
 	//{{{ Private members
 
 	//{{{ Instance variables
-	private JList markerList;
+	private JList<Marker> markerList;
+	private JScrollPane markerListScroller;
 	private View view;
 	private RolloverButton previous;
 	private RolloverButton next;
@@ -179,9 +182,10 @@ public class MarkerViewer extends JPanel implements ActionListener
 	//{{{ refreshList() method
 	private void refreshList()
 	{
-		java.util.Vector markers = view.getBuffer().getMarkers();
+		java.util.Vector<Marker> markers = view.getBuffer().getMarkers();
 		if (markers.size() > 0)
 		{
+			markerListScroller.setViewportView(markerList);
 			markerList.setListData(markers);
 			markerList.setEnabled(true);
 			next.setEnabled(true);
@@ -190,9 +194,7 @@ public class MarkerViewer extends JPanel implements ActionListener
 		}
 		else
 		{
-			markerList.setListData(new Object[] {
-				jEdit.getProperty("no-markers.label") });
-			markerList.setEnabled(false);
+			markerListScroller.setViewportView(new JLabel(jEdit.getProperty("no-markers.label")));
 			next.setEnabled(false);
 			previous.setEnabled(false);
 			clear.setEnabled(false);

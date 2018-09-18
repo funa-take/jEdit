@@ -26,9 +26,10 @@ package org.gjt.sp.jedit.gui;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
-import org.gjt.sp.jedit.jEdit;
-import org.gjt.sp.jedit.GUIUtilities;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
 import org.gjt.sp.jedit.OperatingSystem;
+import org.gjt.sp.util.GenericGUIUtilities;
 //}}}
 
 /** A button that, when clicked, shows a color chooser.
@@ -36,7 +37,7 @@ import org.gjt.sp.jedit.OperatingSystem;
  * You can get and set the currently selected color using
  * {@link #getSelectedColor()} and {@link #setSelectedColor(Color)}.
  * @author Slava Pestov
- * @version $Id: ColorWellButton.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: ColorWellButton.java 24411 2016-06-19 11:02:53Z kerik-sf $
  */
 public class ColorWellButton extends JButton
 {
@@ -44,7 +45,7 @@ public class ColorWellButton extends JButton
 	public ColorWellButton(Color color)
 	{
 		setIcon(new ColorWell(color));
-		setMargin(new Insets(2,2,2,2));
+		setMargin(new Insets(2, 2, 2, 2));
 		addActionListener(new ActionHandler());
 
 		// according to krisk this looks better on OS X...
@@ -76,14 +77,18 @@ public class ColorWellButton extends JButton
 			this.color = color;
 		}
 
+		private Rectangle2D bounds =
+				new JLabel("").getFont().createGlyphVector(
+						new FontRenderContext(null, true, false), "AAAA").getVisualBounds();
+
 		public int getIconWidth()
 		{
-			return 35;
+			return (int)Math.ceil(bounds.getWidth());
 		}
 
 		public int getIconHeight()
 		{
-			return 10;
+			return (int)Math.ceil(bounds.getHeight());
 		}
 
 		public void paintIcon(Component c, Graphics g, int x, int y)
@@ -103,22 +108,20 @@ public class ColorWellButton extends JButton
 	{
 		public void actionPerformed(ActionEvent evt)
 		{
-			JDialog parent = GUIUtilities.getParentDialog(ColorWellButton.this);
+			JDialog parent = GenericGUIUtilities.getParentDialog(ColorWellButton.this);
 			Color c = null;
 			if (parent != null)
 			{
-				c = JColorChooser.showDialog(parent,
-					jEdit.getProperty("colorChooser.title"),
-					ColorWellButton.this.getSelectedColor());
+				ColorChooserDialog dialog = new ColorChooserDialog(parent, getSelectedColor());
+				c = dialog.getColor();
 			}
 			else
 			{
-				c = JColorChooser.showDialog(
-					SwingUtilities.getRoot(ColorWellButton.this),
-					jEdit.getProperty("colorChooser.title"),
-					ColorWellButton.this.getSelectedColor());
+				ColorChooserDialog dialog = new ColorChooserDialog((Window)SwingUtilities.getRoot(ColorWellButton.this), getSelectedColor());
+				c = dialog.getColor();
 			}
-			if (c != null) {
+			if (c != null) 
+			{
 				setSelectedColor(c);
 			}
 		}

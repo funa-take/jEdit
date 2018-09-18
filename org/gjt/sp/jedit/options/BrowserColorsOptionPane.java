@@ -32,7 +32,9 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+import org.gjt.sp.jedit.gui.ColorChooserDialog;
 import org.gjt.sp.jedit.gui.RolloverButton;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.jedit.*;
 //}}}
 
@@ -40,7 +42,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Browser color editor.
  * @author Slava Pestov
- * @version $Id: BrowserColorsOptionPane.java 22665 2013-01-11 16:25:33Z kpouer $
+ * @version $Id: BrowserColorsOptionPane.java 24411 2016-06-19 11:02:53Z kerik-sf $
  */
 public class BrowserColorsOptionPane extends AbstractOptionPane
 {
@@ -59,6 +61,7 @@ public class BrowserColorsOptionPane extends AbstractOptionPane
 
 		colorsModel = new BrowserColorsModel();
 		colorsTable = new JTable(colorsModel);
+		colorsTable.setRowHeight(GenericGUIUtilities.defaultRowHeight());
 		colorsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		colorsTable.getTableHeader().setReorderingAllowed(false);
 		colorsTable.addMouseListener(new MouseHandler());
@@ -196,10 +199,10 @@ public class BrowserColorsOptionPane extends AbstractOptionPane
 			if(row == -1 || column != 1)
 				return;
 
-			Color color = JColorChooser.showDialog(
-				BrowserColorsOptionPane.this,
-				jEdit.getProperty("colorChooser.title"),
+			ColorChooserDialog dialog = new ColorChooserDialog(
+				(Window)SwingUtilities.getRoot(BrowserColorsOptionPane.this), 
 				(Color)colorsModel.getValueAt(row,1));
+			Color color = dialog.getColor();
 			if(color != null)
 				colorsModel.setValueAt(color,row,1);
 		}

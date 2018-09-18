@@ -1,10 +1,10 @@
 /*
  * TextAreaPainter.java - Paints the text area
- * :tabSize=4:indentSize=4:noTabs=false:
+ * :tabSize=4:indentSize=4:noTabs=false:encoding=UTF-8:
  * :folding=explicit:collapseFolds=1:
  *
  * Copyright (C) 1999-2013 Slava Pestov, Shlomy Reinstein
- * Matthieu Casanova, Kazutoshi Satoda, Alan Ezust, Dale Anson  
+ * Matthieu Casanova, Kazutoshi Satoda, Alan Ezust, Dale Anson
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -55,7 +55,7 @@ import org.gjt.sp.util.Log;
  * @see TextArea
  *
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java 23832 2015-01-24 03:26:47Z ezust $
+ * @version $Id: TextAreaPainter.java 24095 2015-09-25 21:31:41Z daleanson $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -155,12 +155,14 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	@Override
 	public void setBounds(int x, int y, int width, int height)
 	{
+		// for some reason, the height is always off by one when the bounds have
+		// not changed at all, hence the +1 on the height check. Without the +1, 
+		// everything gets reset every time, which leads to other problems.
 		if(x == getX() && y == getY() && width == getWidth()
-			&& height == getHeight())
+			&& (height == getHeight() || height == getHeight() + 1))
 		{
 			return;
 		}
-
 		super.setBounds(x,y,width,height);
 
 		textArea.recalculateVisibleLines();
@@ -215,7 +217,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	{
 		if (defaultCursor)
 		{
-		       setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+			   setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 		}
 	} //}}}
 
@@ -521,6 +523,13 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			textArea.invalidateLine(textArea.getCaretLine());
 	} //}}}
 
+	public String getEOLMarkerChar() {
+		return eolMarkerChar;
+	}
+	public void setEOLMarkerChar(String emc) {
+		eolMarkerChar = emc;
+	}
+
 	//{{{ getEOLMarkerColor() method
 	/**
 	 * Returns the EOL marker color.
@@ -757,17 +766,17 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	{
 		return fm;
 	} //}}}
-	
+
 	//{{{ getLineHeight() method
 	/**
-	 * Returns the line height as given by the font metrics plus the 
+	 * Returns the line height as given by the font metrics plus the
 	 * added line spacing.
 	 */
 	public int getLineHeight()
 	{
 		return fm.getHeight() + extraLineSpacing;
 	} //}}}
-	
+
 	//{{{ getFontHeight() method
 	/**
 	 * Returns the font height as given by the font metrics.
@@ -776,7 +785,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	{
 		return fm.getHeight();
 	} //}}}
-	
+
 	//{{{ getLineExtraSpacing() method
 	/**
 	 * Returns the number of pixels from the start of the line to the start
@@ -795,7 +804,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	{
 		extraLineSpacing = spacing;
 	} //}}}
-	
+
 	//{{{ setFont() method
 	/**
 	 * Sets the font for this component. This is overridden to update the
@@ -835,14 +844,14 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	//{{{ getRenderingHints() method
 	/**
 	 * Returns the rendering hints used by the Graphics2D class; in this
-         * case, for anti-aliasing of text.
+		 * case, for anti-aliasing of text.
 	 *
 	 * @since jEdit 4.5pre1
 	 */
-        public RenderingHints getRenderingHints()
+		public RenderingHints getRenderingHints()
 	{
-            return renderingHints;
-        } //}}}
+			return renderingHints;
+		} //}}}
 
 	//{{{ update() method
 	/**
@@ -903,7 +912,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 
 		textArea.updateMaxHorizontalScrollWidth();
 	} //}}}
-	
+
 	//{{{ nextTabStop() method
 	/**
 	 * Implementation of TabExpander interface. Returns next tab stop after
@@ -959,6 +968,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	Color lineHighlightColor;
 	Color structureHighlightColor;
 	Color eolMarkerColor;
+	String eolMarkerChar;
 	Color wrapGuideColor;
 
 	SyntaxStyle[] foldLineStyle;
@@ -993,7 +1003,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		this.textArea = textArea;
 		antiAlias = new AntiAlias(0);
 		extensionMgr = new ExtensionManager();
-
+		eolMarkerChar = "·";
 		setAutoscrolls(true);
 		setOpaque(true);
 		setRequestFocusEnabled(false);
@@ -1011,7 +1021,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		addExtension(TEXT_LAYER,new PaintText());
 		addExtension(TEXT_LAYER,new PaintSelectionText());
 		caretExtension = new PaintCaret();
-		
+
 		extraLineSpacing = 0;
 	} //}}}
 
@@ -1026,7 +1036,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	private Cursor hiddenCursor;
 	private boolean defaultCursor = true;
 	//}}}
-	
+
 	//{{{ updateRenderingHints() method
 	private void updateRenderingHints()
 	{
@@ -1037,7 +1047,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 				: RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
 
 		hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, antiAlias.renderHint());
-		
+
 
 		if (antiAlias.val() == 0)
 		{
@@ -1045,13 +1055,13 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			fontRenderContext = new FontRenderContext(null, antiAlias.val() > 0, fracFontMetrics);
 		}
 		/* Subpixel antialiasing mode */
-		else if (antiAlias.val() > 1) 
+		else if (antiAlias.val() > 1)
 		{
 			Object fontRenderHint = fracFontMetrics ?
 				RenderingHints.VALUE_FRACTIONALMETRICS_ON :
 				RenderingHints.VALUE_FRACTIONALMETRICS_OFF;
-			fontRenderContext = new FontRenderContext(null, antiAlias.renderHint(), 
-				fontRenderHint);			
+			fontRenderContext = new FontRenderContext(null, antiAlias.renderHint(),
+				fontRenderHint);
 		}
 		else /** Standard Antialias Version */
 		{
@@ -1142,14 +1152,14 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			} //}}}
 
 			//{{{ Paint token backgrounds
-			ChunkCache.LineInfo lineInfo = textArea.chunkCache
-				.getLineInfo(screenLine);
+			ChunkCache.LineInfo lineInfo = textArea.chunkCache.getLineInfo(screenLine);
 
 			if(lineInfo.chunks != null)
 			{
-				float baseLine = y + getLineHeight() - (fm.getLeading()+1) - fm.getDescent();
+				float baseLine = y + getLineHeight() - (fm.getLeading() + 1) - fm.getDescent();
 				Chunk.paintChunkBackgrounds(
-					lineInfo.chunks,gfx,
+					lineInfo.chunks, 
+					gfx,
 					textArea.getHorizontalOffset(),
 					baseLine, getLineHeight());
 			} //}}}
@@ -1211,7 +1221,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		{
 			if(textArea.getSelectionCount() == 0)
 				return;
-			if ((! isSelectionFgColorEnabled()) || (getSelectionFgColor() == null)) 
+			if ((! isSelectionFgColorEnabled()) || (getSelectionFgColor() == null))
 				return;
 
 			Iterator<Selection> iter = textArea.getSelectionIterator();
@@ -1280,7 +1290,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 							x = nextX(x, style, sub, tokenStart, startOffset);
 						}
 						else
-							strStart = tokenStart; 
+							strStart = tokenStart;
 						int strEnd = (endOffset > next) ? next : endOffset;
 						sub = textArea.getText(strStart, strEnd - strStart);
 						gfx.drawString(sub, x, baseLine);
@@ -1368,8 +1378,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		public void paintValidLine(Graphics2D gfx, int screenLine,
 			int physicalLine, int start, int end, int y)
 		{
-			ChunkCache.LineInfo lineInfo = textArea.chunkCache
-				.getLineInfo(screenLine);
+			ChunkCache.LineInfo lineInfo = textArea.chunkCache.getLineInfo(screenLine);
 			Font defaultFont = getFont();
 			Color defaultColor = getForeground();
 
@@ -1383,9 +1392,12 @@ public class TextAreaPainter extends JComponent implements TabExpander
 
 			if(lineInfo.chunks != null)
 			{
-				x += Chunk.paintChunkList(lineInfo.chunks,
-					gfx,textArea.getHorizontalOffset(),
-					baseLine,!Debug.DISABLE_GLYPH_VECTOR);
+				x += Chunk.paintChunkList(
+					lineInfo.chunks,
+					gfx,
+					textArea.getHorizontalOffset(),
+					baseLine,
+					!Debug.DISABLE_GLYPH_VECTOR);
 			}
 
 			JEditBuffer buffer = textArea.getBuffer();
@@ -1444,7 +1456,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			{
 				gfx.setFont(defaultFont);
 				gfx.setColor(eolMarkerColor);
-				gfx.drawString(".",x,baseLine);
+				gfx.drawString(eolMarkerChar,x,baseLine);
 				x += textArea.charWidth;
 			}
 
@@ -1468,32 +1480,32 @@ public class TextAreaPainter extends JComponent implements TabExpander
 
 			int offset = caret - textArea.getLineStartOffset(physicalLine);
 			textArea.offsetToXY(physicalLine,
-					    offset, textArea.offsetXY);
+						offset, textArea.offsetXY);
 			int caretX = textArea.offsetXY.x;
 			int lineHeight = getLineHeight();
-			int charHeight = getFontHeight();
-			int charOffset = lineHeight - charHeight;
+			int charHeight = Math.min(lineHeight, getFontHeight());
+			int charOffset = Math.max(lineHeight - charHeight, 0);
 
 			gfx.setColor(caretColor);
 
 			if(textArea.isOverwriteEnabled())
 			{
-				if (thickCaret) 
+				if (thickCaret)
 					gfx.fillRect(caretX, y + lineHeight - 4, textArea.charWidth, 3);
-				
-				else  gfx.drawLine(caretX, y + lineHeight - 1, 
+
+				else  gfx.drawLine(caretX, y + lineHeight - 1,
 					caretX + textArea.charWidth, y + lineHeight - 1);
 			}
 			else if(blockCaret)
-				gfx.drawRect(caretX, y + charOffset, 
+				gfx.drawRect(caretX, y + charOffset,
 					textArea.charWidth - 1, charHeight - 1);
 			else
 			{
-				if (thickCaret) 
+				if (thickCaret)
 					gfx.fillRect(caretX, y + charOffset, 3, charHeight - 1);
 				else
-					gfx.drawLine(caretX, y + charOffset, caretX, 
-						     y + charOffset + charHeight - 1);
+					gfx.drawLine(caretX, y + charOffset, caretX,
+							 y + charOffset + charHeight - 1);
 			}
 		}
 	} //}}}

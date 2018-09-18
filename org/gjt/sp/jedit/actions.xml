@@ -103,28 +103,55 @@
 
 <ACTION NAME="close-all">
 	<CODE>
-		jEdit.closeAllBuffers(view);
+		boolean closeAll = true;
+		if (jEdit.getBooleanProperty("closeAllConfirm"))
+		{
+			int answer = GUIUtilities.confirm(view, "closeall", null, javax.swing.JOptionPane.YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
+			closeAll = answer == javax.swing.JOptionPane.YES_OPTION;
+		}
+		if (closeAll)
+		{
+			jEdit.closeAllBuffers(view);
+		}
 	</CODE>
 </ACTION>
 
 <ACTION NAME="closeall-bufferset">
 	<CODE>
-		org.gjt.sp.jedit.bufferset.BufferSet bufferSet = editPane.getBufferSet();
-		Buffer[] buffers = bufferSet.getAllBuffers();
-		for (Buffer buff: buffers) {
-			jEdit.closeBuffer(editPane,buff);
+		boolean closeAll = true;
+		if (jEdit.getBooleanProperty("closeAllConfirm"))
+		{
+			int answer = GUIUtilities.confirm(view, "closeall", null, javax.swing.JOptionPane.YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
+			closeAll = answer == javax.swing.JOptionPane.YES_OPTION;
+		}
+		if (closeAll)
+		{
+			org.gjt.sp.jedit.bufferset.BufferSet bufferSet = editPane.getBufferSet();
+			Buffer[] buffers = bufferSet.getAllBuffers();
+			for (Buffer buff: buffers) {
+				jEdit.closeBuffer(editPane,buff);
+			}
 		}
 	</CODE>
 </ACTION>
 
 <ACTION NAME="closeall-except-active">
         <CODE>
-		org.gjt.sp.jedit.bufferset.BufferSet bufferSet = editPane.getBufferSet();
-		Buffer[] buffers = bufferSet.getAllBuffers();
-		for (Buffer buff:buffers)
+		boolean closeAll = true;
+		if (jEdit.getBooleanProperty("closeAllConfirm"))
 		{
-			if (buff != buffer)
-				jEdit.closeBuffer(editPane,buff);
+			int answer = GUIUtilities.confirm(view, "closeothers", null, javax.swing.JOptionPane.YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
+			closeAll = answer == javax.swing.JOptionPane.YES_OPTION;
+		}
+		if (closeAll)
+		{
+			org.gjt.sp.jedit.bufferset.BufferSet bufferSet = editPane.getBufferSet();
+			Buffer[] buffers = bufferSet.getAllBuffers();
+			for (Buffer buff:buffers)
+			{
+				if (buff != buffer)
+					jEdit.closeBuffer(editPane,buff);
+			}
 		}
 	</CODE>
 </ACTION>
@@ -424,7 +451,7 @@
 	</CODE>
 	<IS_SELECTED>
 		return (jEdit.getBufferSetManager().getScope().equals(BufferSet.Scope.view));
-	</IS_SELECTED>	
+	</IS_SELECTED>
 </ACTION>
 
 <ACTION NAME="bufferset-toggle-exclusive">
@@ -444,8 +471,8 @@
 	</CODE>
 	<IS_SELECTED>
 		return (jEdit.getBufferSetManager().getScope().equals(BufferSet.Scope.editpane));
-	</IS_SELECTED>	
-	
+	</IS_SELECTED>
+
 </ACTION>
 
 <ACTION NAME="goto-line">
@@ -691,7 +718,7 @@
 
 <ACTION NAME="new-view">
 	<CODE>
-	bsm = jEdit.getBufferSetManager(); 
+	bsm = jEdit.getBufferSetManager();
 	if (bsm.getScope() == BufferSet.Scope.global) {
 		jEdit.newView(view);
 	}
@@ -782,12 +809,6 @@
 	<IS_SELECTED>
 		return textArea.isOverwriteEnabled();
 	</IS_SELECTED>
-</ACTION>
-
-<ACTION NAME="page-setup">
-	<CODE>
-		BufferPrinter1_4.pageSetup(view);
-	</CODE>
 </ACTION>
 
 <ACTION NAME="parent-fold">
@@ -941,20 +962,19 @@
 
 <ACTION NAME="print">
 	<CODE>
-	if(jEdit.getBooleanProperty("print.force13"))
-		BufferPrinter1_3.print(view,buffer,false);
-	else
-		BufferPrinter1_4.print(view,buffer,false);
+		BufferPrinter1_7.print(view, buffer);
 	</CODE>
 </ACTION>
 
-<!-- not yet implemented -->
-
-<!-- <ACTION NAME="print-selection">
+<ACTION NAME="print.toggle-show-page-breaks">
 	<CODE>
-		BufferPrinter.print(view,buffer,true);
+	jEdit.setBooleanProperty("view.pageBreaks", !jEdit.getBooleanProperty("view.pageBreaks"));
+	EditBus.send(new PropertiesChanged(null));
 	</CODE>
-</ACTION> -->
+	<IS_SELECTED>
+		return jEdit.getBooleanProperty("view.pageBreaks");
+	</IS_SELECTED>
+</ACTION>
 
 <ACTION NAME="quick-search" NO_RECORD="TRUE">
 	<CODE>
@@ -1613,16 +1633,6 @@
 <ACTION NAME="unsplit-current">
 	<CODE>
 		view.unsplitCurrent();
-	</CODE>
-</ACTION>
-
-<ACTION NAME="userFeedback">
-	<CODE>
-		import java.awt.Desktop;
-		if (Desktop.isDesktopSupported())
-		{
-			Desktop.getDesktop().browse(new URI("http://jEdit.uservoice.com"));
-		}
 	</CODE>
 </ACTION>
 

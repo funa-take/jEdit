@@ -43,11 +43,14 @@ import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -79,6 +82,8 @@ import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.MiscUtilities;
 
 import org.gjt.sp.jedit.EditBus.EBHandler;
+import org.gjt.sp.jedit.io.AutoDetection;
+import org.gjt.sp.jedit.io.RegexEncodingDetector;
 import org.gjt.sp.jedit.msg.PluginUpdate;
 
 import org.gjt.sp.util.Log;
@@ -90,11 +95,12 @@ import static org.gjt.sp.jedit.help.HelpHistoryModel.HistoryEntry;
  * jEdit's searchable help viewer. It uses a Swing JEditorPane to display the HTML,
  * and implements a URL history.
  * @author Slava Pestov
- * @version $Id: HelpViewer.java 23463 2014-04-07 19:33:50Z kerik-sf $
+ * @version $Id: HelpViewer.java 24211 2015-12-10 03:33:28Z daleanson $
  */
 public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHistoryModelListener
 {
 	private static final long serialVersionUID = 1L;
+	private static final RegexEncodingDetector ENCODING_DETECTOR = new RegexEncodingDetector(":encoding=([^:]+):", "$1");
 
 	//{{{ HelpViewer constructor
 	/**
@@ -298,6 +304,26 @@ public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHisto
 				{
 					try
 					{
+						// reset encoding
+						viewer.putClientProperty("charset", null);
+						// guess encoding
+						if(_url.getPath().matches(".+\\.([tT][xX][tT])"))
+						{
+							URLConnection connection = _url.openConnection();
+							if(connection.getContentEncoding() == null)
+							{
+								InputStream is = connection.getInputStream();
+								BufferedInputStream in = AutoDetection.getMarkedStream(is);
+								String encoding = ENCODING_DETECTOR.detectEncoding(in);
+								if(encoding != null)
+								{
+									// JEditorPane uses charset to create the reader passed to the
+									// EditorKit in JEditorPane.read().
+									viewer.putClientProperty("charset", encoding);
+								}
+								in.close();
+							}
+						}
 						viewer.setPage(_url);
 						success = true;
 					}
@@ -479,7 +505,7 @@ public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHisto
 				HistoryEntry entry = historyModel.back(HelpViewer.this);
 				if(entry == null)
 				{
-					getToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				}
 				else
 				{
@@ -491,7 +517,7 @@ public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHisto
 				HistoryEntry entry = historyModel.forward(HelpViewer.this);
 				if(entry == null)
 				{
-					getToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				}
 				else
 				{

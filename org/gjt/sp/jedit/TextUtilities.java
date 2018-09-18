@@ -42,7 +42,7 @@ import org.gjt.sp.util.StandardUtilities;
  * </ul>
  *
  * @author Slava Pestov
- * @version $Id: TextUtilities.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: TextUtilities.java 24445 2016-07-10 19:48:34Z ezust $
  */
 public class TextUtilities
 {
@@ -97,6 +97,22 @@ public class TextUtilities
 		case '}': if (direction != null) direction[0] = false; return '{';
 		case '<': if (direction != null) direction[0] = true;  return '>';
 		case '>': if (direction != null) direction[0] = false; return '<';
+		case '«': if (direction != null) direction[0] = true;  return '»';
+		case '»': if (direction != null) direction[0] = false; return '«';
+		case '‹': if (direction != null) direction[0] = true;  return '›';
+		case '›': if (direction != null) direction[0] = false; return '‹';
+		case '⟨': if (direction != null) direction[0] = true;  return '⟩';
+		case '⟩': if (direction != null) direction[0] = false; return '⟨';
+		case '⌈': if (direction != null) direction[0] = true;  return '⌉';
+		case '⌉': if (direction != null) direction[0] = false; return '⌈';
+		case '⌊': if (direction != null) direction[0] = true;  return '⌋';
+		case '⌋': if (direction != null) direction[0] = false; return '⌊';
+		case '⦇': if (direction != null) direction[0] = true;  return '⦈';
+		case '⦈': if (direction != null) direction[0] = false; return '⦇';
+		case '⟦': if (direction != null) direction[0] = true;  return '⟧';
+		case '⟧': if (direction != null) direction[0] = false; return '⟦';
+		case '⦃': if (direction != null) direction[0] = true;  return '⦄';
+		case '⦄': if (direction != null) direction[0] = false; return '⦃';
 		default:  return '\0';
 		}
 	} //}}}

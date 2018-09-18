@@ -3,7 +3,7 @@
  * :tabSize=4:indentSize=4:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright © 1999-2013 Slava Pestov, Richard S. Hall, Dirk Moebius,
+ * Copyright \<copyright> 1999-2013 Slava Pestov, Richard S. Hall, Dirk Moebius,
  *    jgellene, ezust, vanza, kpouer, Vampire0, Jarekczek, k_satoda, voituk,
  *    Thomas Meyer, Martin Raspe
  *   And possibly other members of the All Volunteer Developer Team (tm)
@@ -40,7 +40,6 @@ import org.gjt.sp.jedit.io.*;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.IOUtilities;
 
-import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.util.StringList;
 //}}}
@@ -57,7 +56,7 @@ import org.gjt.sp.util.StringList;
  * <li>{@link #constructPath(String,String)}</li>
  * </ul>
  *
- * @version $Id: MiscUtilities.java 23749 2014-12-04 19:51:43Z ezust $
+ * @version $Id: MiscUtilities.java 24840 2018-03-04 20:08:53Z ezust $
  */
 public class MiscUtilities
 {
@@ -176,15 +175,19 @@ public class MiscUtilities
 		}
 		String varName = m.group(2);
 		String expansion = System.getenv(varName);
-		if (expansion == null)
-		{ // try everything uppercase?
-			varName = varName.toUpperCase();
-			String uparg = arg.toUpperCase();
-			m = p.matcher(uparg);
-			expansion = System.getenv(varName);
+		if (expansion == null) {
+			if (varName.equalsIgnoreCase("jedit_settings") && jEdit.getSettingsDirectory() != null) {
+				expansion = jEdit.getSettingsDirectory();
+			}
+			else {
+				// try everything uppercase?
+				varName = varName.toUpperCase();
+				String uparg = arg.toUpperCase();
+				m = p.matcher(uparg);
+				expansion = System.getenv(varName);
+			}
 		}
-		if (expansion != null)
-		{
+		if (expansion != null) {
 			expansion = expansion.replace("\\", "\\\\");
 			return m.replaceFirst(expansion);
 		}
@@ -198,7 +201,7 @@ public class MiscUtilities
 	 *
 	 *	@return an abbreviated path, replacing values with variables, if a prefix exists.
 	 *  @see #expandVariables
-	 *  @since jEdit 4.3pre16
+	 *  @since jEdit 4.3
 	 */
 	public static String abbreviate(String path)
 	{
@@ -617,7 +620,7 @@ public class MiscUtilities
 
 		If a URI is supplied, use desktop browser.
 
-		@param path: path or URI of thing to open/browse
+		@param path or URI of thing to open/browse
 		@author Alan Ezust
 		@since jEdit 5.0
 	*/
@@ -669,56 +672,116 @@ public class MiscUtilities
 		}
 	}// }}}
 
-	//{{{ prepareBackupDirectory method
+	//{{{ prepareAutosaveDirectory method
 	/**
-	 * Prepares the directory to backup the specified file.
-	 * jedit property is used to determine the directory.
-	 * If there is no dedicated backup directory specified by props,
+	 * Prepares the directory to autosave the specified file.
+	 * A jEdit property is used to determine the directory.
+	 * If there is none specified by props,
 	 * then the current directory is used, but only for local files.
-	 * The directory is created if not exists.
-	 * @return Backup directory. <code>null</code> is returned for
+	 * The directory is created if it does not exist.
+	 * @param path path to the buffer
+	 * @return Autosave directory. <code>null</code> is returned for
 	 * non-local files if no backup directory is specified in properties.
-	 * @since 5.0pre1
+	 * @since jEdit 5.5
 	 */
-	public static File prepareBackupDirectory(String path)
+	public static File prepareAutosaveDirectory(String path)
 	{
-		String backupDirectory = jEdit.getProperty("backup.directory");
-		File dir;
 		boolean isLocal = VFSManager.getVFSForPath(path) instanceof FileVFS;
 		File file;
 		if (isLocal)
 			file = new File(path);
 		else
 			file = new File(replaceNonPathChars(path, "_"));
+		File dir = file;
+		if (!dir.isDirectory())
+			dir=dir.getParentFile();
 
-		// Check for backup.directory, and create that
-		// directory if it doesn't exist
-		if(backupDirectory == null || backupDirectory.length() == 0)
+		// Check for autosave.directory
+		String autosaveDirectory = jEdit.getProperty("autosave.directory");
+		if(autosaveDirectory != null)
 		{
-			if (!isLocal)
-				return null;
-			else {
-				backupDirectory = file.getParent();
-				dir = new File(backupDirectory);
-			}
-		}
-		else
-		{
-			backupDirectory = MiscUtilities.constructPath(
-				System.getProperty("user.home"), backupDirectory);
-
+			autosaveDirectory = MiscUtilities.expandVariables(autosaveDirectory);
+			if (path.startsWith(autosaveDirectory))
+				return dir;
 			// Perhaps here we would want to guard with
 			// a property for parallel backups or not.
-			backupDirectory = MiscUtilities.concatPath(
-				backupDirectory,file.getParent());
-
-			dir = new File(backupDirectory);
-
+			autosaveDirectory = MiscUtilities.concatPath(
+				autosaveDirectory, dir.getAbsolutePath());
+			dir = new File(autosaveDirectory);
 			if (!dir.exists())
 				dir.mkdirs();
 		}
-
+		else {
+			if (!isLocal)
+				return null;
+		}
 		return dir;
+
+	} //}}}
+
+
+	//{{{ getBackupDirectory method
+	/**
+	 * Get backup.directory property, or null.
+	 * @return backup.directory property, or null
+	 * @since jEdit 5.5pre1
+	 */
+	public static String getBackupDirectory()
+	{
+		String backupDirectory = jEdit.getProperty("backup.directory");
+		if(backupDirectory == null || backupDirectory.length() == 0)
+		{
+			return null;
+		} else {
+			return MiscUtilities.expandVariables(backupDirectory);
+		}
+	}// }}}
+
+	//{{{ prepareBackupDirectory method
+	/**
+	 * Prepares the directory to backup the specified file.
+	 * A jEdit property is used to determine the directory.
+	 * If there is no dedicated backup directory specified by props,
+	 * then the current directory is used, but only for local files.
+	 * The directory is created if it does not exist.
+	 * @param path path to the buffer
+	 * @return Backup directory. <code>null</code> is returned for
+	 * non-local files if no backup directory is specified in properties.
+	 * @since 5.0pre1
+	 */
+	public static File prepareBackupDirectory(String path)
+	{
+		boolean isLocal = VFSManager.getVFSForPath(path) instanceof FileVFS;
+		File file;
+		if (isLocal)
+			file = new File(path);
+		else
+			file = new File(replaceNonPathChars(path, "_"));
+		File dir = file;
+		if (!dir.isDirectory())
+			dir=dir.getParentFile();
+
+		// Check for backup.directory
+		String backupDirectory = getBackupDirectory();
+		if(backupDirectory == null)
+		{
+			if (!isLocal)
+				return null;
+		}
+		else
+		{
+			if (path.startsWith(backupDirectory))
+				return dir;
+			// Perhaps here we would want to guard with
+			// a property for parallel backups or not.
+			backupDirectory = MiscUtilities.concatPath(
+				backupDirectory, dir.getAbsolutePath());
+			dir = new File(backupDirectory);
+			if (!dir.exists())
+				dir.mkdirs();
+		}
+		return dir;
+
 	} //}}}
 
 	//{{{ prepareBackupFile methods
@@ -756,7 +819,7 @@ public class MiscUtilities
 	 * Checks whether the last backup was not earlier than
 	 * <code>backupTimeDistance</code> ms ago.
 	 * @param path The file to back up.
-	 * @param backups The number of backups. Must be >= 1. If > 1, backup
+	 * @param backups The number of backups. Must be &gt;= 1. If &gt; 1, backup
 	 * files will be numbered.
 	 * @param backupDirectory The directory determined externally or
 	 * obtained from <code>prepareBackupDirectory</code>.
@@ -848,7 +911,7 @@ public class MiscUtilities
 	/**
 	 * Saves a backup (optionally numbered) of a file.
 	 * @param file A local file
-	 * @param backups The number of backups. Must be >= 1. If > 1, backup
+	 * @param backups The number of backups. Must be &gt;= 1. If &gt; 1, backup
 	 * files will be numbered.
 	 * @param backupPrefix The backup file name prefix
 	 * @param backupSuffix The backup file name suffix
@@ -867,7 +930,7 @@ public class MiscUtilities
 	 * Saves a backup (optionally numbered) of a file. Requires
 	 * specifying the backup directory and generates the backup filename.
 	 * @param file A local file
-	 * @param backups The number of backups. Must be >= 1. If > 1, backup
+	 * @param backups The number of backups. Must be &gt;= 1. If &gt; 1, backup
 	 * files will be numbered.
 	 * @param backupPrefix The backup file name prefix
 	 * @param backupSuffix The backup file name suffix
@@ -959,9 +1022,35 @@ public class MiscUtilities
 	 */
 	public static boolean isBackup(String filename)
 	{
-		if (filename.startsWith("#")) return true;
-		if (filename.endsWith("~")) return true;
-		if (filename.endsWith(".bak")) return true;
+		if (filename == null)
+		{
+			return false;
+		}
+
+		// check for #Untitled=X# and #filename#save#
+		if (filename.matches("[#]Untitled-\\d+[#]") || filename.matches("[#].*?[#]save[#]"))
+		{
+			return true;
+		}
+
+		// check for user supplied prefix and suffix
+		String backupPrefix = jEdit.getProperty("backup.prefix");
+		String backupSuffix = jEdit.getProperty("backup.suffix");
+		if (backupPrefix != null && backupSuffix != null)
+		{
+			return filename.startsWith(backupPrefix) && filename.endsWith(backupSuffix);
+		}
+
+		if (backupPrefix != null && filename.startsWith(backupPrefix))
+		{
+			return true;
+		}
+
+		if (backupSuffix != null && filename.startsWith(backupSuffix))
+		{
+			return true;
+		}
+
 		return false;
 	} //}}}
 
@@ -1505,6 +1594,32 @@ loop:		for(;;)
 
 	//}}}
 
+	//{{{ storeProperties() method
+	/**
+	 * Stores properties with sorted keys.
+     * @param props  Given properties.
+     * @param out  Output stream.
+     * @param comments  Description of the property list.
+     * @since jEdit 5.3
+	 */
+	public static void storeProperties(Properties props, OutputStream out, String comments)
+        throws IOException
+	{
+		Properties sorted = new Properties() {
+			@Override
+			public synchronized Enumeration<Object> keys() {
+				return Collections.enumeration(new TreeSet<Object>(props.keySet()));
+			}
+			@Override
+			public synchronized Set<Map.Entry<Object,Object>> entrySet() {
+				return (new TreeMap<Object,Object>(props)).entrySet();
+			}
+
+		};
+		sorted.putAll(props);
+		sorted.store(out, comments);
+	} //}}}
+
 	static VarCompressor svc = null;
 
 	//{{{ VarCompressor class
@@ -1526,6 +1641,8 @@ loop:		for(;;)
 			Map<String, String> env = pb.environment();
 			if (OperatingSystem.isUnix())
 				prefixMap.put(System.getProperty("user.home"), "~");
+			if (jEdit.getSettingsDirectory() != null)
+				prefixMap.put(jEdit.getSettingsDirectory(), "JEDIT_SETTINGS");
 			for (Map.Entry<String, String> entry: env.entrySet())
 			{
 				String k = entry.getKey();
@@ -1555,6 +1672,7 @@ loop:		for(;;)
 				}
 				prefixMap.put(v, k);
 			}
+
 		} //}}}
 
 		//{{{ compress() method

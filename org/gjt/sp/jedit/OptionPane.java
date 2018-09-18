@@ -31,12 +31,12 @@ import java.awt.Component;
  * {@link AbstractOptionPane} instead.
  *
  * @author Slava Pestov
- * @version $Id: OptionPane.java 12504 2008-04-22 23:12:43Z ezust $
+ * @version $Id: OptionPane.java 23981 2015-08-10 14:56:24Z daleanson $
  */
 public interface OptionPane
 {
 	/**
-	 * Returns the internal name of this option pane. The option pane's label
+	 * @return the internal name of this option pane. The option pane's label
 	 * is set to the value of the property named
 	 * <code>options.<i>name</i>.label</code>.
 	 * @see jEdit#getProperty(String)
@@ -44,7 +44,7 @@ public interface OptionPane
 	String getName();
 
 	/**
-	 * Returns the component that should be displayed for this option pane.
+	 * @return the component that should be displayed for this option pane.
 	 */
 	Component getComponent();
 

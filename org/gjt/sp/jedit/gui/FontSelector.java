@@ -33,6 +33,7 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.*;
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.Log;
 //}}}
 
@@ -40,7 +41,7 @@ import org.gjt.sp.util.Log;
 /**
  * A font chooser widget.
  * @author Slava Pestov
- * @version $Id: FontSelector.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: FontSelector.java 24411 2016-06-19 11:02:53Z kerik-sf $
  */
 public class FontSelector extends JButton
 {
@@ -139,7 +140,7 @@ public class FontSelector extends JButton
 		{
 			Font font;
 
-			JDialog dialog = GUIUtilities.getParentDialog(FontSelector.this);
+			JDialog dialog = GenericGUIUtilities.getParentDialog(FontSelector.this);
 			if(dialog == null)
 			{
 				font = new FontSelectorDialog(

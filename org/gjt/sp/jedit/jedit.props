@@ -24,6 +24,13 @@ metal.secondary.fontsize=12
 metal.secondary.fontstyle=0
 #}}}
 
+#{{{ HelpViewer and Tip of the Day font
+helpviewer.font=Dialog
+helpviewer.fontsize=12
+helpviewer.fontstyle=0
+#}}}
+
+
 # Decorate frames and dialogs using Swing L&F?
 decorate.frames=false
 decorate.dialogs=false
@@ -84,7 +91,7 @@ backupEverySave=false
 # Number of backups to make, 0=no backups
 backups=1
 
-# Backup directory
+# Backup directory suggestion: $JEDIT_SETTINGS/backups
 backup.directory=
 
 # Backup filename prefix and suffix
@@ -246,10 +253,15 @@ view.structureHighlightColor=#000000
 # EOL markers
 view.eolMarkers=false
 view.eolMarkerColor=#ff6633
+view.eolMarkerChar=↩
 
 # Wrap guide
 view.wrapGuide=true
 view.wrapGuideColor=#8080ff
+
+# page breaks
+view.pageBreaks=false
+view.pageBreaksColor=#8080ff
 
 # Caret color
 view.caretColor=#ff0000
@@ -518,9 +530,5 @@ keymap.current=jEdit
 keymap.default=jEdit
 #}}}
 
-
-available.lang=en de fr ja cs ru zh
 # if lang.usedefaultlocale is true, the lang.current is not used
 lang.usedefaultlocale=true
-lang.current=en
-

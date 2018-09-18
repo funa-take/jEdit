@@ -29,11 +29,11 @@ package org.gjt.sp.jedit.buffer;
  * undo/redo actions in a buffer.
  *
  * Buffer undo listeners are added and removed from a buffer using
- * <code>JEditBuffer.addBufferUndoListener<code> and
- * <code>JEditBuffer.removeBufferUndoListener<code>, respectively.
+ * <code>JEditBuffer.addBufferUndoListener</code> and
+ * <code>JEditBuffer.removeBufferUndoListener</code>, respectively.
  *
  * @author Shlomy Reinstein
- * @version $Id: BufferUndoListener.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: BufferUndoListener.java 23981 2015-08-10 14:56:24Z daleanson $
  * @since jEdit 4.3pre18
  */
 public interface BufferUndoListener

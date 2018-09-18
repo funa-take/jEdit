@@ -34,7 +34,7 @@ import org.gjt.sp.util.*;
 /**
  * A buffer insert request.
  * @author Slava Pestov
- * @version $Id: BufferInsertRequest.java 22357 2012-10-13 04:58:01Z ezust $
+ * @version $Id: BufferInsertRequest.java 24414 2016-06-19 11:07:43Z kerik-sf $
  */
 public class BufferInsertRequest extends BufferIORequest
 {
@@ -107,18 +107,7 @@ public class BufferInsertRequest extends BufferIORequest
 		finally
 		{
 			IOUtilities.closeQuietly((Closeable)in);
-			try
-			{
-				vfs._endVFSSession(session,view);
-			}
-			catch(Exception e)
-			{
-				Log.log(Log.ERROR,this,e);
-				String[] pp = { e.toString() };
-				VFSManager.error(view,path,"ioerror.read-error",pp);
-
-				buffer.setBooleanProperty(ERROR_OCCURRED,true);
-			}
+			endSessionQuietly();
 		}
 	} //}}}
 }

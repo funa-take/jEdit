@@ -35,7 +35,7 @@ import org.gjt.sp.util.Log;
  * 
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: DisplayManager.java 22670 2013-01-12 12:29:48Z thomasmey $
+ * @version $Id: DisplayManager.java 24211 2015-12-10 03:33:28Z daleanson $
  */
 public class DisplayManager
 {
@@ -362,7 +362,7 @@ public class DisplayManager
 	{
 		if(digit < '1' || digit > '9')
 		{
-			Toolkit.getDefaultToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 		}
 		else
 			expandFolds((digit - '1') + 1);

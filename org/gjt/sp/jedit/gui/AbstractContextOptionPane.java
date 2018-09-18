@@ -29,6 +29,7 @@ import java.util.*;
 
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.browser.VFSBrowser;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.StandardUtilities;
 
 /**
@@ -38,7 +39,7 @@ import org.gjt.sp.util.StandardUtilities;
  *
  * @author Slava Pestov
  * @author Marcelo Vanzin
- * @version $Id: AbstractContextOptionPane.java 21981 2012-08-06 19:19:16Z jarekczek $
+ * @version $Id: AbstractContextOptionPane.java 24428 2016-06-23 02:49:29Z daleanson $
  * @since jEdit 4.3pre13
  */
 public abstract class AbstractContextOptionPane extends AbstractOptionPane
@@ -86,10 +87,10 @@ public abstract class AbstractContextOptionPane extends AbstractOptionPane
 
 		add(BorderLayout.NORTH, caption);
 
-		listModel = new DefaultListModel();
+		listModel = new DefaultListModel<MenuItem>();
 		reloadContextList(getContextMenu());
 
-		list = new JList(listModel);
+		list = new JList<MenuItem>(listModel);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.addListSelectionListener(new ListHandler());
 
@@ -181,8 +182,8 @@ public abstract class AbstractContextOptionPane extends AbstractOptionPane
 	}
 
 	// private members
-	private DefaultListModel listModel;
-	private JList list;
+	private DefaultListModel<MenuItem> listModel;
+	private JList<MenuItem> list;
 	private JButton add;
 	private JButton remove;
 	private JButton moveUp, moveDown;
@@ -229,7 +230,7 @@ public abstract class AbstractContextOptionPane extends AbstractOptionPane
 		MenuItem(String actionName, String label)
 		{
 			this.actionName = actionName;
-			this.label = GUIUtilities.prettifyMenuLabel(label);
+			this.label = GenericGUIUtilities.prettifyMenuLabel(label);
 		}
 
 		public String toString()
@@ -288,7 +289,7 @@ public abstract class AbstractContextOptionPane extends AbstractOptionPane
 			} else if (source == moveUp)
 			{
 				int index = list.getSelectedIndex();
-				Object selected = list.getSelectedValue();
+				MenuItem selected = (MenuItem)list.getSelectedValue();
 				listModel.removeElementAt(index);
 				listModel.insertElementAt(selected, index - 1);
 				list.setSelectedIndex(index - 1);
@@ -296,7 +297,7 @@ public abstract class AbstractContextOptionPane extends AbstractOptionPane
 			} else if (source == moveDown)
 			{
 				int index = list.getSelectedIndex();
-				Object selected = list.getSelectedValue();
+				MenuItem selected = (MenuItem)list.getSelectedValue();
 				listModel.removeElementAt(index);
 				listModel.insertElementAt(selected, index + 1);
 				list.setSelectedIndex(index + 1);

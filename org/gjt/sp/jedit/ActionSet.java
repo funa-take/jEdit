@@ -33,7 +33,7 @@ import org.gjt.sp.util.Log;
 
 /**
  * A set of actions, either loaded from an XML file, or constructed at runtime
- * by a plugin. <p>
+ * by a plugin.
  *
  * <h3>Action sets loaded from XML files</h3>
  *
@@ -139,7 +139,7 @@ import org.gjt.sp.util.Log;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: ActionSet.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: ActionSet.java 24851 2018-03-27 16:26:50Z vampire0 $
  * @since jEdit 4.0pre1
  */
 public class ActionSet extends JEditActionSet<EditAction> implements Comparable
@@ -153,7 +153,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	{
 		label = "<no label set; plugin bug>";
 	} //}}}
-	
+
 	//{{{ ActionSet constructor
 	/**
 	 * Creates a new action set.
@@ -181,7 +181,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 		}
 		loaded = false;
 	} //}}}
-	
+
 	//{{{ addAction() method
 	/**
 	 * Adds an action to the action set.
@@ -190,17 +190,17 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	 * @since jEdit 4.0pre1
 	 */
 	@Override
-	public void addAction(EditAction action)
+	public void addAction(EditAction action)	// NOPMD
 	{
 		super.addAction(action);
 	} //}}}
-	
+
 	//{{{ getArray() method
 	protected EditAction[] getArray(int size)
 	{
 		return new EditAction[size];
 	} //}}}
-	
+
 	//{{{ getActions() method
 	/**
 	 * Returns an array of all actions in this action set.<p>
@@ -210,7 +210,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	 * @since jEdit 4.0pre1
 	 */
 	@Override
-	public EditAction[] getActions()
+	public EditAction[] getActions()	// NOPMD
 	{
 		return super.getActions();
 	} //}}}
@@ -229,7 +229,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 
 	//{{{ getLabel() method
 	/**
-	 * Return the action source label.
+	 * @return the action source label.
 	 * @since jEdit 4.0pre1
 	 */
 	public String getLabel()
@@ -252,7 +252,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 
 	//{{{ getPluginJAR() method
 	/**
-	 * Return the plugin this action set was loaded from, or null.
+	 * @return the plugin this action set was loaded from, or null.
 	 * @since jEdit 4.2pre13
 	 */
 	public PluginJAR getPluginJAR()
@@ -270,10 +270,8 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	public String[] getCacheableActionNames()
 	{
 		LinkedList<String> retVal = new LinkedList<String>();
-		Enumeration e = actions.elements();
-		while(e.hasMoreElements())
+		for (Object obj : actions.values())
 		{
-			Object obj = e.nextElement();
 			if(obj == placeholder)
 			{
 				// ??? this should only be called with
@@ -286,14 +284,14 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 		}
 		return retVal.toArray(new String[retVal.size()]);
 	} //}}}
-	
+
 	//{{{ getProperty() method
-	protected String getProperty(String name)
+	public String getProperty(String name)
 	{
 		Keymap keymap = jEdit.getKeymapManager().getKeymap();
 		return keymap.getShortcut(name);
 	} //}}}
-	
+
 	//{{{ getInputHandler() method
 	public AbstractInputHandler getInputHandler()
 	{
@@ -312,7 +310,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	{
 		return label;
 	} //}}}
-	
+
 	//{{{ createBeanShellAction() method
 	/**
 	 * Creates a BeanShellAction.

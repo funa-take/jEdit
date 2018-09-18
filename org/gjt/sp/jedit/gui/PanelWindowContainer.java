@@ -33,7 +33,6 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -66,13 +65,14 @@ import org.gjt.sp.jedit.OperatingSystem;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.gui.DockableWindowManager.DockingArea;
 import org.gjt.sp.jedit.msg.DockableWindowUpdate;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.StandardUtilities;
 //}}}
 
 /** A container for dockable windows. This class should never be used
  * directly.
  * @author Slava Pestov
- * @version $Id: PanelWindowContainer.java 23221 2013-09-29 20:03:32Z shlomy $
+ * @version $Id: PanelWindowContainer.java 24429 2016-06-23 03:08:58Z daleanson $
  * @since jEdit 4.0pre1
  */
 public class PanelWindowContainer implements DockableWindowContainer, DockingArea
@@ -95,6 +95,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 			closeBox.putClientProperty("JButton.buttonType","toolbar");
 
 		closeBox.setMargin(new Insets(0,0,0,0));
+		GenericGUIUtilities.setButtonContentMargin(closeBox, closeBox.getMargin());
 
 		closeBox.addActionListener(new ActionHandler());
 
@@ -105,6 +106,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 			menuBtn.putClientProperty("JButton.buttonType","toolbar");
 
 		menuBtn.setMargin(new Insets(0,0,0,0));
+		GenericGUIUtilities.setButtonContentMargin(menuBtn, menuBtn.getMargin());
 
 		menuBtn.addMouseListener(new MenuMouseHandler());
 
@@ -148,6 +150,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 
 		JToggleButton button = new JToggleButton();
 		button.setMargin(new Insets(1,1,1,1));
+		GenericGUIUtilities.setButtonContentMargin(button, new Insets(6,6,6,6));
 		button.setRequestFocusEnabled(false);
 		button.setIcon(new RotatedTextIcon(rotation,button.getFont(),
 			entry.shortTitle()));
@@ -224,7 +227,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 	{
 		if(dockables.isEmpty())
 		{
-			Toolkit.getDefaultToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -237,6 +240,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 	} //}}}
 
 	//{{{ show() method
+	@SuppressWarnings({"deprecation"})	// see notes below		
 	public void show(DockableWindowManagerImpl.Entry entry)
 	{
 		if(current == entry)
@@ -250,6 +254,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 				}
 				else
 				{
+					// TODO: requestDefaultFocus is deprecated, fix this
 					entry.win.requestDefaultFocus();
 				}
 			}
@@ -282,6 +287,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 			}
 			else
 			{
+				// TODO: requestDefaultFocus is deprecated, fix this
 				entry.win.requestDefaultFocus();
 			}
 		}
@@ -476,7 +482,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 			else
 				dockable = getCurrent();
 
-			if(comp == menuBtn || GUIUtilities.isPopupTrigger(evt))
+			if(comp == menuBtn || GenericGUIUtilities.isPopupTrigger(evt))
 			{
 				if(dockable == null)
 				{
@@ -501,7 +507,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 					y = evt.getY();
 					point = true;
 				}
-				GUIUtilities.showPopupMenu(popup,
+				GenericGUIUtilities.showPopupMenu(popup,
 					comp,x,y,point);
 			}
 		}

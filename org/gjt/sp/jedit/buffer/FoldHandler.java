@@ -33,13 +33,13 @@ import javax.swing.text.Segment;
  * <code>services.xml</code> files like so:
  *
  * <pre>&lt;SERVICE CLASS="org.gjt.sp.jedit.buffer.FoldHandler" NAME="<i>name</i>"&gt;
- *    new <i>MyFoldHandler<i>();
+ *    new <i>MyFoldHandler</i>();
  *&lt;/SERVICE&gt;</pre>
  *
  * See {@link org.gjt.sp.jedit.ServiceManager} for details.
  *
  * @author Slava Pestov
- * @version $Id: FoldHandler.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: FoldHandler.java 23981 2015-08-10 14:56:24Z daleanson $
  * @since jEdit 4.3pre3
  */
 public abstract class FoldHandler

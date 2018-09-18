@@ -42,7 +42,7 @@ import org.gjt.sp.util.Log;
  * The array is resized when the TextArea geometry changes  
  *
  * @author Slava Pestov
- * @version $Id: ChunkCache.java 22670 2013-01-12 12:29:48Z thomasmey $
+ * @version $Id: ChunkCache.java 24373 2016-05-05 03:02:43Z daleanson $
  */
 class ChunkCache
 {
@@ -58,14 +58,14 @@ class ChunkCache
 	//{{{ getMaxHorizontalScrollWidth() method
 	/**
 	 * Returns the max line width of the textarea.
-	 * It will check all lines the first invalid line.
+	 * It will check all lines in the line info array.
 	 *
 	 * @return the max line width
 	 */
 	int getMaxHorizontalScrollWidth()
 	{
 		int max = 0;
-		for(int i = 0; i < firstInvalidLine; i++)
+		for(int i = 0; i < lineInfo.length; i++)
 		{
 			LineInfo info = lineInfo[i];
 			if(info.width > max)
@@ -255,12 +255,15 @@ class ChunkCache
 
 	//{{{ getLineInfo() method
 	/**
-	 * Returns the line informations for a given screen line
+	 * Returns the line informations for a given screen line or a non-null
+	 * new LineInfo if the requested <code>screenLine</code> is out of range.
 	 * @param screenLine the screen line
 	 * @return the LineInfo for the screenLine
 	 */
 	LineInfo getLineInfo(int screenLine)
 	{
+		if (screenLine >= lineInfo.length)
+			return new LineInfo();
 		updateChunksUpTo(screenLine);
 		return lineInfo[screenLine];
 	} //}}}
@@ -839,15 +842,15 @@ class ChunkCache
 		/**
 		 * The physical line.
 		 */
-		int physicalLine;
+		int physicalLine = -1;
 		/**
 		 * The offset where begins the line.
 		 */
-		int offset;
+		int offset = 0;;
 		/**
 		 * The line length.
 		 */
-		int length;
+		int length = 0;
 		/**
 		 * true if it is the first subregion of a line.
 		 */
@@ -856,10 +859,10 @@ class ChunkCache
 		 * True if it is the last subregion of a line.
 		 */
 		boolean lastSubregion;
-		Chunk chunks;
+		Chunk chunks = null;
 		/** The line width. */
-		int width;
-		TokenMarker.LineContext lineContext;
+		int width = 0;
+		TokenMarker.LineContext lineContext = null;
 
 		@Override
 		public String toString()

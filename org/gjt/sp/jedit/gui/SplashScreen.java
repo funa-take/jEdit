@@ -29,7 +29,7 @@ import org.gjt.sp.util.Log;
 //}}}
 
 /** The splash screen displayed on startup.
- * @version $Id: SplashScreen.java 23449 2014-03-30 19:14:26Z kerik-sf $
+ * @version $Id: SplashScreen.java 24830 2018-02-22 01:21:35Z vampire0 $
  */
 public class SplashScreen extends JComponent
 {
@@ -263,7 +263,7 @@ public class SplashScreen extends JComponent
 	private final Image image;
 	private int progress;
 	private static final int PROGRESS_HEIGHT = 20;
-	private static final int PROGRESS_COUNT = 28;
+	private static final int PROGRESS_COUNT = 23;
 	private String label;
 	private String lastLabel;
 	private long firstAdvanceTime = System.currentTimeMillis();

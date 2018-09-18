@@ -23,7 +23,6 @@
 package org.gjt.sp.jedit.indent;
 
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -36,7 +35,7 @@ import org.gjt.sp.jedit.syntax.TokenMarker;
 
 /**
  * @author Slava Pestov
- * @version $Id: RegexpIndentRule.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: RegexpIndentRule.java 24415 2016-06-19 11:07:55Z kerik-sf $
  */
 public class RegexpIndentRule implements IndentRule
 {
@@ -101,7 +100,7 @@ public class RegexpIndentRule implements IndentRule
 	 */
 	private static class TokenFilter implements TokenHandler
 	{
-		public StringBuilder result;
+		StringBuilder result;
 
 		public TokenFilter(int originalLength)
 		{

@@ -43,7 +43,7 @@ import org.gjt.sp.util.ThreadUtilities;
 //}}}
 
 /**
- * @version $Id: PluginManager.java 23099 2013-07-29 18:08:50Z ezust $
+ * @version $Id: PluginManager.java 24426 2016-06-22 20:26:02Z daleanson $
  */
 public class PluginManager extends JFrame
 {
@@ -202,7 +202,6 @@ public class PluginManager extends JFrame
 		buttons.add(pluginOptions);
 		buttons.add(Box.createHorizontalStrut(6));
 		buttons.add(done);
-		buttons.add(Box.createGlue());
 
 		getRootPane().setDefaultButton(done);
 
@@ -222,7 +221,7 @@ public class PluginManager extends JFrame
 	/**
 	* Check if the plugin list should be updated.
 	* It will return <code>true</code> if the pluginList is <code>null</code>
-	* or if the mirror id of the current plugin list is not the current preffered mirror id
+	* or if the mirror id of the current plugin list is not the current preferred mirror id
 	* and will return always false if the plugin list is currently downloading
 	*
 	* @return true if the plugin list should be updated
@@ -248,13 +247,14 @@ public class PluginManager extends JFrame
 			return;
 		}
 
+		installer.loading();
+		updater.loading();
+
 		ThreadUtilities.runInBackground(new Task()
 		{
 			@Override
 			public void _run()
 			{
-				installer.loading();
-				updater.loading();
 				try
 				{
 					downloadingPluginList = true;
@@ -368,10 +368,13 @@ public class PluginManager extends JFrame
 	//{{{ Inner classes
 
 	//{{{ ActionHandler class
+	@SuppressWarnings("deprecation")
 	class ActionHandler implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
 		{
+			// TODO: update this, use CombinedOptins instead of GlobalOptions
+			// and PluginOptions
 			Object source = evt.getSource();
 			if(source == done)
 				ok();

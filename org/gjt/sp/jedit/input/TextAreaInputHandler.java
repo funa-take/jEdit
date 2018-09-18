@@ -279,7 +279,7 @@ public abstract class TextAreaInputHandler extends AbstractInputHandler<JEditBea
 				// beep when caps lock is pressed, etc.
 				if(currentBindings != bindings)
 				{
-					Toolkit.getDefaultToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 					// F10 should be passed on, but C+e F10
 					// shouldn't
 					repeatCount = 1;
@@ -291,13 +291,6 @@ public abstract class TextAreaInputHandler extends AbstractInputHandler<JEditBea
 					{ // let user input be only local
 						userInput(input);
 					}
-				}
-				else
-				{
-					// this is retarded. excuse me while I drool
-					// and make stupid noises
-					if(KeyEventWorkaround.isNumericKeypad(keyStroke.key))
-						KeyEventWorkaround.numericKeypadKey();
 				}
 				sendShortcutPrefixOff();
 			}

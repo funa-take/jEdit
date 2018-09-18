@@ -3,9 +3,9 @@
 <!-- maxLineLen=90:wrap=soft:indentSize=2:noTabs=true: -->
 <!-- jEdit user's guide -->
 <book id="users-guide"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude"  xsi:noNamespaceSchemaLocation='http://www.docbook.org/xsd/4.4/docbook.xsd'>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude"  xsi:noNamespaceSchemaLocation='https://www.docbook.org/xsd/4.4/docbook.xsd'>
     <bookinfo>
-        <title>jEdit 5.2 User's Guide</title>
+        <title>jEdit 5.5 User's Guide</title>
 
         <legalnotice>
             <title>Legal Notice</title>
@@ -22,7 +22,7 @@
         <author>
            <othername> The jEdit all-volunteer developer team </othername>
         </author>
-        
+
         <revhistory>
            <revision>
                 <revnumber>1.0 - 4.3</revnumber>
@@ -30,17 +30,17 @@
                 <author> <firstname>Slava</firstname> <surname>Pestov</surname> </author>
                 <revremark>Initial HTML document</revremark>
             </revision>
-            
+
             <revision>
                <revnumber>3.2 - 4.1</revnumber>
                <date>2001-2002</date>
                <author> <firstname>John</firstname><surname>Gellene</surname> </author>
                <revremark> Initial DocBook version. Initial versions of Plugin Guide and Macro Guide. </revremark>
                </revision>
-            
+
             <revision>
-              <revnumber>4.3 - 5.2</revnumber>
-              <date>2005-2014</date>
+              <revnumber>4.3 - 5.5</revnumber>
+              <date>2005-2017</date>
               <author><firstname>Alan</firstname><surname>Ezust</surname></author>
               <revremark> Maintainer. </revremark>
             </revision>
@@ -130,10 +130,10 @@
             While this guide assumes some working knowledge of the language, you
             are not required to be a Java wizard. If you can write a useful
             application of any size in Java, you can write a plugin. </para>
-            
+
             <para>Where applicable, this section will also explain how jEdit's
-            source code is similar. Therefore, this is also a good introduction to 
-            to jEdit development. </para>   
+            source code is similar. Therefore, this is also a good introduction to
+            to jEdit development. </para>
 
         </partintro>
 

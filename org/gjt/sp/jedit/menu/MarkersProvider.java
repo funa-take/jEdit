@@ -113,8 +113,8 @@ public class MarkersProvider implements DynamicMenuProvider
 
 			if(shortcut != null)
 			{
-				d.width += (getFontMetrics(acceleratorFont)
-					.stringWidth(shortcut) + 15);
+				FontMetrics fm = getFontMetrics(acceleratorFont);
+				d.width += (fm.stringWidth(shortcut) + fm.stringWidth("AAAA"));
 			}
 			return d;
 		} //}}}
@@ -128,7 +128,9 @@ public class MarkersProvider implements DynamicMenuProvider
 
 			if(shortcut != null)
 			{
+				Graphics2D g2 = (Graphics2D)g;
 				g.setFont(acceleratorFont);
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				g.setColor(getModel().isArmed() ?
 					acceleratorSelectionForeground :
 					acceleratorForeground);
@@ -136,8 +138,7 @@ public class MarkersProvider implements DynamicMenuProvider
 				Insets insets = getInsets();
 				g.drawString(shortcut,getWidth() - (fm.stringWidth(
 					shortcut) + insets.right + insets.left + 5),
-					getFont().getSize() + (insets.top - 1)
-					/* XXX magic number */);
+					fm.getAscent() + insets.top);
 			}
 		} //}}}
 
@@ -169,10 +170,7 @@ public class MarkersProvider implements DynamicMenuProvider
 		//{{{ Class initializer
 		static
 		{
-			acceleratorFont = UIManager.getFont("MenuItem.acceleratorFont");
-			acceleratorFont = new Font("Monospaced",
-				acceleratorFont.getStyle(),
-				acceleratorFont.getSize());
+			acceleratorFont = GUIUtilities.menuAcceleratorFont();
 			acceleratorForeground = UIManager
 				.getColor("MenuItem.acceleratorForeground");
 			acceleratorSelectionForeground = UIManager

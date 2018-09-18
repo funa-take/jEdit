@@ -29,9 +29,9 @@ import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.jEdit;
 
 /**
- * HyperSearch results window.
+ * A file in the HyperSearch results window.
  * @author Slava Pestov
- * @version $Id: HyperSearchFileNode.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: HyperSearchFileNode.java 24421 2016-06-19 15:33:49Z kerik-sf $
  */
 public class HyperSearchFileNode implements HyperSearchNode
 {

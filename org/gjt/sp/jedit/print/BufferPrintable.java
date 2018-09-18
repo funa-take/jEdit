@@ -39,8 +39,14 @@ import org.gjt.sp.jedit.*;
 import org.gjt.sp.util.*;
 //}}}
 
+@Deprecated
 /**
- * @version $Id: BufferPrintable.java 23221 2013-09-29 20:03:32Z shlomy $
+ * @version $Id: BufferPrintable.java 24592 2017-01-20 02:34:44Z vampire0 $
+ * @deprecated
+ * Replaced by BufferPrinter1_7. All the workarounds for java 1.3 and 1.4 don't
+ * matter any more since jEdit requires java 1.8 at minimum.
+ * Leaving this in place rather than removing it since it might be needed by the
+ * stand-alone text area.
  */
 class BufferPrintable implements Printable
 {
@@ -125,42 +131,42 @@ class BufferPrintable implements Printable
 		if(frc == null)
 		{
 			frc = ((Graphics2D)_gfx).getFontRenderContext();
-			Log.log(Log.DEBUG,this,"Font render context is " + frc);
+			//Log.log(Log.DEBUG,this,"Font render context is " + frc);
 		}
 
-		Log.log(Log.DEBUG,this,"Asked to print page " + pageIndex);
-		Log.log(Log.DEBUG,this,"Current page is " + currentPage);
+		//Log.log(Log.DEBUG,this,"Asked to print page " + pageIndex);
+		//Log.log(Log.DEBUG,this,"Current page is " + currentPage);
 
 		if(pageIndex > currentPage)
 		{
 			for(int i = currentPage; i < pageIndex; i++)
 			{
-				Log.log(Log.DEBUG,this,"Current physical line is now " + currentPageStart);
+				//Log.log(Log.DEBUG,this,"Current physical line is now " + currentPageStart);
 				currentPhysicalLine = currentPageStart;
 				printPage(_gfx,pageFormat,i,true);
 			}
 
 			currentPage = pageIndex - 1;
-			Log.log(Log.DEBUG,this,"Current page is now " + currentPage);
+			//Log.log(Log.DEBUG,this,"Current page is now " + currentPage);
 		}
 
 		if(pageIndex == currentPage + 1)
 		{
 			if(end)
 			{
-				Log.log(Log.DEBUG,this,"The end");
+				//Log.log(Log.DEBUG,this,"The end");
 				return NO_SUCH_PAGE;
 			}
 
 			currentPageStart = currentPhysicalLine;
-			Log.log(Log.DEBUG,this,"#2 - Current physical line is now " + currentPageStart);
+			//Log.log(Log.DEBUG,this,"#2 - Current physical line is now " + currentPageStart);
 			currentPage = pageIndex;
-			Log.log(Log.DEBUG,this,"#2 - Current page is now " + currentPage);
+			//Log.log(Log.DEBUG,this,"#2 - Current page is now " + currentPage);
 		}
 		else if(pageIndex == currentPage)
 		{
 			currentPhysicalLine = currentPageStart;
-			Log.log(Log.DEBUG,this,"#3 - Current physical line is now " + currentPageStart);
+			//Log.log(Log.DEBUG,this,"#3 - Current physical line is now " + currentPageStart);
 		}
 
 		printPage(_gfx,pageFormat,pageIndex,true);
@@ -208,7 +214,7 @@ class BufferPrintable implements Printable
 	private void printPage(Graphics _gfx, PageFormat pageFormat, int pageIndex,
 		boolean actuallyPaint)
 	{
-		Log.log(Log.DEBUG,this,"printPage(" + pageIndex + ',' + actuallyPaint + ')');
+		//Log.log(Log.DEBUG,this,"printPage(" + pageIndex + ',' + actuallyPaint + ')');
 		Graphics2D gfx = (Graphics2D)_gfx;
 		gfx.setFont(font);
 
@@ -217,8 +223,7 @@ class BufferPrintable implements Printable
 		double pageWidth = pageFormat.getImageableWidth();
 		double pageHeight = pageFormat.getImageableHeight();
 
-		Log.log(Log.DEBUG,this,"#1 - Page dimensions: " + pageWidth
-			+ 'x' + pageHeight);
+		//Log.log(Log.DEBUG,this,"#1 - Page dimensions: " + pageWidth + 'x' + pageHeight);
 
 		if(header)
 		{
@@ -257,9 +262,9 @@ class BufferPrintable implements Printable
 			lineNumberWidth = 0.0;
 		//}}}
 
-		Log.log(Log.DEBUG,this,"#2 - Page dimensions: "
-			+ (pageWidth - lineNumberWidth)
-			+ 'x' + pageHeight);
+		//Log.log(Log.DEBUG,this,"#2 - Page dimensions: "
+		//	+ (pageWidth - lineNumberWidth)
+		//	+ 'x' + pageHeight);
 
 		//{{{ calculate tab size
 		int tabSize = jEdit.getIntegerProperty("print.tabSize",8);
@@ -272,7 +277,7 @@ class BufferPrintable implements Printable
 		//}}}
 
 		lm = font.getLineMetrics("gGyYX",frc);
-		Log.log(Log.DEBUG,this,"Line height is " + lm.getHeight());
+		//Log.log(Log.DEBUG,this,"Line height is " + lm.getHeight());
 
 		double y = 0.0;
 print_loop:	for(;;)
@@ -286,12 +291,12 @@ print_loop:	for(;;)
 			if (!jEdit.getBooleanProperty("print.folds",true) &&
 				!view.getTextArea().getDisplayManager().isLineVisible(currentPhysicalLine))
 			{
-				
+
 				Log.log(Log.DEBUG,this,"Skipping invisible line");
 				currentPhysicalLine++;
 				continue;
 			}
-				
+
 			lineList.clear();
 
 			tokenHandler.init(styles,frc,e,lineList,

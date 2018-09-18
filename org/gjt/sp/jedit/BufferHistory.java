@@ -41,7 +41,7 @@ import org.gjt.sp.util.IOUtilities;
 /**
  * Recent file list.
  * @author Slava Pestov
- * @version $Id: BufferHistory.java 22948 2013-04-23 17:58:00Z thomasmey $
+ * @version $Id: BufferHistory.java 24428 2016-06-23 02:49:29Z daleanson $
  */
 public class BufferHistory
 {
@@ -141,6 +141,7 @@ public class BufferHistory
 	 * @return the buffer history list
 	 * @since jEdit 4.2pre2
 	 */
+	@SuppressWarnings({"unchecked"}) 
 	public static List<Entry> getHistory()
 	{
 		// Returns a snapshot to avoid concurrent access to the
@@ -478,7 +479,7 @@ public class BufferHistory
 		private String selection;
 		private String encoding;
 		private String mode;
-		private final StringBuilder charData = new StringBuilder();
+		private final StringBuilder charData = new StringBuilder();	// NOPMD
 	} //}}}
 
 	//}}}

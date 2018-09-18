@@ -29,25 +29,26 @@ import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 //}}}
 /** Paste previous/paste deleted dialog */
 public class PasteFromListDialog extends EnhancedDialog
 {
 	//{{{ PasteFromListDialog constructor
-	public PasteFromListDialog(String name, View view, MutableListModel model)
+	public PasteFromListDialog(String name, View view, MutableListModel<String> model)
 	{
 		super(view,jEdit.getProperty(name + ".title"),true);
 		this.view = view;
 		this.listModel = model;
 
 		JPanel content = new JPanel(new BorderLayout());
-		content.setBorder(new EmptyBorder(12,12,12,12));
+		content.setBorder(BorderFactory.createEmptyBorder(12, 12, 11, 11));
 		setContentPane(content);
-		JPanel center = new JPanel(new GridLayout(2,1,2,12));
+		JPanel center = new JPanel(new GridLayout(2, 1, 2, 12));
 
 		int maxItemLength =
 			jEdit.getIntegerProperty("paste-from-list.max-item-length", 1000);
-		clips = new JList(model);
+		clips = new JList<String>(model);
 		clips.setCellRenderer(new Renderer(maxItemLength));
 		clips.setVisibleRowCount(12);
 
@@ -58,29 +59,31 @@ public class PasteFromListDialog extends EnhancedDialog
 		cancel = new JButton(jEdit.getProperty("common.cancel"));
 
 		JLabel label = new JLabel(jEdit.getProperty(name + ".caption"));
-		label.setBorder(new EmptyBorder(0,0,6,0));
+		label.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
 		content.add(BorderLayout.NORTH,label);
 
 		JScrollPane scroller = new JScrollPane(clips);
-		scroller.setPreferredSize(new Dimension(500,150));
+		scroller.setPreferredSize(new Dimension(500, 150));
 		center.add(scroller);
 
 		clipText = new JTextArea();
 		clipText.setEditable(false);
 		scroller = new JScrollPane(clipText);
-		scroller.setPreferredSize(new Dimension(500,150));
+		scroller.setPreferredSize(new Dimension(500, 150));
 		center.add(scroller);
 
 		content.add(center, BorderLayout.CENTER);
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
-		panel.setBorder(new EmptyBorder(12,0,0,0));
+		panel.setBorder(new EmptyBorder(17, 0, 0, 0));
 		panel.add(Box.createGlue());
 		panel.add(insert);
 		panel.add(Box.createHorizontalStrut(6));
 		panel.add(cancel);
-		panel.add(Box.createGlue());
+		
+		GenericGUIUtilities.makeSameSize(insert, cancel);
+
 		content.add(panel, BorderLayout.SOUTH);
 
 		if(model.getSize() >= 1)
@@ -91,7 +94,7 @@ public class PasteFromListDialog extends EnhancedDialog
 		insert.addActionListener(new ActionHandler());
 		cancel.addActionListener(new ActionHandler());
 
-		GUIUtilities.requestFocus(this,clips);
+		GenericGUIUtilities.requestFocus(this,clips);
 
 		pack();
 		setLocationRelativeTo(view);
@@ -101,10 +104,10 @@ public class PasteFromListDialog extends EnhancedDialog
 	//{{{ ok() method
 	public void ok()
 	{
-		Object[] selected = clips.getSelectedValues();
-		if(selected == null || selected.length == 0)
+		java.util.List<String> selected = clips.getSelectedValuesList();
+		if(selected == null || selected.isEmpty())
 		{
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -115,7 +118,7 @@ public class PasteFromListDialog extends EnhancedDialog
 		 * to the model. This has the effect of moving it to the
 		 * top of the list.
 		 */
-		for (Object sel : selected)
+		for (String sel : selected)
 		{
 			listModel.removeElement(sel);
 			listModel.insertElementAt(sel, 0);
@@ -136,8 +139,8 @@ public class PasteFromListDialog extends EnhancedDialog
 
 	//{{{ Instance variables
 	private View view;
-	private MutableListModel listModel;
-	private JList clips;
+	private MutableListModel<String> listModel;
+	private JList<String> clips;
 	private JTextArea clipText;
 	private JButton insert;
 	private JButton cancel;
@@ -148,7 +151,7 @@ public class PasteFromListDialog extends EnhancedDialog
 	{
 		// Remove the reference to the JList from the history model so that the
 		// list doesn't keep getting updated after the dialog is gone
-		Object[] nothing = {};
+		String[] nothing = {};
 		clips.setListData(nothing);
 		dispose();
 	} //}}}
@@ -156,22 +159,23 @@ public class PasteFromListDialog extends EnhancedDialog
 	//{{{ getSelectedClipText()
 	private String getSelectedClipText()
 	{
-		Object[] selected = clips.getSelectedValues();
-
-		if (selected.length == 1)
+		java.util.List selected = clips.getSelectedValuesList();
+		if (selected == null || selected.isEmpty())
+			return "";
+		if (selected.size() == 1)
 		{
 			// These strings may be very large, so if we can just return the same string
 			// instead of making a copy, do so
-			return selected[0].toString();
+			return selected.get(0).toString();
 		}
 		else
 		{
 			StringBuilder clip = new StringBuilder();
-			for(int i = 0; i < selected.length; i++)
+			for(int i = 0; i < selected.size(); i++)
 			{
 				if(i != 0)
 					clip.append('\n');
-				clip.append(selected[i]);
+				clip.append(selected.get(i));
 			}
 			return clip.toString();
 		}
@@ -188,8 +192,8 @@ public class PasteFromListDialog extends EnhancedDialog
 	//{{{ showClipText() method
 	private void showClipText()
 	{
-		Object[] selected = clips.getSelectedValues();
-		if(selected == null || selected.length == 0)
+		java.util.List selected = clips.getSelectedValuesList();
+		if(selected == null || selected.isEmpty())
 		{
 			clipText.setText("");
 		}
@@ -202,10 +206,9 @@ public class PasteFromListDialog extends EnhancedDialog
 
 			if (text.length() > maxPreviewLength)
 			{
-				String showText = text.substring(0, maxPreviewLength);
-				showText += "<" + (text.length() - maxPreviewLength) +
-					" more bytes>";
-				clipText.setText(showText);
+				StringBuilder showText = new StringBuilder(text.substring(0, maxPreviewLength));
+				showText.append('<').append((text.length() - maxPreviewLength)).append(" more bytes>");
+				clipText.setText(showText.toString());
 			}
 			else
 			{
@@ -247,9 +250,7 @@ public class PasteFromListDialog extends EnhancedDialog
 				char ch = item.charAt(i);
 				if(Character.isWhitespace(ch))
 				{
-					if(ws)
-						/* do nothing */;
-					else
+					if(!ws)
 					{
 						buf.append(' ');
 						ws = true;
@@ -268,7 +269,7 @@ public class PasteFromListDialog extends EnhancedDialog
 		}
 
 		public Component getListCellRendererComponent(
-			JList list, Object value, int index,
+			JList<?> list, Object value, int index,
 			boolean isSelected, boolean cellHasFocus)
 		{
 			super.getListCellRendererComponent(list,value,index,

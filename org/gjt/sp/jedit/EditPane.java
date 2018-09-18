@@ -34,6 +34,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
@@ -89,7 +90,7 @@ import org.gjt.sp.util.ThreadUtilities;
  * @see View#getEditPanes()
  *
  * @author Slava Pestov
- * @version $Id: EditPane.java 23701 2014-10-26 14:09:49Z ezust $
+ * @version $Id: EditPane.java 24820 2018-01-25 20:19:28Z daleanson $
  */
 public class EditPane extends JPanel implements BufferSetListener
 {
@@ -181,7 +182,7 @@ public class EditPane extends JPanel implements BufferSetListener
 			{
 				if(bufferSwitcher.getSelectedItem() != buffer)
 					bufferSwitcher.setSelectedItem(buffer);
-				bufferSwitcher.setToolTipText(buffer.getPath());
+				bufferSwitcher.updateStyle(buffer);
 			}
 
 			EditBus.send(new EditPaneUpdate(this,EditPaneUpdate
@@ -259,7 +260,7 @@ public class EditPane extends JPanel implements BufferSetListener
 		if(recentBuffer != null)
 			setBuffer(recentBuffer);
 		else
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 	} //}}}
 
 	//{{{ focusOnTextArea() method
@@ -309,7 +310,7 @@ public class EditPane extends JPanel implements BufferSetListener
 	public void focusBufferSwitcher()
 	{
 		if(bufferSwitcher == null)
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 		else
 		{
 			SwingUtilities.invokeLater(new Runnable()
@@ -416,6 +417,10 @@ public class EditPane extends JPanel implements BufferSetListener
 			for(int i = 0; i < selection.length; i++)
 			{
 				Selection s = selection[i];
+				// it happens sometimes when a buffer has an invalid selection and is loaded in two caret panes during
+				// startup
+				if (s == null)
+					continue;
 				int max = buffer.getLength();
 				if(s.getStart() > max || s.getEnd() > max)
 					selection[i] = null;
@@ -494,6 +499,7 @@ public class EditPane extends JPanel implements BufferSetListener
 	//{{{ goToNextMarker() method
 	/**
 	 * Moves the caret to the next marker.
+	 * @param select whether to select the marker
 	 * @since jEdit 4.3pre3
 	 */
 	public void goToNextMarker(boolean select)
@@ -501,7 +507,7 @@ public class EditPane extends JPanel implements BufferSetListener
 		java.util.List<Marker> markers = buffer.getMarkers();
 		if(markers.isEmpty())
 		{
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -531,6 +537,7 @@ public class EditPane extends JPanel implements BufferSetListener
 	//{{{ goToPrevMarker() method
 	/**
 	 * Moves the caret to the previous marker.
+	 * @param select whether to select the marker
 	 * @since jEdit 2.7pre2
 	 */
 	public void goToPrevMarker(boolean select)
@@ -538,7 +545,7 @@ public class EditPane extends JPanel implements BufferSetListener
 		java.util.List<Marker> markers = buffer.getMarkers();
 		if(markers.isEmpty())
 		{
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -578,7 +585,7 @@ public class EditPane extends JPanel implements BufferSetListener
 		Marker marker = buffer.getMarker(shortcut);
 		if(marker == null)
 		{
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -629,7 +636,7 @@ public class EditPane extends JPanel implements BufferSetListener
 		Marker marker = buffer.getMarker(shortcut);
 		if(marker == null)
 		{
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -770,36 +777,36 @@ public class EditPane extends JPanel implements BufferSetListener
 	EditPane(@Nonnull View view, @Nullable BufferSet bufferSetSource, @Nonnull Buffer buffer)
 	{
 		super(new BorderLayout());
-        BufferSet.Scope scope = jEdit.getBufferSetManager().getScope();
-        BufferSet source = bufferSetSource;
-        switch (scope)
-        {
-            case editpane:
-                // do nothing
-                break;
-            case view:
-                {
-                    EditPane editPane = view.getEditPane();
-                    if (editPane != null)
-                    {
-                        // if we have an editpane we copy it
-                        source = editPane.getBufferSet();
-                    }
-                }
-                break;
-            case global:
-                View activeView = jEdit.getActiveView();
-                if (activeView != null)
-                {
-                    EditPane editPane = activeView.getEditPane();
-                    if (editPane != null)
-                    {
-                        source = editPane.getBufferSet();
-                    }
-                }
-                break;
-        }
-        bufferSet = new BufferSet(source);
+		BufferSet.Scope scope = jEdit.getBufferSetManager().getScope();
+		BufferSet source = bufferSetSource;
+		switch (scope)
+		{
+			case editpane:
+				// do nothing
+				break;
+			case view:
+				{
+					EditPane editPane = view.getEditPane();
+					if (editPane != null)
+					{
+						// if we have an editpane we copy it
+						source = editPane.getBufferSet();
+					}
+				}
+				break;
+			case global:
+				View activeView = jEdit.getActiveView();
+				if (activeView != null)
+				{
+					EditPane editPane = activeView.getEditPane();
+					if (editPane != null)
+					{
+						source = editPane.getBufferSet();
+					}
+				}
+				break;
+		}
+		bufferSet = new BufferSet(source);
 
 		init = true;
 
@@ -905,7 +912,6 @@ public class EditPane extends JPanel implements BufferSetListener
 			jEdit.getColorProperty("view.gutter.structureHighlightColor"));
 		Color backgroundColor = jEdit.getColorProperty("view.gutter.bgColor");
 		gutter.setBackground(backgroundColor);
-		textArea.setBackground(backgroundColor);
 		gutter.setForeground(
 			jEdit.getColorProperty("view.gutter.fgColor"));
 		gutter.setHighlightedForeground(
@@ -973,6 +979,9 @@ public class EditPane extends JPanel implements BufferSetListener
 
 		textArea.setCtrlForRectangularSelection(jEdit.getBooleanProperty(
 			"view.ctrlForRectangularSelection"));
+		
+		textArea.setBackground(UIManager.getDefaults().getColor(
+			"ScrollBar.background"));
 
 		textArea.propertiesChanged();
 
@@ -999,6 +1008,8 @@ public class EditPane extends JPanel implements BufferSetListener
 			jEdit.getColorProperty("view.structureHighlightColor"));
 		painter.setEOLMarkersPainted(jEdit.getBooleanProperty(
 			"view.eolMarkers"));
+		painter.setEOLMarkerChar(
+			jEdit.getProperty("view.eolMarkerChar", "·"));
 		painter.setEOLMarkerColor(
 			jEdit.getColorProperty("view.eolMarkerColor"));
 		painter.setWrapGuidePainted(jEdit.getBooleanProperty(
@@ -1039,9 +1050,9 @@ public class EditPane extends JPanel implements BufferSetListener
 		SyntaxStyle[] foldLineStyle = new SyntaxStyle[4];
 		for(int i = 0; i <= 3; i++)
 		{
-			foldLineStyle[i] = GUIUtilities.parseStyle(
+			foldLineStyle[i] = SyntaxUtilities.parseStyle(
 				jEdit.getProperty("view.style.foldLine." + i),
-				defaultFont,defaultFontSize);
+				defaultFont,defaultFontSize, true);
 		}
 		painter.setFoldLineStyle(foldLineStyle);
 	} //}}}

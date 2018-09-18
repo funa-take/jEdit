@@ -46,18 +46,20 @@ public class TipOfTheDay extends EnhancedDialog
 		setContentPane(content);
 
 		JLabel label = new JLabel(jEdit.getProperty("tip.caption"));
-		label.setFont(new Font("SansSerif",Font.PLAIN,24));
+		label.setFont(label.getFont().deriveFont(label.getFont().getSize2D() * 2.0f));
 		label.setForeground(UIManager.getColor("Button.foreground"));
 		content.add(BorderLayout.NORTH,label);
 
 		tipText = new JEditorPane();
 		tipText.setEditable(false);
 		tipText.setContentType("text/html");
+		tipText.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+		tipText.setFont(jEdit.getFontProperty("helpviewer.font"));
 
 		nextTip();
 
 		JScrollPane scroller = new JScrollPane(tipText);
-		scroller.setPreferredSize(new Dimension(150,150));
+		scroller.setPreferredSize(new Dimension(250,250));
 		content.add(BorderLayout.CENTER,scroller);
 
 		ActionHandler actionHandler = new ActionHandler();

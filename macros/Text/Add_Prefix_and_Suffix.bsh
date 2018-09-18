@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Add_Prefix_and_Suffix.bsh 21353 2012-03-14 09:46:51Z jojaba_67 $
+ * $Id: Add_Prefix_and_Suffix.bsh 23971 2015-08-08 19:37:35Z daleanson $
  *
  * Notes on use:
  *
@@ -142,9 +142,6 @@ void prefixSuffixDialog(View view)
 
 // this single line of code is the script's main routine
 // it calls the methods and exits
-if(buffer.isReadOnly())
-	Macros.error(view, NotEditableMessage);
-else
 	prefixSuffixDialog(view);
 
 /*

@@ -27,7 +27,7 @@ package org.gjt.sp.jedit;
  * development) and debugging routines.
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: Debug.java 23185 2013-09-18 20:01:10Z ezust $
+ * @version $Id: Debug.java 23981 2015-08-10 14:56:24Z daleanson $
  */
 public class Debug
 {
@@ -154,6 +154,7 @@ public class Debug
 	 * the given period of time. Used to force conditions that are
 	 * hard to reproduce, for example deadlock cases.
 	 * @param time Required delay, in ms
+	 * @return an integer
 	 */
 	public static int compDelay(long time)
 	{

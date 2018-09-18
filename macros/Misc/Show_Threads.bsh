@@ -22,7 +22,7 @@
  * Version 1.0
  * requires JDK 1.1, jEdit3.1
  *
- * $Id: Show_Threads.bsh 21353 2012-03-14 09:46:51Z jojaba_67 $
+ * $Id: Show_Threads.bsh 23923 2015-05-22 14:10:47Z ezust $
  */
 
 
@@ -120,6 +120,7 @@ JFrame createThreadsFrame() {
 
 
 	tree = new JTree(createModel());
+	tree.setRowHeight(0);
 	tree.putClientProperty("JTree.lineStyle", "Angled");
 	tree.addKeyListener(this);
 

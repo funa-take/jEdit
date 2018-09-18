@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Display_Abbreviations.bsh 21917 2012-07-03 12:10:15Z kpouer $
+ * $Id: Display_Abbreviations.bsh 23920 2015-05-22 08:03:45Z ezust $
  *
  * requires JDK 1.2, jEdit3.0
  *
@@ -153,6 +153,7 @@ void showAbbrevs()
 	columnNames.addElement(new String(AbbreviationLabel));
 	columnNames.addElement(new String(ExpansionLabel));
 	table = new JTable();
+	table.setRowHeight(GUIUtilities.defaultRowHeight());
 	table.setModel(new DefaultTableModel(data, columnNames));
 	table.setRowSelectionAllowed(true);
 	/* 	The next line prevents the table from being edited.

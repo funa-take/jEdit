@@ -32,7 +32,7 @@ import org.gjt.sp.jedit.*;
 /** The default input handler maps sequences of keystrokes into actions and inserts key typed events into the text area.
  *
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: DefaultInputHandler.java 24211 2015-12-10 03:33:28Z daleanson $
  */
 public class DefaultInputHandler extends InputHandler
 {
@@ -154,7 +154,7 @@ public class DefaultInputHandler extends InputHandler
 				// beep when caps lock is pressed, etc.
 				if(currentBindings != bindings)
 				{
-					Toolkit.getDefaultToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 					// F10 should be passed on, but C+e F10
 					// shouldn't
 					repeatCount = 1;
@@ -166,13 +166,6 @@ public class DefaultInputHandler extends InputHandler
 					{ // let user input be only local
 						userInput(input);
 					}
-				}
-				else
-				{
-					// this is retarded. excuse me while I drool
-					// and make stupid noises
-					if(KeyEventWorkaround.isNumericKeypad(keyStroke.key))
-						KeyEventWorkaround.numericKeypadKey();
 				}
 				sendShortcutPrefixOff();
 			}

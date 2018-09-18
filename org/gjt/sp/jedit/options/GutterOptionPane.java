@@ -34,7 +34,7 @@ import org.gjt.sp.jedit.gui.*;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.*;
 //}}}
-
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.SyntaxUtilities;
 
 public class GutterOptionPane extends AbstractOptionPane
@@ -296,7 +296,7 @@ public class GutterOptionPane extends AbstractOptionPane
 	//{{{ setGutterComponentsEnabledState
 	private void setGutterComponentsEnabledState()
 	{
-		GUIUtilities.setEnabledRecursively(gutterComponents,
+		GenericGUIUtilities.setEnabledRecursively(gutterComponents,
 			gutterEnabled.isSelected());
 	} //}}}
 
@@ -304,7 +304,7 @@ public class GutterOptionPane extends AbstractOptionPane
 	private void addFoldStyleChooser()
 	{
 		painters = ServiceManager.getServiceNames(JEditTextArea.FOLD_PAINTER_SERVICE);
-		foldPainter = new JComboBox();
+		foldPainter = new JComboBox<String>();
 		String current = JEditTextArea.getFoldPainterName();
 		int selected = 0;
 		for (int i = 0; i < painters.length; i++)
@@ -381,7 +381,7 @@ public class GutterOptionPane extends AbstractOptionPane
 	private JCheckBox gutterMarkerHighlightEnabled;
 	private ColorWellButton gutterMarkerHighlight;
 	private ColorWellButton gutterFoldMarkers;
-	private JComboBox foldPainter;
+	private JComboBox<String> foldPainter;
 	private ColorWellButton gutterFocusBorder;
 	private ColorWellButton gutterNoFocusBorder;
 	private String [] painters;

@@ -97,7 +97,7 @@ import org.gjt.sp.util.SyntaxUtilities;
  * @author Slava Pestov
  * @author John Gellene (API documentation)
    @author Matthieu Casanova
- * @version $Id: StandaloneTextArea.java 23297 2013-10-29 12:32:55Z kpouer $
+ * @version $Id: StandaloneTextArea.java 23821 2015-01-04 14:31:09Z ezust $
  */
 public class StandaloneTextArea extends TextArea
 {
@@ -269,6 +269,8 @@ public class StandaloneTextArea extends TextArea
 			getColorProperty("view.structureHighlightColor"));
 		painter.setEOLMarkersPainted(getBooleanProperty(
 			"view.eolMarkers"));
+		String emc = getProperty("view.eolMarkerChar");
+		if (emc.length() > 0) painter.setEOLMarkerChar(emc);
 		painter.setEOLMarkerColor(
 			getColorProperty("view.eolMarkerColor"));
 		painter.setWrapGuidePainted(getBooleanProperty(
@@ -620,11 +622,11 @@ public class StandaloneTextArea extends TextArea
 
 		@Override
 		protected JEditBeanShellAction createBeanShellAction(String actionName,
-								     String code,
-								     String selected,
-								     boolean noRepeat,
-								     boolean noRecord,
-								     boolean noRememberLast)
+									 String code,
+									 String selected,
+									 boolean noRepeat,
+									 boolean noRecord,
+									 boolean noRememberLast)
 		{
 			return new JEditBeanShellAction(actionName,code,selected,noRepeat,noRecord,noRememberLast);
 		}

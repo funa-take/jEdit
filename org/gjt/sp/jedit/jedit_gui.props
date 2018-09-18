@@ -141,29 +141,28 @@ view.mbar=file edit search markers folds view utils macros plugins help-menu
 
 #{{{ File menu
 file=new-file \
-     new-file-in-mode \
-     open-file \
-     %recent-files \
-     - \
-     reload \
-     reload-all \
-     %reload-encoding \
-     - \
-     close-buffer \
-     closeall-except-active \
-     closeall-bufferset \
-     global-close-buffer \
-     close-all \
-     - \
-     save \
-     save-as \
-     save-a-copy-as \
-     save-all \
-     - \
-     print \
-     page-setup \
-     - \
-     exit
+	 new-file-in-mode \
+	 open-file \
+	 %recent-files \
+	 - \
+	 reload \
+	 reload-all \
+	 %reload-encoding \
+	 - \
+	 close-buffer \
+	 closeall-except-active \
+	 closeall-bufferset \
+	 global-close-buffer \
+	 close-all \
+	 - \
+	 save \
+	 save-as \
+	 save-a-copy-as \
+	 save-all \
+	 - \
+	 print \
+	 - \
+	 exit
 new-file.icon.small=16x16/actions/document-new.png
 new-file-in-mode.icon.small=16x16/actions/document-new.png
 open-file.icon.small=16x16/actions/document-open.png
@@ -193,25 +192,25 @@ reload-encoding.icon.small=16x16/actions/view-refresh.png
 
 #{{{ Edit menu
 edit=undo \
-     redo \
-     - \
-     cut \
-     copy \
-     paste \
-     %clipboard \
-     - \
-     select-all \
-     %selection \
-     - \
-     word-count \
-     complete-word \
-     expand-abbrev \
-     - \
-     goto-line \
-     - \
-     %text \
-     %indent \
-     %source
+	 redo \
+	 - \
+	 cut \
+	 copy \
+	 paste \
+	 %clipboard \
+	 - \
+	 select-all \
+	 %selection \
+	 - \
+	 word-count \
+	 complete-word \
+	 expand-abbrev \
+	 - \
+	 goto-line \
+	 - \
+	 %text \
+	 %indent \
+	 %source
 undo.icon.small=16x16/actions/edit-undo.png
 redo.icon.small=16x16/actions/edit-redo.png
 cut.icon.small=16x16/actions/edit-cut.png
@@ -254,61 +253,61 @@ selection=select-none \
 
 #{{{ Text menu
 text=delete-line \
-     delete-start-line \
-     delete-end-line \
-     join-lines \
-     - \
-     format-paragraph \
-     delete-paragraph \
-     - \
-     to-lower \
-     to-upper
+	 delete-start-line \
+	 delete-end-line \
+	 join-lines \
+	 - \
+	 format-paragraph \
+	 delete-paragraph \
+	 - \
+	 to-lower \
+	 to-upper
 #}}}
 
 #{{{ Indent menu
 indent=indent-lines \
-       shift-left \
-       shift-right \
-       - \
-       remove-trailing-ws \
-       spaces-to-tabs \
-       tabs-to-spaces
+	   shift-left \
+	   shift-right \
+	   - \
+	   remove-trailing-ws \
+	   spaces-to-tabs \
+	   tabs-to-spaces
 #}}}
 
 #{{{ Source menu
 source=range-comment \
-       line-comment \
-       - \
-       select-block \
-       match-bracket \
-       prev-bracket \
-       next-bracket
+	   line-comment \
+	   - \
+	   select-block \
+	   match-bracket \
+	   prev-bracket \
+	   next-bracket
 #}}}
 
 #}}}
 
 #{{{ Search menu
 search=find \
-       find-next \
-       find-prev \
-       - \
-       search-in-open-buffers \
-       search-in-directory \
-       - \
-       replace-in-selection \
-       replace-and-find-next \
-       replace-all \
-       - \
-       quick-search \
-       hypersearch \
-       quick-search-word \
-       hypersearch-word \
-       - \
-       whole-word \
-       ignore-case \
-       regexp \
-       - \
-       hypersearch-results
+	   find-next \
+	   find-prev \
+	   - \
+	   search-in-open-buffers \
+	   search-in-directory \
+	   - \
+	   replace-in-selection \
+	   replace-and-find-next \
+	   replace-all \
+	   - \
+	   quick-search \
+	   hypersearch \
+	   quick-search-word \
+	   hypersearch-word \
+	   - \
+	   whole-word \
+	   ignore-case \
+	   regexp \
+	   - \
+	   hypersearch-results
 find.icon.small=22x22/actions/edit-find.png
 find-next.icon.small=22x22/actions/edit-find-next.png
 search-in-directory.icon.small=22x22/actions/edit-find-in-folder.png
@@ -347,47 +346,48 @@ next-marker.icon.small=22x22/actions/go-next.png
 
 #{{{ Folding menu
 folds=collapse-fold \
-      expand-one-level \
-      expand-fold \
-      - \
-      collapse-all-folds \
-      expand-folds \
-      expand-all-folds \
-      - \
-      select-fold \
-      - \
-      add-explicit-fold \
-      - \
-      narrow-to-fold \
-      narrow-to-selection \
-      - \
-      parent-fold \
-      prev-fold \
-      next-fold
+	  expand-one-level \
+	  expand-fold \
+	  - \
+	  collapse-all-folds \
+	  expand-folds \
+	  expand-all-folds \
+	  - \
+	  select-fold \
+	  - \
+	  add-explicit-fold \
+	  - \
+	  narrow-to-fold \
+	  narrow-to-selection \
+	  - \
+	  parent-fold \
+	  prev-fold \
+	  next-fold
 #}}}
 
 #{{{ View menu
 view=new-view \
-     new-plain-view \
-     close-view \
-     - \
-     prev-buffer \
-     next-buffer \
-     recent-buffer \
-     focus-buffer-switcher \
-     - \
-     toggle-line-numbers \
-     toggle-statusbar \
-     toggle-gutter \
-     toggle-buffer-switcher \
-     - \
-     %scrolling \
-     %splitting \
-     %docking \
-     %buffersets \
-     - \
-     set-view-title \
-     toggle-full-screen
+	 new-plain-view \
+	 close-view \
+	 - \
+	 prev-buffer \
+	 next-buffer \
+	 recent-buffer \
+	 focus-buffer-switcher \
+	 - \
+	 toggle-line-numbers \
+	 print.toggle-show-page-breaks \
+	 toggle-statusbar \
+	 toggle-gutter \
+	 toggle-buffer-switcher \
+	 - \
+	 %scrolling \
+	 %splitting \
+	 %docking \
+	 %buffersets \
+	 - \
+	 set-view-title \
+	 toggle-full-screen
 new-view.icon.small=16x16/actions/window-new.png
 new-plain-view.icon.small=16x16/actions/window-new.png
 close-view.icon.small=16x16/actions/document-close.png
@@ -436,23 +436,23 @@ docking=left-docking-area \
 
 #{{{ Utilities menu
 utils=vfs.browser \
-      %recent-directories \
-      - \
-      %favorites \
-      %current-directory \
-      %jedit-directory \
-      %settings-directory \
-      - \
-      %beanshell \
-      %troubleshooting \
-      - \
-      action-bar \
-      last-action \
-      - \
-      buffer-options \
-      global-options \
-      - \
-      %quick-options
+	  %recent-directories \
+	  - \
+	  %favorites \
+	  %current-directory \
+	  %jedit-directory \
+	  %settings-directory \
+	  - \
+	  %beanshell \
+	  %troubleshooting \
+	  - \
+	  action-bar \
+	  last-action \
+	  - \
+	  buffer-options \
+	  global-options \
+	  - \
+	  %quick-options
 
 buffer-options.icon.small=16x16/actions/document-properties.png
 global-options.icon.small=16x16/categories/preferences-system.png
@@ -483,8 +483,8 @@ settings-directory.code=settings = jEdit.getSettingsDirectory(); \
 
 #{{{ BeanShell menu
 beanshell=eval \
-       eval-for-selected-lines \
-       eval-selection
+	   eval-for-selected-lines \
+	   eval-selection
 #}}}
 
 #{{{ Troubleshooting menu
@@ -505,18 +505,18 @@ quick-options=edit-syntax-style
 
 #{{{ Macros menu
 macros=new-macro \
-       - \
-       record-macro \
-       stop-recording \
-       - \
-       last-macro \
-       - \
-       record-temp-macro \
-       run-temp-macro \
-       - \
-       run-other-macro \
-       rescan-macros \
-       -
+	   - \
+	   record-macro \
+	   stop-recording \
+	   - \
+	   last-macro \
+	   - \
+	   record-temp-macro \
+	   run-temp-macro \
+	   - \
+	   run-other-macro \
+	   rescan-macros \
+	   -
 macros.code=new MacrosProvider();
 new-macro.icon.small=16x16/actions/document-new.png
 record-macro.icon.small=16x16/actions/media-record.png
@@ -530,9 +530,8 @@ plugins.code=new PluginsProvider();
 
 #{{{ Help menu
 help-menu=about \
-     help \
-     tip-of-the-day \
-     userFeedback
+	 help \
+	 tip-of-the-day
 #}}}
 
 #}}}
@@ -542,7 +541,7 @@ help-menu=about \
 # Title
 
 #{{{ Status bar component visibility
-view.status=( mode , fold , encoding ) wrap multiSelect rectSelect overwrite lineSep buffersets task-monitor memory-status errors clock
+view.status=( mode , fold , encoding ) locked wrap multiSelect rectSelect overwrite lineSep buffersets task-monitor memory-status errors clock
 
 view.status.show-caret-status=true
 #}}}
@@ -613,6 +612,7 @@ about.text.contributors=Slava Pestov\n\
 	Eric Benoit\n\
 	Eric Berry\n\
 	Eric Ladner\n\
+	Eric Le Lay\n\
 	Evan Wright\n\
 	Fan Ho Yin\n\
 	Francesc Roses\n\
@@ -668,6 +668,7 @@ about.text.contributors=Slava Pestov\n\
 	Lionel Fiol\n\
 	Magnus Henriksson\n\
 	Maik Schreiber\n\
+	Makarius Wenzel\n\
 	Marc Rummel\n\
 	Marcelo Vanzin\n\
 	Marcio Marchini\n\
@@ -704,6 +705,7 @@ about.text.contributors=Slava Pestov\n\
 	Peter C. Chapin\n\
 	Peter Cox\n\
 	Peter Graves\n\
+	Peter Lynch\n\
 	Philipp Janda\n\
 	Phillip Mateescu\n\
 	Ralf Engels\n\
@@ -791,7 +793,7 @@ options.last=editing
 #{{{ Options groups
 options.groups=jedit browser
 options.group.jedit=general abbrevs appearance context docking editing \
-	encodings gutter mouse plugin-manager print firewall save-back \
+	encodings gutter large-files mouse plugin-manager firewall save-back \
 	shortcuts status syntax textarea toolbar view
 options.group.browser=browser.general browser.colors browser.custom.context
 #}}}
@@ -809,12 +811,18 @@ options.abbrevs.remove.icon=22x22/actions/list-remove.png
 
 #{{{ Appearance pane
 options.appearance.code=new AppearanceOptionPane();
+
+# List of available languages:
+available.lang=en de fr ja cs ru zh ko
+
 # It is encouraged to set the following labels in their own language
 # here (not in localized .props) to catch eyes of non-English users more
 # friendly.
 options.appearance.lang.en=English
 options.appearance.lang.fr=Français
 options.appearance.lang.de=Deutsch
+# Korean
+options.appearance.lang.ko=한국의
 #Japanese
 options.appearance.lang.ja=日本語
 options.appearance.lang.cs=Česky
@@ -847,6 +855,10 @@ options.encodings.code=new EncodingsOptionPane();
 
 #{{{ Gutter pane
 options.gutter.code=new GutterOptionPane();
+#}}}
+
+#{{{ Large file pane
+options.large-files.code=new LargeFilesOptionPane();
 #}}}
 
 #{{{ Mouse pane
@@ -955,15 +967,15 @@ vfs.browser.previous.icon=22x22/actions/go-previous.png
 
 #{{{ Tool bar
 vfs.browser.toolbar-browser=vfs.browser.previous \
-			    vfs.browser.next \
-			    vfs.browser.up \
-			    vfs.browser.reload \
-			    vfs.browser.home \
-			    vfs.browser.roots \
-			    vfs.browser.synchronize \
-			    vfs.browser.new-file \
-			    vfs.browser.new-directory \
-			    vfs.browser.search-directory
+				vfs.browser.next \
+				vfs.browser.up \
+				vfs.browser.reload \
+				vfs.browser.home \
+				vfs.browser.roots \
+				vfs.browser.synchronize \
+				vfs.browser.new-file \
+				vfs.browser.new-directory \
+				vfs.browser.search-directory
 
 vfs.browser.toolbar-dialog=vfs.browser.previous \
 			   vfs.browser.next \
@@ -977,8 +989,8 @@ vfs.browser.toolbar-dialog=vfs.browser.previous \
 
 #{{{ Commands menu
 vfs.browser.open-in=vfs.browser.open-view \
-		    vfs.browser.open-plain-view \
-		    vfs.browser.open-split
+			vfs.browser.open-plain-view \
+			vfs.browser.open-split
 #}}}
 
 #}}}

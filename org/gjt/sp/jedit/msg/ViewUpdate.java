@@ -27,7 +27,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Message sent when a view-related change occurs.
  * @author Slava Pestov
- * @version $Id: ViewUpdate.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: ViewUpdate.java 23714 2014-11-02 01:29:37Z daleanson $
  *
  * @since jEdit 2.2pre6
  */
@@ -54,6 +54,13 @@ public class ViewUpdate extends EBMessage
 	 * @since jEdit 4.3pre4
 	 */
 	public static final Object ACTIVATED = "VIEW_ACTIVATED";
+	
+	
+	/**
+	 * Full screen mode has been toggled.
+	 * @since jEdit 5.3pre1
+	 */
+	public static final Object FULL_SCREEN_TOGGLED = "FULL_SCREEN_TOGGLED";
 
 	//{{{ ViewUpdate constructor
 	/**

@@ -23,8 +23,6 @@
 package org.gjt.sp.jedit.gui.statusbar;
 
 //{{{ Imports
-import org.gjt.sp.jedit.ActionSet;
-import org.gjt.sp.jedit.EditAction;
 import org.gjt.sp.jedit.JEditActionSet;
 import org.gjt.sp.jedit.JEditBeanShellAction;
 import org.gjt.sp.jedit.Registers;
@@ -36,7 +34,9 @@ import org.gjt.sp.jedit.syntax.SyntaxStyle;
 import org.gjt.sp.jedit.textarea.JEditEmbeddedTextArea;
 import org.gjt.sp.jedit.textarea.StandaloneTextArea;
 import org.gjt.sp.jedit.textarea.TextArea;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.Log;
+import org.gjt.sp.util.SyntaxUtilities;
 import org.jedit.keymap.Keymap;
 
 import javax.swing.*;
@@ -100,9 +100,9 @@ public class ErrorsWidgetFactory implements StatusWidgetFactory
 		{
 			String defaultFont = jEdit.getProperty("view.font");
 			int defaultFontSize = jEdit.getIntegerProperty("view.fontsize", 12);
-			SyntaxStyle invalid = GUIUtilities.parseStyle(
+			SyntaxStyle invalid = SyntaxUtilities.parseStyle(
 				jEdit.getProperty("view.style.invalid"),
-				defaultFont,defaultFontSize);
+				defaultFont,defaultFontSize, true);
 			foregroundColor = invalid.getForegroundColor();
 			setForeground(foregroundColor);
 			setBackground(jEdit.getColorProperty("view.status.background"));
@@ -184,10 +184,10 @@ public class ErrorsWidgetFactory implements StatusWidgetFactory
 			{
 				if (Log.throwables.isEmpty())
 					return;
-				if (GUIUtilities.isRightButton(e.getModifiers()))
+				if (GenericGUIUtilities.isRightButton(e.getModifiers()))
 				{
 					JPopupMenu menu = GUIUtilities.loadPopupMenu("errorwidget.popupmenu");
-					GUIUtilities.showPopupMenu(menu, ErrorHighlight.this, e.getX(), e.getY());
+					GenericGUIUtilities.showPopupMenu(menu, ErrorHighlight.this, e.getX(), e.getY());
 
 				}
 				else if (e.getClickCount() == 2)
@@ -206,8 +206,8 @@ public class ErrorsWidgetFactory implements StatusWidgetFactory
 		private final PrintStream printStream;
 		private final JButton removeThisError;
 		private final JButton removeAllErrors;
-		private final Object[] throwables;
-		private final JComboBox combo;
+		private final Throwable[] throwables;
+		private final JComboBox<Throwable> combo;
 
 		//{{{ ErrorDialog constructor
 		private ErrorDialog(Frame view)
@@ -215,7 +215,7 @@ public class ErrorsWidgetFactory implements StatusWidgetFactory
 			super(view, "Errors", false);
 			byteArrayOutputStream = new ByteArrayOutputStream();
 			printStream = new PrintStream(byteArrayOutputStream);
-			throwables = Log.throwables.toArray();
+			throwables = Log.throwables.toArray(new Throwable[0]);
 			textArea = new JEditEmbeddedTextArea();
 			JEditActionSet<JEditBeanShellAction> actionSet = new StandaloneTextArea.StandaloneActionSet(jEdit.getPropertyManager(),
 																										textArea,
@@ -251,7 +251,7 @@ public class ErrorsWidgetFactory implements StatusWidgetFactory
 				Throwable throwable = (Throwable) throwables[0];
 				setThrowable(throwable);
 			}
-			combo = new JComboBox(throwables);
+			combo = new JComboBox<Throwable>(throwables);
 			combo.addItemListener(new ItemListener()
 			{
 				@Override

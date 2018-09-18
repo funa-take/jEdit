@@ -35,14 +35,16 @@ import java.util.Collections;
 import org.gjt.sp.jedit.syntax.*;
 import org.gjt.sp.jedit.gui.StyleEditor;
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.StandardUtilities;
+import org.gjt.sp.util.SyntaxUtilities;
 //}}}
 
 //{{{ SyntaxHiliteOptionPane class
 /**
  * Style option pane.
  * @author Slava Pestov
- * @version $Id: SyntaxHiliteOptionPane.java 23222 2013-09-29 20:43:34Z shlomy $
+ * @version $Id: SyntaxHiliteOptionPane.java 24411 2016-06-19 11:02:53Z kerik-sf $
  */
 public class SyntaxHiliteOptionPane extends AbstractOptionPane
 {
@@ -84,6 +86,7 @@ public class SyntaxHiliteOptionPane extends AbstractOptionPane
 	{
 		styleModel = createStyleTableModel();
 		styleTable = new JTable(styleModel);
+		styleTable.setRowHeight(GenericGUIUtilities.defaultRowHeight());
 		styleTable.setRowSelectionAllowed(false);
 		styleTable.setColumnSelectionAllowed(false);
 		styleTable.setCellSelectionEnabled(false);
@@ -120,7 +123,7 @@ public class SyntaxHiliteOptionPane extends AbstractOptionPane
 			SyntaxStyle style;
 			SyntaxStyle current = (SyntaxStyle)styleModel.getValueAt(row,1);
 			String token = (String) styleModel.getValueAt(row, 0);
-			JDialog dialog = GUIUtilities.getParentDialog(
+			JDialog dialog = GenericGUIUtilities.getParentDialog(
 					SyntaxHiliteOptionPane.this);
 			if (dialog != null)
 				style = new StyleEditor(dialog, current, token).getStyle();
@@ -227,10 +230,11 @@ public class SyntaxHiliteOptionPane extends AbstractOptionPane
 		//{{{ addStyleChoice() method
 		private void addStyleChoice(String label, String property)
 		{
+			Font font = new JLabel().getFont();
 			styleChoices.add(new StyleChoice(label,
 			                                 property,
-			                                 GUIUtilities.parseStyle(jEdit.getProperty(property),
-			                                                         "Dialog",12)));
+			                                 SyntaxUtilities.parseStyle(jEdit.getProperty(property),
+			                                                         font.getFamily(), font.getSize(), true)));
 		} //}}}
 
 		//{{{ StyleChoice class

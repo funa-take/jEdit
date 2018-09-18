@@ -58,7 +58,7 @@ import org.gjt.sp.util.Log;
  * complicated stuff can be done too.
  *
  * @author Slava Pestov
- * @version $Id: EditServer.java 23220 2013-09-29 19:19:24Z shlomy $
+ * @version $Id: EditServer.java 23981 2015-08-10 14:56:24Z daleanson $
  */
 public class EditServer extends Thread
 {
@@ -175,7 +175,8 @@ public class EditServer extends Thread
 	 * @param newView Open a new view?
 	 * @param newPlainView Open a new plain view?
 	 * @param parent The client's parent directory
-	 * @param args A list of files. Null entries are ignored, for convinience
+	 * @param args A list of files. Null entries are ignored, for convenience
+	 * @return the buffer
 	 * @since jEdit 4.2pre1
 	 */
 	public static Buffer handleClient(boolean restore,

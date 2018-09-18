@@ -34,7 +34,7 @@ import org.gjt.sp.util.*;
 /**
  * A buffer autosave request.
  * @author Slava Pestov
- * @version $Id: BufferAutosaveRequest.java 22357 2012-10-13 04:58:01Z ezust $
+ * @version $Id: BufferAutosaveRequest.java 24725 2017-07-14 14:41:01Z ezust $
  */
 public class BufferAutosaveRequest extends BufferIORequest
 {
@@ -71,8 +71,13 @@ public class BufferAutosaveRequest extends BufferIORequest
 				buffer.readLock();
 				if(buffer.isDirty())
 					out = vfs._createOutputStream(session,path,view);
-				if(out != null)
+				if(out != null) {
+					Log.log(Log.DEBUG,MiscUtilities.class,
+						"Saving autosave of file \"" +
+						buffer.getPath() + "\" to \"" +
+						path + '"');
 					write(buffer,out);
+			}
 			}
 			catch (FileNotFoundException e)
 			{

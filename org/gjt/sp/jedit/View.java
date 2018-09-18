@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -91,6 +91,7 @@ import org.gjt.sp.jedit.textarea.ScrollListener;
 import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.jedit.visitors.JEditVisitor;
 import org.gjt.sp.jedit.visitors.JEditVisitorAdapter;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.StandardUtilities;
 //}}}
@@ -134,7 +135,7 @@ import org.gjt.sp.util.StandardUtilities;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: View.java 23412 2014-02-11 05:06:18Z ezust $
+ * @version $Id: View.java 24814 2018-01-10 03:51:43Z ezust $
  */
 public class View extends JFrame implements InputHandlerProvider
 {
@@ -282,7 +283,7 @@ public class View extends JFrame implements InputHandlerProvider
 			if (dockingFrameworkProvider == null)
 			{
 				Log.log(Log.ERROR, View.class, "No docking framework " + framework +
-							       " available, using the original one");
+								   " available, using the original one");
 				dockingFrameworkProvider = (DockingFrameworkProvider)
 				ServiceManager.getService(
 					DOCKING_FRAMEWORK_PROVIDER_SERVICE, ORIGINAL_DOCKING_FRAMEWORK);
@@ -777,7 +778,7 @@ public class View extends JFrame implements InputHandlerProvider
 			editPane.focusOnTextArea();
 		}
 		else
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 	} //}}}
 
 	//{{{ unsplitCurrent() method
@@ -805,7 +806,7 @@ public class View extends JFrame implements InputHandlerProvider
 			// of the current edit pane's parent splitter
 			for(EditPane _editPane: getEditPanes())
 			{
-				if(GUIUtilities.isAncestorOf(comp,_editPane)
+				if(GenericGUIUtilities.isAncestorOf(comp,_editPane)
 					&& _editPane != editPane)
 				{
 					if (scope == BufferSet.Scope.editpane)
@@ -838,7 +839,7 @@ public class View extends JFrame implements InputHandlerProvider
 			editPane.focusOnTextArea();
 		}
 		else
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 	} //}}}
 
 	//{{{ resplit() method
@@ -850,7 +851,7 @@ public class View extends JFrame implements InputHandlerProvider
 	public void resplit()
 	{
 		if(lastSplitConfig == null)
-			getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 		else
 			setSplitConfig(null,lastSplitConfig);
 	} //}}}
@@ -967,7 +968,8 @@ public class View extends JFrame implements InputHandlerProvider
 	//{{{ getBuffers() method
 	/**
 	 * Returns all Buffers opened in this View,
-	 * sorted according to View options. (as of jEdit 5.2)
+	 * Sorted according to View options. (as of jEdit 5.2)
+	 * With order preserved for unsorted buffersets (as of jEdit 5.3)
 	 * @since jEdit 5.1
 	 */
 	public Buffer[] getBuffers()
@@ -980,7 +982,7 @@ public class View extends JFrame implements InputHandlerProvider
 			if (retval == null) {
 				Comparator<Buffer> sorter = bs.getSorter();
 				if (sorter == null)
-					retval = new HashSet<Buffer>();
+					retval = new LinkedHashSet<Buffer>();
 				else
 					retval = new TreeSet<Buffer>(sorter);
 			}
@@ -1309,7 +1311,7 @@ public class View extends JFrame implements InputHandlerProvider
 
 	// {{{ closeAllMenus()
 	/** closes any popup menus that may have been opened
-	    @since jEdit 4.4pre1
+		@since jEdit 4.4pre1
 	*/
 	public void closeAllMenus()
 	{
@@ -1452,6 +1454,7 @@ public class View extends JFrame implements InputHandlerProvider
 		closeAllMenus();
 		// so you can keep typing in your editpane afterwards...
 		editPane.getTextArea().requestFocus();
+		EditBus.send(new ViewUpdate(this,ViewUpdate.FULL_SCREEN_TOGGLED));
 	} //}}}
 
 	//{{{ confirmToCloseDirty() methods
@@ -1464,6 +1467,8 @@ public class View extends JFrame implements InputHandlerProvider
 	 */
 	boolean confirmToCloseDirty()
 	{
+		boolean autosaveUntitled = jEdit.getBooleanProperty("autosaveUntitled");
+		boolean suppressNotSavedConfirmUntitled = jEdit.getBooleanProperty("suppressNotSavedConfirmUntitled") || autosaveUntitled;
 		Set<Buffer> checkingBuffers = getOpenBuffers();
 		for (View view: jEdit.getViews())
 		{
@@ -1475,7 +1480,7 @@ public class View extends JFrame implements InputHandlerProvider
 		}
 		for (Buffer buffer: checkingBuffers)
 		{
-			if (buffer.isDirty())
+			if (buffer.isDirty() && !(buffer.isUntitled() && suppressNotSavedConfirmUntitled))
 			{
 				return new CloseDialog(this, checkingBuffers).isOK();
 			}
@@ -1672,21 +1677,22 @@ public class View extends JFrame implements InputHandlerProvider
 		}
 		else
 		{
+			boolean autosaveUntitled = jEdit.getBooleanProperty("autosaveUntitled");
+
 			// the component is an editPane
 			EditPane editPane = (EditPane) component;
 			splitConfig.append('"');
-			splitConfig.append(StandardUtilities.charsToEscapes(
-				editPane.getBuffer().getPath()));
+			Buffer editPaneBuffer = editPane.getBuffer();
+			splitConfig.append(StandardUtilities.charsToEscapes(editPaneBuffer.getPath()));
 			splitConfig.append("\" buffer");
 			BufferSet bufferSet = editPane.getBufferSet();
 			Buffer[] buffers = bufferSet.getAllBuffers();
 			for (Buffer buffer : buffers)
 			{
-				if (!buffer.isNewFile())
+				if (!buffer.isNewFile() || (buffer.isUntitled() && autosaveUntitled))
 				{
 					splitConfig.append(" \"");
-					splitConfig.append(StandardUtilities.charsToEscapes(
-						buffer.getPath()));
+					splitConfig.append(StandardUtilities.charsToEscapes(buffer.getPath() ));
 					splitConfig.append("\" buff");
 				}
 			}
@@ -1784,7 +1790,7 @@ loop:		while (true)
 						if (buffer == null)
 						{
 							buffer = jEdit.openTemporary(jEdit.getActiveView(), null,
-											    path, true, null);
+												path, true, null, true);
 							jEdit.commitTemporary(buffer);
 						}
 					}
@@ -1885,7 +1891,7 @@ loop:		while (true)
 		getContentPane().remove(status);
 
 		boolean showStatus = plainView ? jEdit.getBooleanProperty("view.status.plainview.visible") :
-				    jEdit.getBooleanProperty("view.status.visible");
+					jEdit.getBooleanProperty("view.status.visible");
 		if (jEdit.getBooleanProperty("view.toolbar.alternateLayout"))
 		{
 			getContentPane().add(BorderLayout.NORTH,topToolBars);
@@ -2074,7 +2080,9 @@ loop:		while (true)
 		final int check = jEdit.getIntegerProperty("checkFileStatus");
 		if ((check == 0) || !jEdit.isStartupDone()) return;
 		// "buffer visit" also includes checking the buffer when you change editpanes.
-		if ((msg.getWhat() == ViewUpdate.EDIT_PANE_CHANGED) &&
+		// "buffer visit" also includes checking the buffer when you activate view, coming from
+		// another program, which could have alterered file on disk.
+		if ((msg.getWhat() == ViewUpdate.EDIT_PANE_CHANGED || msg.getWhat() == ViewUpdate.ACTIVATED) &&
 			((check & GeneralOptionPane.checkFileStatus_focusBuffer) > 0))
 			jEdit.checkBufferStatus(View.this, true);
 		else if ((msg.getWhat() == ViewUpdate.ACTIVATED) &&
@@ -2131,7 +2139,7 @@ loop:		while (true)
 	//{{{ getOpenBuffers() method
 	private Set<Buffer> getOpenBuffers()
 	{
-		Set<Buffer> openBuffers = new HashSet<Buffer>();
+		Set<Buffer> openBuffers = new LinkedHashSet<Buffer>();
 		for (EditPane editPane: getEditPanes())
 		{
 			openBuffers.addAll(Arrays.asList(
@@ -2280,7 +2288,7 @@ loop:		while (true)
 	{
 		Rectangle bounds;
 		if (parent == null)
-			bounds = GUIUtilities.getScreenBounds();
+			bounds = GenericGUIUtilities.getScreenBounds();
 		else
 			bounds = parent.getGraphicsConfiguration().getBounds();
 		int minWidth = jEdit.getIntegerProperty("view.minStartupWidth");

@@ -92,6 +92,7 @@ import org.gjt.sp.jedit.bsh.UtilEvalError;
 	</pre>
 
 */
+@SuppressWarnings("unchecked")
 public class ClassManagerImpl extends BshClassManager
 {
 	static final String BSH_PACKAGE = "org.gjt.sp.jedit.bsh";
@@ -399,7 +400,7 @@ public class ClassManagerImpl extends BshClassManager
 	/**
 		Reload all classes in the specified package: e.g. "com.sun.tools"
 
-		The special package name "<unpackaged>" can be used to refer 
+		The special package name "&lt;unpackaged&gt;" can be used to refer 
 		to unpackaged classes.
 	*/
 	public void reloadPackage( String pack ) 

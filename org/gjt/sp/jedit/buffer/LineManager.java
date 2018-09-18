@@ -37,7 +37,7 @@ import org.gjt.sp.util.Log;
  * called through, implements such protection.
  *
  * @author Slava Pestov
- * @version $Id: LineManager.java 23220 2013-09-29 19:19:24Z shlomy $
+ * @version $Id: LineManager.java 24459 2016-07-16 02:42:50Z ezust $
  * @since jEdit 4.2pre3
  */
 public class LineManager
@@ -243,15 +243,15 @@ public class LineManager
 			else if(gapLine != -1)
 				offset -= gapWidth;
 
-			if(startLine < firstInvalidLineContext)
-				firstInvalidLineContext += numLines;
-
 			for(int i = 0; i < numLines; i++)
 			{
 				this.endOffsets[startLine + i] = (offset + endOffsets.get(i));
 				foldLevels[startLine + i] = 0;
 			}
 		} //}}}
+
+		if(firstInvalidLineContext == -1 || firstInvalidLineContext > startLine)
+			firstInvalidLineContext = startLine;
 
 		if(firstInvalidFoldLevel == -1 || firstInvalidFoldLevel > startLine)
 			firstInvalidFoldLevel = startLine;
@@ -274,11 +274,6 @@ public class LineManager
 			else if(startLine < gapLine)
 				gapLine = startLine;
 
-			if(startLine + numLines < firstInvalidLineContext)
-				firstInvalidLineContext -= numLines;
-			else if(startLine < firstInvalidLineContext)
-				firstInvalidLineContext = startLine - 1;
-
 			lineCount -= numLines;
 
 			System.arraycopy(endOffsets,endLine,endOffsets,
@@ -288,6 +283,9 @@ public class LineManager
 			System.arraycopy(lineContext,endLine,lineContext,
 				startLine,lineCount - startLine);
 		} //}}}
+
+		if(firstInvalidLineContext == -1 || firstInvalidLineContext > startLine)
+			firstInvalidLineContext = startLine;
 
 		if(firstInvalidFoldLevel == -1 || firstInvalidFoldLevel > startLine)
 			firstInvalidFoldLevel = startLine;

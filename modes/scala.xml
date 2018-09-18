@@ -1,13 +1,15 @@
 <?xml version="1.0"?>
-<!-- Scala mode by Daniel Spiewak downloaded on 2012-03-10 from https://github.com/djspiewak/jedit-modes/blob/master/scala.xml -->
+<!-- Scala mode by Daniel Spiewak downloaded on 2015-05-17 from https://github.com/djspiewak/jedit-modes/blob/master/scala.xml -->
+
 <!DOCTYPE MODE SYSTEM "xmode.dtd">
+
 <MODE>
   <PROPS>
     <PROPERTY NAME="indentOpenBrackets" VALUE="{" />
     <PROPERTY NAME="indentCloseBrackets" VALUE="}" />
     <PROPERTY NAME="lineUpClosingBracket" VALUE="true" />
-<PROPERTY NAME="indentNextLine"
-VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var|type).*=)\s*$"/>
+  <PROPERTY NAME="indentNextLine"
+    VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var|type).*=)\s*$"/>
     <!-- set this to 'true' if you want to use GNU coding style -->
     <PROPERTY NAME="doubleBracketIndent" VALUE="false" />
     <PROPERTY NAME="commentStart" VALUE="/*" />
@@ -18,15 +20,15 @@ VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var
     <PROPERTY NAME="indentSize" VALUE="2" />
     <PROPERTY NAME="wordBreakChars" VALUE=",+-=&lt;&gt;/?^&amp;*" />
   </PROPS>
-  
+
   <RULES IGNORE_CASE="FALSE" HIGHLIGHT_DIGITS="TRUE"
-   DIGIT_RE="(0[lL]?|[1-9]\d{0,9}(\d{0,9}[lL])?|0[xX]\p{XDigit}{1,8}(\p{XDigit}{0,8}[lL])?|0[0-7]{1,11}([0-7]{0,11}[lL])?|([0-9]+\.[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?[fFdD]?|[0-9]+([eE][+-]?[0-9]+[fFdD]?|([eE][+-]?[0-9]+)?[fFdD]))">
+      DIGIT_RE="(0[lL]?|[1-9]\d{0,9}(\d{0,9}[lL])?|0[xX]\p{XDigit}{1,8}(\p{XDigit}{0,8}[lL])?|0[0-7]{1,11}([0-7]{0,11}[lL])?|([0-9]+\.[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?[fFdD]?|[0-9]+([eE][+-]?[0-9]+[fFdD]?|([eE][+-]?[0-9]+)?[fFdD]))">
 
-<MARK_FOLLOWING TYPE="LABEL">@</MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="LABEL">@</MARK_FOLLOWING>
 
-<IMPORT DELEGATE="PRIMARY"/>
+  <IMPORT DELEGATE="PRIMARY"/>
   </RULES>
-  
+
   <RULES SET="PRIMARY">
     <!-- Silly comment -->
     <SEQ TYPE="COMMENT1">/**/</SEQ>
@@ -40,21 +42,31 @@ VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var
     </SPAN>
 
     <!-- Scala comment (Java style) -->
-    <SPAN TYPE="COMMENT1">
+    <SPAN TYPE="COMMENT1" DELEGATE="COMMENT_BLOCK">
       <BEGIN>/*</BEGIN>
       <END>*/</END>
     </SPAN>
-    
+
     <SPAN MATCH_TYPE="NULL" DELEGATE="MAIN">
-     <BEGIN>{</BEGIN>
-     <END>}</END>
+      <BEGIN>{</BEGIN>
+      <END>}</END>
     </SPAN>
-    
+
     <!-- XML literals; keep this in sync with the XML_LITERAL rule set! -->
-   <IMPORT DELEGATE="XML_SHARED"/>
+    <IMPORT DELEGATE="XML_SHARED"/>
+
+    <!-- interpolated stuff -->
+    <SPAN_REGEXP DELEGATE="STRING" MATCH_TYPE="LITERAL1" NO_LINE_BREAK="FALSE" ESCAPE="">
+      <BEGIN>[0-9a-zA-Z&gt;&lt;=+]([0-9a-zA-Z&gt;&lt;=+]|_[0-9a-zA-Z&gt;&lt;=+])*"""</BEGIN>
+      <END>"""</END>
+    </SPAN_REGEXP>
+    <SPAN_REGEXP DELEGATE="STRING" MATCH_TYPE="LITERAL1" NO_LINE_BREAK="FALSE" ESCAPE="\">
+      <BEGIN>[0-9a-zA-Z&gt;&lt;=+]([0-9a-zA-Z&gt;&lt;=+]|_[0-9a-zA-Z&gt;&lt;=+])*"</BEGIN>
+      <END>"</END>
+    </SPAN_REGEXP>
 
     <!-- string and character literals -->
-    <SPAN TYPE="LITERAL1" NO_LINE_BREAK="FALSE" ESCAPE="FALSE">
+    <SPAN TYPE="LITERAL1" NO_LINE_BREAK="FALSE" ESCAPE="">
       <BEGIN>"""</BEGIN>
       <END>"""</END>
     </SPAN>
@@ -62,20 +74,20 @@ VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var
       <BEGIN>"</BEGIN>
       <END>"</END>
     </SPAN>
-<SEQ_REGEXP HASH_CHAR="'" TYPE="LITERAL1">'([^'\\]|\\.)'</SEQ_REGEXP>
+  <SEQ_REGEXP HASH_CHAR="'" TYPE="LITERAL1">'([^'\\]|\\.)'</SEQ_REGEXP>
 
     <!-- symbol literals -->
     <SEQ_REGEXP HASH_CHAR="'" TYPE="LABEL">'[0-9a-zA-Z&gt;&lt;=+]([0-9a-zA-Z&gt;&lt;=+]|_[0-9a-zA-Z&gt;&lt;=+])*</SEQ_REGEXP>
 
     <SPAN MATCH_TYPE="LITERAL3" DELEGATE="TYPE_PARAMS">
-<BEGIN>[</BEGIN>
-<END>]</END>
-</SPAN>
+    <BEGIN>[</BEGIN>
+    <END>]</END>
+  </SPAN>
 
-<SPAN MATCH_TYPE="NULL">
-<BEGIN>`</BEGIN>
-<END>`</END>
-</SPAN>
+  <SPAN MATCH_TYPE="NULL">
+    <BEGIN>`</BEGIN>
+    <END>`</END>
+  </SPAN>
 
     <SEQ TYPE="OPERATOR">(</SEQ>
     <SEQ TYPE="OPERATOR">)</SEQ>
@@ -89,19 +101,96 @@ VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var
     <!-- Function calls -->
     <!-- <MARK_PREVIOUS TYPE="FUNCTION" MATCH_TYPE="OPERATOR">(</MARK_PREVIOUS> -->
 
-<!-- Function declarations (overloaded for different spacing styles)-->
-<MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def </MARK_FOLLOWING>
-<MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def </MARK_FOLLOWING>
-<MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def </MARK_FOLLOWING>
-<MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def </MARK_FOLLOWING>
-<MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def </MARK_FOLLOWING>
-<MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def </MARK_FOLLOWING>
-<MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def </MARK_FOLLOWING>
+    <EOL_SPAN MATCH_TYPE="KEYWORD1" DELEGATE="TYPE">import </EOL_SPAN>
 
-<SPAN DELEGATE="PATTERN" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE" NO_LINE_BREAK="TRUE">
-<BEGIN>case </BEGIN>
-<END>=&gt;</END>
-</SPAN>
+  <!-- Function declarations (overloaded for different spacing styles)-->
+  <MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="FUNCTION" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">def </MARK_FOLLOWING>
+
+  <!-- class declarations (overloaded for different spacing styles)-->
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">class       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">class      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">class     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">class    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">class   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">class  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">class </MARK_FOLLOWING>
+
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case class       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case class      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case class     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case class    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case class   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case class  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case class </MARK_FOLLOWING>
+
+  <!-- instantiations (overloaded for different spacing styles)-->
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">new       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">new      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">new     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">new    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">new   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">new  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">new </MARK_FOLLOWING>
+
+  <!-- object declarations (overloaded for different spacing styles)-->
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">object       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">object      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">object     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">object    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">object   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">object  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">object </MARK_FOLLOWING>
+
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case object       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case object      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case object     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case object    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case object   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case object  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">case object </MARK_FOLLOWING>
+
+  <!-- trait declarations (overloaded for different spacing styles)-->
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">trait       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">trait      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">trait     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">trait    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">trait   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">trait  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD3" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">trait </MARK_FOLLOWING>
+
+  <!-- extends (overloaded for different spacing styles)-->
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">extends       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">extends      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">extends     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">extends    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">extends   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">extends  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">extends </MARK_FOLLOWING>
+
+  <!-- with (overloaded for different spacing styles)-->
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">with       </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">with      </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">with     </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">with    </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">with   </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">with  </MARK_FOLLOWING>
+  <MARK_FOLLOWING TYPE="KEYWORD4" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE">with </MARK_FOLLOWING>
+
+  <SPAN DELEGATE="PATTERN" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE" NO_LINE_BREAK="FALSE">
+    <BEGIN>case </BEGIN>
+    <END>=&gt;</END>
+  </SPAN>
+
+  <SPAN DELEGATE="PATTERN" MATCH_TYPE="KEYWORD1" AT_WORD_START="TRUE" NO_LINE_BREAK="TRUE">
+    <BEGIN>val </BEGIN>
+    <END>=</END>
+  </SPAN>
 
     <KEYWORDS>
       <KEYWORD1>abstract</KEYWORD1>
@@ -120,6 +209,7 @@ VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var
       <KEYWORD1>implicit</KEYWORD1>
       <KEYWORD1>import</KEYWORD1>
       <KEYWORD1>lazy</KEYWORD1>
+      <KEYWORD1>macro</KEYWORD1>
       <KEYWORD1>match</KEYWORD1>
       <KEYWORD1>new</KEYWORD1>
       <KEYWORD1>object</KEYWORD1>
@@ -161,25 +251,41 @@ VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var
       <KEYWORD3>AnyRef</KEYWORD3>
       <KEYWORD3>Nothing</KEYWORD3>
 
-<LITERAL2>false</LITERAL2>
-<LITERAL2>null</LITERAL2>
-<LITERAL2>super</LITERAL2>
-<LITERAL2>this</LITERAL2>
-<LITERAL2>true</LITERAL2>
+    <LITERAL2>false</LITERAL2>
+    <LITERAL2>null</LITERAL2>
+    <LITERAL2>super</LITERAL2>
+    <LITERAL2>this</LITERAL2>
+    <LITERAL2>true</LITERAL2>
+
+    <INVALID>???</INVALID>
+
+    <!-- reserved -->
+    <INVALID>then</INVALID>
     </KEYWORDS>
   </RULES>
-  
-  <RULES SET="TYPE_PARAMS" DEFAULT="LITERAL3">
-   <SPAN MATCH_TYPE="LITERAL3" DELEGATE="TYPE_PARAMS">
-<BEGIN>[</BEGIN>
-<END>]</END>
-</SPAN>
-  </RULES>
-  
-  <RULES SET="PATTERN" DEFAULT="NULL" IGNORE_CASE="FALSE">
-   <IMPORT DELEGATE="PRIMARY"/>
 
-<SEQ TYPE="OPERATOR">@</SEQ>
+  <RULES SET="TYPE_PARAMS" DEFAULT="LITERAL3">
+    <SPAN MATCH_TYPE="LITERAL3" DELEGATE="TYPE_PARAMS">
+    <BEGIN>[</BEGIN>
+    <END>]</END>
+  </SPAN>
+  </RULES>
+
+  <RULES SET="PATTERN" DEFAULT="NULL" IGNORE_CASE="FALSE"
+    DIGIT_RE="(0[lL]?|[1-9]\d{0,9}(\d{0,9}[lL])?|0[xX]\p{XDigit}{1,8}(\p{XDigit}{0,8}[lL])?|0[0-7]{1,11}([0-7]{0,11}[lL])?|([0-9]+\.[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?[fFdD]?|[0-9]+([eE][+-]?[0-9]+[fFdD]?|([eE][+-]?[0-9]+)?[fFdD]))">
+
+    <IMPORT DELEGATE="PRIMARY"/>
+
+  <SEQ TYPE="OPERATOR">@</SEQ>
+
+  <SEQ_REGEXP AT_WORD_START="TRUE" TYPE="KEYWORD4">[A-Z][^(\s:@)\[\]]*</SEQ_REGEXP>
+  </RULES>
+
+  <RULES SET="COMMENT_BLOCK" DEFAULT="COMMENT1">
+    <SPAN TYPE="COMMENT1" DELEGATE="COMMENT_BLOCK">
+      <BEGIN>/*</BEGIN>
+      <END>*/</END>
+    </SPAN>
   </RULES>
 
   <RULES SET="SCALADOC" DEFAULT="COMMENT3" IGNORE_CASE="TRUE">
@@ -256,51 +362,67 @@ VALUE="(.*((if|while|else\s+if|for)\s*\().*\)|\s*else|\s*case.*=>|.*(def|val|var
   </RULES>
 
   <RULES SET="SCALADOC_PRE" DEFAULT="COMMENT3" />
-  
+
   <RULES SET="XML_SHARED">
-   <SPAN TYPE="COMMENT2">
-   <BEGIN>&lt;!--</BEGIN>
-   <END>--&gt;</END>
-   </SPAN>
-  
-   <SPAN TYPE="LITERAL3">
-   <BEGIN>&lt;?</BEGIN>
-   <END>?&gt;</END>
-   </SPAN>
-  
-   <SPAN MATCH_TYPE="LITERAL3" TYPE="COMMENT4">
-   <BEGIN>&lt;![CDATA[</BEGIN>
-   <END>]]&gt;</END>
-   </SPAN>
-    
+    <SPAN TYPE="COMMENT2">
+      <BEGIN>&lt;!--</BEGIN>
+      <END>--&gt;</END>
+    </SPAN>
+
+    <SPAN_REGEXP TYPE="LITERAL3" HASH_CHARS="&lt;">
+      <BEGIN>&lt;\?[^\s]</BEGIN>
+      <END>?&gt;</END>
+    </SPAN_REGEXP>
+
+    <SPAN MATCH_TYPE="LITERAL3" TYPE="COMMENT4">
+      <BEGIN>&lt;![CDATA[</BEGIN>
+      <END>]]&gt;</END>
+    </SPAN>
+
     <SEQ_REGEXP HASH_CHAR="&lt;" TYPE="LITERAL3">&lt;([\d\w_\-:.]+)(\s+[\d\w_\-:.]+=('[^']*'|"[^"]*"))*\s*/\s*&gt;</SEQ_REGEXP>
-    
+
     <SPAN_REGEXP DELEGATE="XML_LITERAL" HASH_CHAR="&lt;" MATCH_TYPE="LITERAL3" TYPE="NULL">
-     <BEGIN>&lt;([\d\w_\-:.]+)(\s+[\d\w_\-:.]+=('[^']*'|"[^"]*"))*\s*&gt;</BEGIN>
-     <END>&lt;/$1&gt;</END>
+      <BEGIN>&lt;([\d\w_\-:.]+)(\s+[\d\w_\-:.]+=('[^']*'|"[^"]*"))*\s*&gt;</BEGIN>
+      <END>&lt;/$1&gt;</END>
     </SPAN_REGEXP>
   </RULES>
-  
+
   <!-- TODO find a way to highlight attribute names as LABEL, attribute values as LITERAL1 -->
   <RULES SET="XML_LITERAL" DEFAULT="COMMENT4">
-   <PROPS>
-<PROPERTY NAME="commentStart" VALUE="&lt;!--" />
-<PROPERTY NAME="commentEnd" VALUE="--&gt;" />
-<PROPERTY NAME="lineComment" VALUE="" />
-   </PROPS>
-  
-   <IMPORT DELEGATE="XML_SHARED"/>
-  
+    <PROPS>
+    <PROPERTY NAME="commentStart" VALUE="&lt;!--" />
+    <PROPERTY NAME="commentEnd" VALUE="--&gt;" />
+    <PROPERTY NAME="lineComment" VALUE="" />
+    </PROPS>
+
+    <IMPORT DELEGATE="XML_SHARED"/>
+
     <SPAN DELEGATE="MAIN">
       <BEGIN>{</BEGIN>
       <END>}</END>
     </SPAN>
-    
+
     <SPAN TYPE="LABEL" NO_WORD_BREAK="TRUE">
-     <BEGIN>&amp;</BEGIN>
-     <END>;</END>
+      <BEGIN>&amp;</BEGIN>
+      <END>;</END>
     </SPAN>
-    
-    <SEQ_REGEXP HASH_CHAR="&lt;" TYPE="INVALID">&lt;/[\d\w_\-:.]+&gt;</SEQ_REGEXP> <!-- unmatched closing tags -->
+
+    <SEQ_REGEXP HASH_CHAR="&lt;" TYPE="INVALID">&lt;/[\d\w_\-:.]+&gt;</SEQ_REGEXP>		<!-- unmatched closing tags -->
+  </RULES>
+
+  <RULES SET="STRING" DEFAULT="LITERAL1">
+    <SEQ TYPE="LITERAL1">$$</SEQ>
+
+    <SPAN DELEGATE="MAIN">
+      <BEGIN>${</BEGIN>
+      <END>}</END>
+    </SPAN>
+
+    <MARK_FOLLOWING TYPE="NULL" MATCH_TYPE="NULL">$</MARK_FOLLOWING>
+  </RULES>
+
+  <RULES SET="TYPE" DEFAULT="KEYWORD4">
+    <IMPORT DELEGATE="MAIN"/>
   </RULES>
 </MODE>
+

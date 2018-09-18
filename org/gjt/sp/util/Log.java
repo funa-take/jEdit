@@ -23,7 +23,6 @@
 package org.gjt.sp.util;
 
 //{{{ Imports
-import java.awt.Toolkit;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -58,7 +57,7 @@ import static java.text.DateFormat.MEDIUM;
  * to the log, see {@link #init}.
  *
  * @author Slava Pestov
- * @version $Id: Log.java 23221 2013-09-29 20:03:32Z shlomy $
+ * @version $Id: Log.java 24740 2017-09-20 17:16:54Z daleanson $
  */
 public class Log
 {
@@ -120,13 +119,10 @@ public class Log
 	 */
 	public static void init(boolean stdio, int level)
 	{
-		if(stdio)
+		if(stdio && System.out == realOut && System.err == realErr)
 		{
-			if(System.out == realOut && System.err == realErr)
-			{
-				System.setOut(createPrintStream(NOTICE,null));
-				System.setErr(createPrintStream(ERROR,null));
-			}
+			System.setOut(createPrintStream(NOTICE,null));
+			System.setErr(createPrintStream(ERROR,null));
 		}
 
 		Log.level = level;
@@ -177,9 +173,9 @@ public class Log
 
 				stream.flush();
 			}
-			catch(Exception e)
+			catch(Exception e)		// NOPMD
 			{
-				// do nothing, who cares
+				// do nothing, who cares -- well, PMD will call you on it.
 			}
 		}
 
@@ -205,6 +201,43 @@ public class Log
 	{
 		Log.beepOnOutput = beepOnOutput;
 	} //}}}
+	
+	public static void setMaxLines(int newMax)
+	{
+		if (newMax == MAXLINES)
+			return;
+		
+		// find last non-null entry in log array
+		int lineCount = 0;
+		for (int i = 0; i < log.length; i++) 
+		{
+			if (log[i] == null)
+				break;
+			++lineCount;
+		}
+		
+		// copy entries from log to newLog
+		String[] newLog = new String[newMax];
+		if (newMax > lineCount)
+		{
+			System.arraycopy(log, 0, newLog, 0, lineCount);
+		}
+		else
+		{
+			// lineCount > newMax
+			System.arraycopy(log, lineCount - newMax, newLog, 0, newMax);
+			logLineCount = newMax;
+		}
+		
+		MAXLINES = newMax;
+		log = newLog;
+		listModel.update(lineCount, true);
+	}
+	
+	public static int getMaxLinex()
+	{
+		return MAXLINES;	
+	}
 
 	//{{{ flushStream() method
 	/**
@@ -252,7 +285,7 @@ public class Log
 	 * Returns the list model for viewing the log contents.
 	 * @since jEdit 4.2pre1
 	 */
-	public static ListModel getLogListModel()
+	public static ListModel<String> getLogListModel()
 	{
 		return listModel;
 	} //}}}
@@ -348,7 +381,7 @@ public class Log
 
 	//{{{ Instance variables
 	private static final Object LOCK;
-	private static final String[] log;
+	private static String[] log;
 	private static int logLineCount;
 	private static boolean wrap;
 	private static int level;
@@ -452,7 +485,7 @@ public class Log
 				
 				if (time - lastBeepTime > 1000)
 				{
-					Toolkit.getDefaultToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 					lastBeepTime = System.currentTimeMillis();
 				}
 			}
@@ -482,7 +515,7 @@ public class Log
 	//}}}
 
 	//{{{ LogListModel class
-	static class LogListModel implements ListModel
+	static class LogListModel implements ListModel<String>
 	{
 		final List<ListDataListener> listeners = new ArrayList<ListDataListener>();
 
@@ -620,7 +653,7 @@ public class Log
 					orig.write(data, 0, data.length);
 					out = orig;
 				}
-				catch (IOException ioe)
+				catch (IOException ioe)		// NOPMD
 				{
 					// don't do anything?
 				}

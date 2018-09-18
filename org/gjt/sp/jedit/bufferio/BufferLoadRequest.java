@@ -40,10 +40,12 @@ import org.gjt.sp.util.*;
 /**
  * A buffer load request.
  * @author Slava Pestov
- * @version $Id: BufferLoadRequest.java 23224 2013-09-30 20:51:42Z shlomy $
+ * @version $Id: BufferLoadRequest.java 24705 2017-06-12 20:48:59Z ezust $
  */
 public class BufferLoadRequest extends BufferIORequest
 {
+	private boolean untitled;
+	
 	//{{{ BufferLoadRequest constructor
 	/**
 	 * Creates a new buffer I/O request.
@@ -52,11 +54,13 @@ public class BufferLoadRequest extends BufferIORequest
 	 * @param session The VFS session
 	 * @param vfs The VFS
 	 * @param path The path
+	 * @param untitled is the buffer untitled
 	 */
 	public BufferLoadRequest(View view, Buffer buffer,
-		Object session, VFS vfs, String path)
+		Object session, VFS vfs, String path, boolean untitled)
 	{
 		super(view,buffer,session,vfs,path);
+		this.untitled = untitled;
 	} //}}}
 
 	//{{{ run() method
@@ -75,7 +79,7 @@ public class BufferLoadRequest extends BufferIORequest
 			path = vfs._canonPath(session,path,view);
 
 			readContents();
-			buffer.setNewFile(false);
+			buffer.setNewFile(untitled);
 
 			if (jEdit.getBooleanProperty("persistentMarkers") &&
 			    (vfs.isMarkersFileSupported()))
@@ -124,18 +128,7 @@ public class BufferLoadRequest extends BufferIORequest
 		}
 		finally
 		{
-			try
-			{
-				vfs._endVFSSession(session,view);
-			}
-			catch(Exception e)
-			{
-				Log.log(Log.ERROR,this,e);
-				String[] pp = { e.toString() };
-				VFSManager.error(view,path,"ioerror.read-error",pp);
-
-				buffer.setBooleanProperty(ERROR_OCCURRED,true);
-			}
+			endSessionQuietly();
 		}
 	} //}}}
 

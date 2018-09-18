@@ -173,7 +173,8 @@ public class BufferSetManager
 	//{{{ addBuffer() methods
 	/**
 	 * Add a buffer into the current editPane of the given view.
-	 * If the view is null, it will be added to the global bufferSet
+	 * If the view is null, it will be added to the current
+	 * editPane of the active view.
 	 * @param view a view (or null)
 	 * @param buffer the buffer to add
 	 */
@@ -184,8 +185,9 @@ public class BufferSetManager
 	}
 
 	/**
-	 * Add a buffer into the current editPane of the given editPane.
-	 * If the editPane is null, it will be added to the global bufferSet
+	 * Add a buffer into the given editPane.
+	 * If the editPane is null, it will be added to the current
+	 * editPane of the active view.
 	 * @param editPane an EditPane (or null)
 	 * @param buffer the buffer to add
 	 */
@@ -347,16 +349,19 @@ public class BufferSetManager
 		}
 		if (parent == null)
 		{
-			parent = System.getProperty("user.home");
+			parent = MiscUtilities.getBackupDirectory();
 		}
-		VFS vfs = VFSManager.getVFSForPath(parent);
-		if ((vfs.getCapabilities() & VFS.WRITE_CAP) == 0)
+		VFS vfs = null;
+		if (parent != null) {
+			vfs = VFSManager.getVFSForPath(parent);
+		}
+		if (vfs != null && (vfs.getCapabilities() & VFS.WRITE_CAP) == 0)
 		{
 			// cannot write on that VFS, creating untitled buffer in home directory
 			parent = System.getProperty("user.home");
 		}
 		Buffer newEmptyBuffer = jEdit.openTemporary(view, parent,
-							    "Untitled-" + untitledCount,true, null);
+							    "Untitled-" + untitledCount,true, true);
 		jEdit.commitTemporary(newEmptyBuffer);
 		return newEmptyBuffer;
 	} //}}}

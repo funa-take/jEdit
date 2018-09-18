@@ -50,7 +50,7 @@ import org.gjt.sp.util.Log;
  * @see TextArea
  *
  * @author Mike Dillon and Slava Pestov
- * @version $Id: Gutter.java 23461 2014-04-06 18:00:29Z ezust $
+ * @version $Id: Gutter.java 24165 2015-11-28 21:49:32Z daleanson $
  */
 public class Gutter extends JComponent implements SwingConstants
 {
@@ -184,7 +184,7 @@ public class Gutter extends JComponent implements SwingConstants
 			Log.log(Log.ERROR,this,"     lineHeight=" + lineHeight);
 		}
 	
-		int y = clip.y - clip.y % lineHeight;
+		int y = clip.y - clip.y % lineHeight + textArea.getPainter().getLineExtraSpacing();
 
 		extensionMgr.paintScreenLineRange(textArea,gfx,
 			firstLine,lastLine,y,lineHeight);
@@ -723,8 +723,8 @@ public class Gutter extends JComponent implements SwingConstants
 
 		FontMetrics textAreaFm = textArea.getPainter().getFontMetrics();
 		int lineHeight = textArea.getPainter().getLineHeight();
-		int baseline = textAreaFm.getAscent();
-
+		int baseline = textAreaFm.getAscent() + textAreaFm.getLeading();
+		
 		ChunkCache.LineInfo info = textArea.chunkCache.getLineInfo(line);
 		int physicalLine = info.physicalLine;
 
@@ -739,12 +739,12 @@ public class Gutter extends JComponent implements SwingConstants
 			drawFoldMiddle = false;
 			foldPainter.paintFoldStart(this, gfx, line, physicalLine,
 					textArea.displayManager.isLineVisible(physicalLine+1),
-					y, lineHeight, buffer);
+					y - textArea.getPainter().getLineExtraSpacing(), lineHeight, buffer);
 		}
 		else if(info.lastSubregion && buffer.isFoldEnd(physicalLine))
 		{
 			drawFoldMiddle = false;
-			foldPainter.paintFoldEnd(this, gfx, line, physicalLine, y,
+			foldPainter.paintFoldEnd(this, gfx, line, physicalLine, y - textArea.getPainter().getLineExtraSpacing(),
 					lineHeight, buffer);
 		} //}}}
 		//{{{ Paint bracket scope
@@ -841,7 +841,7 @@ public class Gutter extends JComponent implements SwingConstants
 		if(drawFoldMiddle && buffer.getFoldLevel(physicalLine) > 0)
 		{
 			foldPainter.paintFoldMiddle(this, gfx, line, physicalLine,
-					y, lineHeight, buffer);
+					y - textArea.getPainter().getLineExtraSpacing(), lineHeight, buffer);
 		}
 
 		//{{{ Paint line numbers

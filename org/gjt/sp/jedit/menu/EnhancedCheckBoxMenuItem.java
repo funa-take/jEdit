@@ -24,11 +24,11 @@ package org.gjt.sp.jedit.menu;
 
 //{{{ Imports
 import javax.swing.*;
-import java.awt.event.*;
 import java.awt.*;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.jedit.gui.KeyEventTranslator;
+import org.gjt.sp.jedit.gui.statusbar.HoverSetStatusMouseHandler;
 import org.jedit.keymap.Keymap;
 //}}}
 
@@ -84,7 +84,7 @@ public class EnhancedCheckBoxMenuItem extends JCheckBoxMenuItem
 			setEnabled(true);
 			addActionListener(new EditAction.Wrapper(context,action));
 
-			addMouseListener(new MouseHandler());
+			addMouseListener(new HoverSetStatusMouseHandler(action));
 		}
 		else
 			setEnabled(false);
@@ -100,8 +100,8 @@ public class EnhancedCheckBoxMenuItem extends JCheckBoxMenuItem
 
 		if(shortcut != null)
 		{
-			d.width += (getFontMetrics(EnhancedMenuItem.acceleratorFont)
-				.stringWidth(shortcut) + 15);
+			FontMetrics fm = getFontMetrics(EnhancedMenuItem.acceleratorFont);
+			d.width += (fm.stringWidth(shortcut) + fm.stringWidth("AAAA"));
 		}
 		return d;
 	} //}}}
@@ -114,7 +114,9 @@ public class EnhancedCheckBoxMenuItem extends JCheckBoxMenuItem
 
 		if(shortcut != null)
 		{
+			Graphics2D g2 = (Graphics2D)g;
 			g.setFont(EnhancedMenuItem.acceleratorFont);
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g.setColor(getModel().isArmed() ?
 				EnhancedMenuItem.acceleratorSelectionForeground :
 				EnhancedMenuItem.acceleratorForeground);
@@ -122,9 +124,7 @@ public class EnhancedCheckBoxMenuItem extends JCheckBoxMenuItem
 			Insets insets = getInsets();
 			g.drawString(shortcut,getWidth() - (fm.stringWidth(
 				shortcut) + insets.right + insets.left + 5),
-				getFont().getSize() + (insets.top - 
-				(OperatingSystem.isMacOSLF() ? 0 : 1))
-				/* XXX magic number */);
+				fm.getAscent() + insets.top);
 		}
 	} //}}}
 
@@ -170,43 +170,4 @@ public class EnhancedCheckBoxMenuItem extends JCheckBoxMenuItem
 		public void setSelected(boolean b) {}
 	} //}}}
 
-	//{{{ MouseHandler class
-	class MouseHandler extends MouseAdapter
-	{
-		boolean msgSet = false;
-
-		@Override
-		public void mouseReleased(MouseEvent evt)
-		{
-			if(msgSet)
-			{
-				GUIUtilities.getView((Component)evt.getSource())
-					.getStatus().setMessage(null);
-				msgSet = false;
-			}
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent evt)
-		{
-			String msg = jEdit.getProperty(action + ".mouse-over");
-			if(msg != null)
-			{
-				GUIUtilities.getView((Component)evt.getSource())
-					.getStatus().setMessage(msg);
-				msgSet = true;
-			}
-		}
-
-		@Override
-		public void mouseExited(MouseEvent evt)
-		{
-			if(msgSet)
-			{
-				GUIUtilities.getView((Component)evt.getSource())
-					.getStatus().setMessage(null);
-				msgSet = false;
-			}
-		}
-	} //}}}
 }

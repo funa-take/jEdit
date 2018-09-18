@@ -32,7 +32,7 @@ import java.text.CharacterIterator;
 
 /**
  * Creates {@link Chunk} objects that can be painted on screen.
- * @version $Id: DisplayTokenHandler.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: DisplayTokenHandler.java 23912 2015-05-17 19:44:33Z ezust $
  */
 public class DisplayTokenHandler extends DefaultTokenHandler
 {
@@ -60,13 +60,7 @@ public class DisplayTokenHandler extends DefaultTokenHandler
 		this.fontRenderContext = fontRenderContext;
 		this.expander = expander;
 		this.out = out;
-
-		// SILLY: allow for anti-aliased characters' "fuzz"
-		if(wrapMargin != 0.0f)
-			this.wrapMargin = wrapMargin + 2.0f;
-		else
-			this.wrapMargin = 0.0f;
-
+		this.wrapMargin = wrapMargin;
 		this.physicalLineOffset = physicalLineOffset;
 	} //}}}
 

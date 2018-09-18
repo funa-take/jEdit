@@ -31,6 +31,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 import org.gjt.sp.jedit.gui.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.jedit.*;
 
 //}}}
@@ -38,7 +39,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Status bar editor.
  * @author Matthieu Casanova
- * @version $Id: StatusBarOptionPane.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: StatusBarOptionPane.java 24428 2016-06-23 02:49:29Z daleanson $
  */
 public class StatusBarOptionPane extends AbstractOptionPane
 {
@@ -140,7 +141,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 		//{{{ widgets panel
 		String statusbar = jEdit.getProperty("view.status");
 		StringTokenizer st = new StringTokenizer(statusbar);
-		listModel = new DefaultListModel();
+		listModel = new DefaultListModel<String>();
 		while (st.hasMoreTokens())
 		{
 			String token = st.nextToken();
@@ -148,7 +149,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 		}
 
 
-		list = new JList(listModel);
+		list = new JList<String>(listModel);
 		list.setCellRenderer(new WidgetListCellRenderer());
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.addListSelectionListener(new ListHandler());
@@ -248,9 +249,9 @@ public class StatusBarOptionPane extends AbstractOptionPane
 	private ColorWellButton memBackgroundColor;
 	private JCheckBox showStatusbar;
 	private JCheckBox showStatusbarPlain;
-	private DefaultListModel listModel;
+	private DefaultListModel<String> listModel;
 	private JLabel previewStatusBar;
-	private JList list;
+	private JList<String> list;
 	private RolloverButton add;
 	private RolloverButton remove;
 	private RolloverButton moveUp, moveDown;
@@ -316,7 +317,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 				else
 					index++;
 
-				listModel.insertElementAt(value,index);
+				listModel.insertElementAt(value, index);
 				list.setSelectedIndex(index);
 				list.ensureIndexIsVisible(index);
 				updatePreview();
@@ -340,7 +341,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 				int index = list.getSelectedIndex();
 				Object selected = list.getSelectedValue();
 				listModel.removeElementAt(index);
-				listModel.insertElementAt(selected,index-1);
+				listModel.insertElementAt(selected.toString(), index-1);
 				list.setSelectedIndex(index-1);
 				list.ensureIndexIsVisible(index-1);
 				updatePreview();
@@ -350,7 +351,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 				int index = list.getSelectedIndex();
 				Object selected = list.getSelectedValue();
 				listModel.removeElementAt(index);
-				listModel.insertElementAt(selected,index+1);
+				listModel.insertElementAt(selected.toString(), index+1);
 				list.setSelectedIndex(index+1);
 				list.ensureIndexIsVisible(index+1);
 				updatePreview();
@@ -411,7 +412,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 		private final JTextField labelField;
 		private final JLabel labelLabel;
 		private final JRadioButton labelRadio;
-		private final JComboBox widgetCombo;
+		private final JComboBox<String> widgetCombo;
 		private final JLabel widgetLabel;
 		private final JRadioButton widgetRadio;
 		private String value;
@@ -419,7 +420,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 		//{{{ WidgetSelectionDialog constructors
 		WidgetSelectionDialog(Component comp, String value)
 		{
-			super(GUIUtilities.getParentDialog(comp), jEdit.getProperty("options.status.edit.title"), true);
+			super(GenericGUIUtilities.getParentDialog(comp), jEdit.getProperty("options.status.edit.title"), true);
 			ButtonGroup buttonGroup = new ButtonGroup();
 			labelRadio = new JRadioButton(jEdit.getProperty("options.status.edit.labelRadioButton"));
 			widgetRadio = new JRadioButton(jEdit.getProperty("options.status.edit.widgetRadioButton"));
@@ -447,7 +448,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 				if (!usedWidget.contains(widget) || (valueIsWidget && widget.equals(value)))
 					widgets.add(widget);
 			}
-			widgetCombo = new JComboBox(widgets);
+			widgetCombo = new JComboBox<String>(widgets);
 			widgetCombo.setRenderer(new WidgetListCellRenderer());
 			ActionHandler actionHandler = new ActionHandler();
 			labelRadio.addActionListener(actionHandler);
@@ -512,7 +513,7 @@ public class StatusBarOptionPane extends AbstractOptionPane
 			getContentPane().add(center, BorderLayout.CENTER);
 			getContentPane().add(southPanel, BorderLayout.SOUTH);
 			pack();
-			setLocationRelativeTo(GUIUtilities.getParentDialog(comp));
+			setLocationRelativeTo(GenericGUIUtilities.getParentDialog(comp));
 			setVisible(true);
 		}
 

@@ -25,16 +25,15 @@ package org.gjt.sp.jedit.gui;
 //{{{ Imports
 import javax.swing.*;
 import javax.swing.text.*;
-import javax.swing.event.MouseInputAdapter;
-import java.awt.*;
 import java.awt.event.*;
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.util.GenericGUIUtilities;
 //}}}
 
 /**
  * Controller (manager of models) for HistoryTextArea.
  * @author Slava Pestov
- * @version $Id: HistoryText.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: HistoryText.java 24411 2016-06-19 11:02:53Z kerik-sf $
  */
 public class HistoryText
 {
@@ -152,7 +151,7 @@ public class HistoryText
 			}
 		}
 
-		text.getToolkit().beep();
+		javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 	} //}}}
 
 	//{{{ doForwardSearch() method
@@ -188,7 +187,7 @@ public class HistoryText
 			}
 		}
 
-		text.getToolkit().beep();
+		javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 	} //}}}
 
 	//{{{ historyPrevious() method
@@ -198,7 +197,7 @@ public class HistoryText
 			return;
 
 		if(index == historyModel.getSize() - 1)
-			text.getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 		else if(index == -1)
 		{
 			current = getText();
@@ -221,7 +220,7 @@ public class HistoryText
 			return;
 
 		if(index == -1)
-			text.getToolkit().beep();
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 		else if(index == 0)
 			setText(current);
 		else
@@ -322,7 +321,7 @@ public class HistoryText
 			}
 		}
 
-		GUIUtilities.showPopupMenu(popup,text,x,y,false);
+		GenericGUIUtilities.showPopupMenu(popup,text,x,y,false);
 	} //}}}
 
 	//{{{ showPopupMenu() method

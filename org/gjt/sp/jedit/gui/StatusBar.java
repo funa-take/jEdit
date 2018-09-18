@@ -52,7 +52,7 @@ import org.gjt.sp.util.*;
  * <li>Displaying memory status
  * </ul>
  *
- * @version $Id: StatusBar.java 23410 2014-02-09 19:23:35Z ezust $
+ * @version $Id: StatusBar.java 24809 2017-12-30 21:11:37Z daleanson $
  * @author Slava Pestov
  * @since jEdit 3.2pre2
  */
@@ -93,6 +93,7 @@ public class StatusBar extends JPanel
 		rectSelectWidget = _getWidget("rectSelect");
 		overwriteWidget = _getWidget("overwrite");
 		lineSepWidget = _getWidget("lineSep");
+		lockedWidget = _getWidget("locked");
 
 		taskHandler = new TaskHandler();
 	} //}}}
@@ -432,6 +433,7 @@ public class StatusBar extends JPanel
 		modeWidget.update();
 		foldWidget.update();
 		encodingWidget.update();
+		lockedWidget.update();
 	} //}}}
 
 	//{{{ updateMiscStatus() method
@@ -460,6 +462,7 @@ public class StatusBar extends JPanel
 	private final Widget rectSelectWidget;
 	private final Widget overwriteWidget;
 	private final Widget lineSepWidget;
+	private final Widget lockedWidget;
 	/* package-private for speed */ StringBuilder buf = new StringBuilder();
 	private Timer tempTimer;
 	private boolean currentMessageIsIO;
@@ -492,6 +495,8 @@ public class StatusBar extends JPanel
 			return overwriteWidget;
 		if ("lineSep".equals(name))
 			return lineSepWidget;
+		if ("locked".equals(name))
+			return lockedWidget;
 
 		return _getWidget(name);
 	} //}}}

@@ -43,7 +43,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Search and replace dialog.
  * @author Slava Pestov
- * @version $Id: SearchDialog.java 23391 2014-01-04 01:01:28Z ezust $
+ * @version $Id: SearchDialog.java 24464 2016-07-19 14:47:33Z ezust $
  */
 public class SearchDialog extends EnhancedDialog
 {
@@ -64,12 +64,13 @@ public class SearchDialog extends EnhancedDialog
 		if (searchDialog == null)
 		{
 			searchDialog = new SearchDialog(view);
+			searchDialog.setAutoRequestFocus(true);
 			viewHash.put(view, searchDialog);
 		}
-		
+
 		return searchDialog;
 	} //}}}
-	
+
 	//{{{ showSearchDialog() method
 	/**
 	 * Displays a search and replace dialog box, reusing an existing one
@@ -84,29 +85,38 @@ public class SearchDialog extends EnhancedDialog
 	{
 		final SearchDialog dialog = getSearchDialog(view);
 
-		dialog.setSearchString(searchString,searchIn);
-
-		// ugly workaround
-		if(OperatingSystem.isUnix() && !OperatingSystem.isMacOS())
-			dialog.setVisible(false);
+		dialog.setSearchString(searchString, searchIn);
 
 		// I'm not sure if calling requestFocus() is strictly necessary
 		// (focus looks fine without this, on Linux at least), but
 		// it doesn't hurt to leave it here.
-		SwingUtilities.invokeLater(new Runnable() 
+		// -- Better is to use requestFocusInWindow
+		if (SwingUtilities.isEventDispatchThread())
 		{
-			public void run() 
+			dialog.setVisible(true);
+			dialog.toFront();
+			dialog.requestFocusInWindow();
+			dialog.find.requestFocusInWindow();
+		}
+		else
+		{
+			SwingUtilities.invokeLater(new Runnable()
 			{
-				dialog.toFront();
-				dialog.requestFocus();
+				public void run()
+				{
+					dialog.setVisible(true);
+					dialog.toFront();
+
 					// Ensure that the dialog gets the focus. Just bringing
 					// it to front just not necessarily give it the focus.
-				dialog.find.requestFocus();
+					dialog.requestFocusInWindow();
+
 					// Given that the dialog has the focus, set the focus
 					// to the 'find' field.
-			}
-		});
-		dialog.setVisible(true);
+					dialog.find.requestFocusInWindow();
+				}
+			});
+		}
 	} //}}}
 
 	//{{{ setSearchString() method
@@ -180,7 +190,7 @@ public class SearchDialog extends EnhancedDialog
 			{
 				filter.setText(((DirectoryListSet)fileset)
 					.getFileFilter());
-				directory.setText(((DirectoryListSet)fileset)
+				directoryField.setText(((DirectoryListSet)fileset)
 					.getDirectory());
 				searchSubDirectories.setSelected(((DirectoryListSet)fileset)
 					.isRecursive());
@@ -260,53 +270,53 @@ public class SearchDialog extends EnhancedDialog
 			dispose();
 		}
 	} //}}}
-	
+
 	//{{{ initFocusOrder() method
-	private void initFocusOrder() 
+	private void initFocusOrder()
 	{
 		// find and replace history fields
 		focusOrder.add(find);
 		focusOrder.add(replace);
-		
+
 		// buttons
 		focusOrder.add(findBtn);
 		focusOrder.add(replaceBtn);
 		focusOrder.add(replaceAndFindBtn);
 		focusOrder.add(replaceAllBtn);
 		focusOrder.add(closeBtn);
-		
+
 		// replace with text or beanshell snippet radio buttons
 		focusOrder.add(stringReplace);
 		focusOrder.add(beanShellReplace);
-		
+
 		// search in settings
 		focusOrder.add(searchSelection);
 		focusOrder.add(searchCurrentBuffer);
 		focusOrder.add(searchAllBuffers);
 		focusOrder.add(searchDirectory);
-		
+
 		// search settings
 		focusOrder.add(keepDialog);
 		focusOrder.add(ignoreCase);
 		focusOrder.add(regexp);
 		focusOrder.add(hyperSearch);
 		focusOrder.add(wholeWord);
-		
+
 		// direction settings
 		focusOrder.add(searchBack);
 		focusOrder.add(searchForward);
 		focusOrder.add(wrap);
-		
+
 		// directory controls
 		focusOrder.add(filter);
 		focusOrder.add(synchronize);
-		focusOrder.add(directory);
+		focusOrder.add(directoryField);
 		focusOrder.add(choose);
 		focusOrder.add(searchSubDirectories);
 		focusOrder.add(skipHidden);
 		focusOrder.add(skipBinaryFiles);
 	} //}}}
-	
+
 	//{{{ dispose() method
 	@Override
 	public void dispose()
@@ -336,11 +346,11 @@ public class SearchDialog extends EnhancedDialog
 		searchAllBuffers, searchDirectory;
 
 	// multifile settings
-	private HistoryTextField filter, directory;
+	private HistoryTextField filter, directoryField;
 	private JCheckBox searchSubDirectories;
 	private JCheckBox skipBinaryFiles;
 	private JCheckBox skipHidden;
-	
+
 	private JButton choose;
 	private JButton synchronize;
 
@@ -349,7 +359,7 @@ public class SearchDialog extends EnhancedDialog
 		closeBtn;
 
 	private boolean saving;
-	
+
 	private FocusOrder focusOrder;
 	//}}}
 
@@ -380,7 +390,7 @@ public class SearchDialog extends EnhancedDialog
 		focusOrder = new FocusOrder();
 		initFocusOrder();
 		setFocusTraversalPolicy(focusOrder);
-		
+
 		pack();
 		jEdit.unsetProperty("search.width");
 		jEdit.unsetProperty("search.d-width");
@@ -398,7 +408,7 @@ public class SearchDialog extends EnhancedDialog
 		GridBagConstraints cons)
 	{
 		JLabel label = new JLabel(jEdit.getProperty("search.find"));
-		
+
 		label.setDisplayedMnemonic(jEdit.getProperty("search.find.mnemonic")
 			.charAt(0));
 		find = new HistoryTextArea("find");
@@ -449,7 +459,7 @@ public class SearchDialog extends EnhancedDialog
 		cons.weighty = 1.0;
 		fieldPanel.add(new JScrollPane(replace),cons);
 		cons.gridy++;
-		
+
 		ButtonGroup grp = new ButtonGroup();
 		ReplaceActionHandler replaceActionHandler = new ReplaceActionHandler();
 
@@ -459,7 +469,7 @@ public class SearchDialog extends EnhancedDialog
 		grp.add(stringReplace);
 		cons.gridwidth = 1;
 		fieldPanel.add(stringReplace,cons);
-		
+
 		cons.gridx++;
 		cons.insets = new Insets(0,12,0,0);
 		beanShellReplace = new JRadioButton(jEdit.getProperty(
@@ -467,7 +477,7 @@ public class SearchDialog extends EnhancedDialog
 		beanShellReplace.addActionListener(replaceActionHandler);
 		grp.add(beanShellReplace);
 		fieldPanel.add(beanShellReplace,cons);
-		
+
 		cons.gridy++;
 	} //}}}
 
@@ -584,7 +594,7 @@ public class SearchDialog extends EnhancedDialog
 			.charAt(0));
 		searchSettings.add(wholeWord);
 		wholeWord.addActionListener(actionHandler);
-		
+
 		return searchSettings;
 	} //}}}
 
@@ -603,7 +613,7 @@ public class SearchDialog extends EnhancedDialog
 
 		MultiFileActionHandler actionListener = new MultiFileActionHandler();
 		filter = new HistoryTextField("search.filter");
-		
+
 		filter.setToolTipText(jEdit.getProperty("glob.tooltip"));
 		filter.addActionListener(actionListener);
 
@@ -639,20 +649,20 @@ public class SearchDialog extends EnhancedDialog
 		synchronize.addActionListener(actionListener);
 		layout.setConstraints(synchronize,cons);
 		multifile.add(synchronize);
-		
+
 		cons.gridy++;
 
-		directory = new HistoryTextField("search.directory");
-		directory.setColumns(25);
-		directory.addActionListener(actionListener);
-		
+		directoryField = new HistoryTextField("search.directory");
+		directoryField.setColumns(25);
+		directoryField.addActionListener(actionListener);
+
 		label = new JLabel(jEdit.getProperty("search.directoryField"),
 			SwingConstants.RIGHT);
 		label.setBorder(new EmptyBorder(0,0,0,12));
 
 		label.setDisplayedMnemonic(jEdit.getProperty("search.directoryField.mnemonic")
 			.charAt(0));
-		label.setLabelFor(directory);
+		label.setLabelFor(directoryField);
 		cons.insets = new Insets(0,0,3,0);
 		cons.weightx = 0.0;
 		layout.setConstraints(label,cons);
@@ -661,8 +671,8 @@ public class SearchDialog extends EnhancedDialog
 		cons.insets = new Insets(0,0,3,6);
 		cons.weightx = 1.0;
 		cons.gridwidth = 2;
-		layout.setConstraints(directory,cons);
-		multifile.add(directory);
+		layout.setConstraints(directoryField,cons);
+		multifile.add(directoryField);
 
 		choose = new JButton(jEdit.getProperty("search.choose"));
 		choose.setMnemonic(jEdit.getProperty("search.choose.mnemonic")
@@ -673,7 +683,7 @@ public class SearchDialog extends EnhancedDialog
 		layout.setConstraints(choose,cons);
 		multifile.add(choose);
 		choose.addActionListener(actionListener);
-		
+
 		cons.insets = new Insets(0,0,0,0);
 		cons.gridy++;
 		cons.gridwidth = 3;
@@ -715,7 +725,7 @@ public class SearchDialog extends EnhancedDialog
 		JPanel grid = new JPanel(new GridLayout(5,1,0,12));
 
 		findBtn = new JButton(jEdit.getProperty("search.findBtn"));
-	    
+
 		getRootPane().setDefaultButton(findBtn);
 		grid.add(findBtn);
 		findBtn.addActionListener(actionHandler);
@@ -767,12 +777,12 @@ public class SearchDialog extends EnhancedDialog
 			|| searchDirectory.isSelected());
 
 		boolean searchDirs = searchDirectory.isSelected();
-		directory.setEnabled(searchDirs);
+		directoryField.setEnabled(searchDirs);
 		choose.setEnabled(searchDirs);
 		searchSubDirectories.setEnabled(searchDirs);
 		skipHidden.setEnabled(searchDirs);
 		skipBinaryFiles.setEnabled(searchDirs);
-		
+
 		synchronize.setEnabled(searchAllBuffers.isSelected()
 			|| searchDirectory.isSelected());
 
@@ -826,10 +836,11 @@ public class SearchDialog extends EnhancedDialog
 				fileset = new AllBufferSet(filter, view);
 			else if(searchDirectory.isSelected())
 			{
-				String directory = this.directory.getText();
-				this.directory.addCurrentToHistory();
+				String directory = this.directoryField.getText();
+				directory = MiscUtilities.expandVariables(directory);
+				this.directoryField.addCurrentToHistory();
 				directory = MiscUtilities.constructPath(
-					view.getBuffer().getDirectory(),directory);
+					view.getBuffer().getDirectory(), directory);
 
 				if((VFSManager.getVFSForPath(directory).getCapabilities()
 					& VFS.LOW_LATENCY_CAP) == 0)
@@ -880,7 +891,7 @@ public class SearchDialog extends EnhancedDialog
 			if(find.getText().length() == 0)
 			{
 				if(!cancel)
-					getToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 				return false;
 			}
 
@@ -954,11 +965,11 @@ public class SearchDialog extends EnhancedDialog
 				.getFileExtension(view.getBuffer()
 				.getName()));
 		}
-		model = directory.getModel();
+		model = directoryField.getModel();
 		if(model.getSize() != 0)
-			directory.setText(model.getItem(0));
+			directoryField.setText(model.getItem(0));
 		else
-			directory.setText(view.getBuffer().getDirectory());
+			directoryField.setText(view.getBuffer().getDirectory());
 
 		searchSubDirectories.setSelected(jEdit.getBooleanProperty(
 			"search.subdirs.toggle"));
@@ -967,7 +978,7 @@ public class SearchDialog extends EnhancedDialog
 		{
 			filter.setText(((DirectoryListSet)fileset)
 				.getFileFilter());
-			directory.setText(((DirectoryListSet)fileset)
+			directoryField.setText(((DirectoryListSet)fileset)
 				.getDirectory());
 			searchSubDirectories.setSelected(((DirectoryListSet)fileset)
 				.isRecursive());
@@ -978,7 +989,7 @@ public class SearchDialog extends EnhancedDialog
 				.getFileFilter());
 		}
 
-		directory.addCurrentToHistory();
+		directoryField.addCurrentToHistory();
 
 		keepDialog.setSelected(jEdit.getBooleanProperty(
 			"search.keepDialog.toggle"));
@@ -1025,15 +1036,18 @@ public class SearchDialog extends EnhancedDialog
 	{
 		public void actionPerformed(ActionEvent evt)
 		{
+			String path = MiscUtilities.expandVariables(directoryField.getText());
+			directoryField.setText(path);
+
 			if(evt.getSource() == choose)
 			{
 				String[] dirs = GUIUtilities.showVFSFileDialog(
 					SearchDialog.this,
-					view,directory.getText(),
+					view, path,
 					VFSBrowser.CHOOSE_DIRECTORY_DIALOG,
 					false);
 				if(dirs != null)
-					directory.setText(dirs[0]);
+					directoryField.setText(dirs[0]);
 			}
 			else if(evt.getSource() == synchronize)
 			{
@@ -1054,9 +1068,9 @@ public class SearchDialog extends EnhancedDialog
 			// don't sync search directory when "search all buffers" is active
 			if(searchDirectory.isSelected())
 			{
-				directory.setText(view.getBuffer().getDirectory());
+				directoryField.setText(view.getBuffer().getDirectory());
 			}
-			
+
 			if (!jEdit.getBooleanProperty("search.dontSyncFilter", false))
 			{
 				filter.setText('*' + MiscUtilities
@@ -1091,7 +1105,7 @@ public class SearchDialog extends EnhancedDialog
 				if(SearchAndReplace.replace(view))
 					ok();
 				else
-					getToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 			}
 			else if(source == replaceAllBtn)
 			{
@@ -1108,7 +1122,7 @@ public class SearchDialog extends EnhancedDialog
 				if(!save(false))
 				{
 					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-					getToolkit().beep();
+					javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 					return;
 				}
 
@@ -1117,14 +1131,14 @@ public class SearchDialog extends EnhancedDialog
 					if(SearchAndReplace.replace(view))
 						closeOrKeepDialog();
 					else
-						getToolkit().beep();
+						javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 				}
 				else
 				{
 					if(SearchAndReplace.replaceAll(view))
 						closeOrKeepDialog();
 					else
-						getToolkit().beep();
+						javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 				}
 
 				setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -1138,22 +1152,22 @@ public class SearchDialog extends EnhancedDialog
 	class FocusOrder extends FocusTraversalPolicy
 	{
 		private List<Component> components = new ArrayList<Component>();
-		
-		public void add(Component component) 
+
+		public void add(Component component)
 		{
-			components.add(component);	
+			components.add(component);
 		}
-		
+
 		public Component getComponentAfter(Container aContainer, Component aComponent)
 		{
 			int index = components.indexOf(aComponent);
-			if (index == -1) 
+			if (index == -1)
 			{
 				return null;
 			}
 			index = index >= components.size() - 1 ? 0 : index + 1;
 			Component component = components.get(index);
-			if (!(component.isEnabled() && component.isFocusable())) 
+			if (!(component.isEnabled() && component.isFocusable()))
 			{
 				return getComponentAfter(aContainer, component);
 			}
@@ -1162,17 +1176,17 @@ public class SearchDialog extends EnhancedDialog
 				return components.get(index);
 			}
 		}
-		
+
 		public Component getComponentBefore(Container aContainer, Component aComponent)
 		{
 			int index = components.indexOf(aComponent);
-			if (index == -1) 
+			if (index == -1)
 			{
 				return null;
 			}
 			index = index == 0 ? components.size() - 1 : index - 1;
 			Component component = components.get(index);
-			if (!(component.isEnabled() && component.isFocusable())) 
+			if (!(component.isEnabled() && component.isFocusable()))
 			{
 				return getComponentBefore(aContainer, component);
 			}
@@ -1181,27 +1195,27 @@ public class SearchDialog extends EnhancedDialog
 				return components.get(index);
 			}
 		}
-		
+
 		public Component getDefaultComponent(Container aContainer)
 		{
 			return components.size() > 0 ? components.get(0) : null;
 		}
-		
+
 		public Component getFirstComponent(Container aContainer)
 		{
 			return components.size() > 0 ? components.get(0) : null;
 		}
-		
+
 		public Component getInitialComponent(Window window)
 		{
 			return components.size() > 0 ? components.get(0) : null;
 		}
-		
-		public Component getLastComponent(Container aContainer) 		
+
+		public Component getLastComponent(Container aContainer)
 		{
 			return components.size() > 0 ? components.get(components.size() - 1) : null;
 		}
 	} //}}}
-	
+
 	//}}}
 }

@@ -42,6 +42,7 @@ import java.net.*;
 	service. Output is printed to stdout and a numeric return value is scraped
 	from the result.
 */
+@SuppressWarnings("unchecked")
 public class Remote
 {
     public static void main( String args[] )
@@ -143,6 +144,7 @@ public class Remote
 		the encoded charset?  I guess we're supposed to add a ";charset" clause
 		to the content type?
 	*/
+	@SuppressWarnings({"deprecation"})
 	static String doHttp( String postURL, String text )
 	{
 		String returnValue = null;

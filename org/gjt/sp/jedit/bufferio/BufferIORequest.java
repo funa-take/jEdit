@@ -40,16 +40,18 @@ import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.io.VFS;
+import org.gjt.sp.jedit.io.VFSManager;
 import org.gjt.sp.jedit.io.Encoding;
 import org.gjt.sp.jedit.io.EncodingServer;
 import org.gjt.sp.util.IntegerArray;
 import org.gjt.sp.util.SegmentBuffer;
+import org.gjt.sp.util.Log;
 //}}}
 
 /**
  * A buffer I/O request.
  * @author Slava Pestov
- * @version $Id: BufferIORequest.java 22943 2013-04-22 11:44:40Z thomasmey $
+ * @version $Id: BufferIORequest.java 24414 2016-06-19 11:07:43Z kerik-sf $
  */
 public abstract class BufferIORequest extends IoTask
 {
@@ -395,6 +397,23 @@ public abstract class BufferIORequest extends IoTask
 				setValue(i / PROGRESS_INTERVAL);
 		}
 		writer.flush();
+	} //}}}
+
+	//{{{ endSessionQuietly() method
+	protected void endSessionQuietly()
+	{
+		try
+		{
+			vfs._endVFSSession(session,view);
+		}
+		catch(Exception e)
+		{
+			Log.log(Log.ERROR,this,e);
+			String[] pp = { e.toString() };
+			VFSManager.error(view,path,"ioerror.read-error",pp);
+
+			buffer.setBooleanProperty(ERROR_OCCURRED,true);
+		}
 	} //}}}
 
 	//{{{ Private members

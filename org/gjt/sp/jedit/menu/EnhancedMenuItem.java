@@ -24,11 +24,10 @@ package org.gjt.sp.jedit.menu;
 
 //{{{ Imports
 import javax.swing.*;
-import java.awt.event.*;
 import java.awt.*;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.gui.KeyEventTranslator;
-import org.gjt.sp.jedit.gui.StatusBar;
+import org.gjt.sp.jedit.gui.statusbar.HoverSetStatusMouseHandler;
 import org.jedit.keymap.Keymap;
 //}}}
 
@@ -48,7 +47,6 @@ public class EnhancedMenuItem extends JMenuItem
 	 */
 	public EnhancedMenuItem(String label, String action, ActionContext context)
 	{
-		this.action = action;
 		this.shortcut = GUIUtilities.getShortcutLabel(action, true);
 		String toolTip = jEdit.getProperty(action+ ".tooltip");
 		if (toolTip != null) {
@@ -81,7 +79,7 @@ public class EnhancedMenuItem extends JMenuItem
 		{
 			setEnabled(true);
 			addActionListener(new EditAction.Wrapper(context,action));
-			addMouseListener(new MouseHandler());
+			addMouseListener(new HoverSetStatusMouseHandler(action));
 		}
 		else
 			setEnabled(false);
@@ -94,8 +92,8 @@ public class EnhancedMenuItem extends JMenuItem
 
 		if(shortcut != null)
 		{
-			d.width += (getFontMetrics(acceleratorFont)
-				.stringWidth(shortcut) + 15);
+			FontMetrics fm = getFontMetrics(acceleratorFont);
+			d.width += (fm.stringWidth(shortcut) + fm.stringWidth("AAAA"));
 		}
 		return d;
 	} //}}}
@@ -107,7 +105,9 @@ public class EnhancedMenuItem extends JMenuItem
 
 		if(shortcut != null)
 		{
+			Graphics2D g2 = (Graphics2D)g;
 			g.setFont(acceleratorFont);
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g.setColor(getModel().isArmed() ?
 				acceleratorSelectionForeground :
 				acceleratorForeground);
@@ -115,9 +115,7 @@ public class EnhancedMenuItem extends JMenuItem
 			Insets insets = getInsets();
 			g.drawString(shortcut,getWidth() - (fm.stringWidth(
 				shortcut) + insets.right + insets.left + 5),
-				getFont().getSize() + (insets.top - 
-				(OperatingSystem.isMacOSLF() ? 0 : 1))
-				/* XXX magic number */);
+				fm.getAscent() + insets.top);
 		}
 	} //}}}
 
@@ -131,27 +129,13 @@ public class EnhancedMenuItem extends JMenuItem
 
 	//{{{ Instance variables
 	private String shortcut;
-	private String action;
 	//}}}
 
 	//{{{ Class initializer
 	static
 	{
-		String shortcutFont;
-		if (OperatingSystem.isMacOSLF())
-		{
-			shortcutFont = "Lucida Grande";
-		}
-		else
-		{
-			shortcutFont = "Monospaced";
-		}
-		
-		acceleratorFont = UIManager.getFont("MenuItem.acceleratorFont");
-		if(acceleratorFont == null)
-		{
-			acceleratorFont = new Font(shortcutFont,Font.PLAIN,12);
-		}
+		acceleratorFont = GUIUtilities.menuAcceleratorFont();
+
 		acceleratorForeground = UIManager
 			.getColor("MenuItem.acceleratorForeground");
 		if(acceleratorForeground == null)
@@ -169,46 +153,5 @@ public class EnhancedMenuItem extends JMenuItem
 
 	//}}}
 
-	//{{{ MouseHandler class
-	class MouseHandler extends MouseAdapter
-	{
-		boolean msgSet = false;
-		private String msg;
-
-		public void mouseReleased(MouseEvent evt)
-		{
-			cleanupStatusBar(evt);
-		}
-
-		public void mouseEntered(MouseEvent evt)
-		{
-			msg = jEdit.getProperty(action + ".mouse-over");
-			if(msg != null)
-			{
-				GUIUtilities.getView((Component)evt.getSource())
-					.getStatus().setMessage(msg);
-				msgSet = true;
-			}
-		}
-
-		public void mouseExited(MouseEvent evt)
-		{
-			cleanupStatusBar(evt);
-		}
-
-		private void cleanupStatusBar(MouseEvent evt)
-		{
-			if(msgSet)
-			{
-				StatusBar statusBar = GUIUtilities.getView((Component) evt.getSource())
-					.getStatus();
-				if (msg == statusBar.getMessage())
-				{
-					statusBar.setMessage(null);
-				}
-				msgSet = false;
-				msg = null;
-			}
-		}
-	} //}}}
+	
 }

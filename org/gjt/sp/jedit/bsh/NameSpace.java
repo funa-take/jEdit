@@ -62,6 +62,7 @@ import java.lang.reflect.Field;
     Thanks to Slava Pestov (of jEdit fame) for import caching enhancements.
     Note: This class has gotten too big.  It should be broken down a bit.
 */
+@SuppressWarnings("unchecked")
 public class NameSpace
     implements java.io.Serializable, BshClassManager.Listener,
     NameSource
@@ -580,7 +581,7 @@ System.out.println("experiment: creating class manager");
     /**
         Locate a variable and return the Variable object with optional
         recursion through parent name spaces.
-        <p/>
+        <p>
         If this namespace is static, return only static variables.
 
         @return the Variable value or null if it is not defined
@@ -931,7 +932,7 @@ System.out.println("experiment: creating class manager");
         A command is a scripted method or compiled command class implementing a
         specified method signature.  Commands are loaded from the classpath
         and may be imported using the importCommands() method.
-        <p/>
+        <p>
 
         This method searches the imported commands packages for a script or
         command object corresponding to the name of the method.  If it is a
@@ -939,14 +940,14 @@ System.out.println("experiment: creating class manager");
         the requested signature is returned.  If it is a compiled class the
         class is returned.  (Compiled command classes implement static invoke()
         methods).
-        <p/>
+        <p>
 
         The imported packages are searched in reverse order, so that later
         imports take priority.
         Currently only the first object (script or class) with the appropriate
         name is checked.  If another, overloaded form, is located in another
         package it will not currently be found.  This could be fixed.
-        <p/>
+        <p>
 
         @return a BshMethod, Class, or null if no such command is found.
         @param name is the name of the desired command method
@@ -1569,7 +1570,7 @@ System.out.println("experiment: creating class manager");
         locally in this namespace method / fields of the object will be
         checked.  Objects are checked in the order of import with later imports
         taking precedence.
-        <p/>
+        <p>
     */
     /*
         Note: this impor pattern is becoming common... could factor it out into

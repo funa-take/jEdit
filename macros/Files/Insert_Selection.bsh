@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2004 Ollie Rutherfurd <oliver@jedit.org>
  *
- * $Id: Insert_Selection.bsh 22845 2013-03-16 08:28:12Z thomasmey $
+ * $Id: Insert_Selection.bsh 23971 2015-08-08 19:37:35Z daleanson $
  */
 
 insertSelected(View view, String path){
@@ -28,16 +28,11 @@ insertSelected(View view, String path){
 	}
 }
 
-if(buffer.isReadOnly()){
-	Toolkit.getDefaultToolkit().beep();
-}
-else{
 	String selected = view.getTextArea().getSelectedText();
 	if(selected == null || selected.indexOf('\n') != -1)
 		Toolkit.getDefaultToolkit().beep();
 	else
 		insertSelected(view,selected);
-}
 
 /*
 
