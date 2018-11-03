@@ -347,7 +347,12 @@ public class VFSDirectoryEntryTable extends JTable
 	{
 		// avoid scrolling to the right
 		rect.width = 0;
-		super.scrollRectToVisible(rect);
+		// Funa edit
+		EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					VFSDirectoryEntryTable.super.scrollRectToVisible(rect);
+				}
+		});
 	} //}}}
 
 	// Funa Edit
