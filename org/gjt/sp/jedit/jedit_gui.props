@@ -959,8 +959,6 @@ vfs.browser.collapse.icon=16x16/actions/group-collapse.png
 vfs.browser.dock-position=left
 
 #{{{ Actions
-# edit funa
-vfs.browser.copy-path2.label=Copy Path Name
 vfs.browser.delete.label=Delete...
 vfs.browser.delete.shortcut=DELETE
 vfs.browser.home.icon=22x22/actions/go-home.png
