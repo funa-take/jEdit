@@ -70,6 +70,43 @@ class BrowserView extends JPanel
 		parentScroller.setMinimumSize(new Dimension(0,0));
 		
 		table = new VFSDirectoryEntryTable(this);
+		
+		// funa edit 
+		Action copyAction = new AbstractAction("vfs.browser.copy-path") {
+			@Override
+			public void actionPerformed(ActionEvent evt)
+			{
+				VFSFile[] files = getSelectedFiles();
+				org.gjt.sp.jedit.datatransfer.ListVFSFileTransferable transferable =
+				new org.gjt.sp.jedit.datatransfer.ListVFSFileTransferable(files);
+				Registers.setRegister('$',transferable);
+			}
+		};
+		Action pasteAction = new AbstractAction("vfs.browser.paste") {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				try {
+					VFSFile[] files = getSelectedFiles();
+					if (files.length != 1)
+						return;
+					browser.paste(files[0]);
+				} catch (Exception e){
+					Log.log(Log.ERROR, this, e, e);
+				}
+				
+			}
+		};
+		KeyStroke copyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, java.awt.event.InputEvent.CTRL_DOWN_MASK);
+		KeyStroke pasteStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, java.awt.event.InputEvent.CTRL_DOWN_MASK);
+		
+		ActionMap amap = table.getActionMap();
+		InputMap imap = table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		
+		amap.put(copyAction.getValue(Action.NAME), copyAction);
+		imap.put(copyStroke, copyAction.getValue(Action.NAME));
+		amap.put(pasteAction.getValue(Action.NAME), pasteAction);
+		imap.put(pasteStroke, pasteAction.getValue(Action.NAME));
+		
 		table.addMouseListener(new TableMouseHandler());
 		table.addKeyListener(new TableKeyListener());
 		table.setName("file");
