@@ -96,16 +96,17 @@ class BrowserView extends JPanel
 				
 			}
 		};
-		KeyStroke copyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, java.awt.event.InputEvent.CTRL_DOWN_MASK);
-		KeyStroke pasteStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, java.awt.event.InputEvent.CTRL_DOWN_MASK);
 		
+		// KeyStrokeがOSやLookAndFeelによって変わるので、アクション名を指定してcopy、pasteの挙動を上書きする
+		// "copy", "paste"を指定しても良いが、念の為 TransferHandlerに定義されているアクションから名前を取得する
+		// KeyStroke copyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, java.awt.event.InputEvent.CTRL_DOWN_MASK);
+		// KeyStroke pasteStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, java.awt.event.InputEvent.CTRL_DOWN_MASK);
 		ActionMap amap = table.getActionMap();
-		InputMap imap = table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		
-		amap.put(copyAction.getValue(Action.NAME), copyAction);
-		imap.put(copyStroke, copyAction.getValue(Action.NAME));
-		amap.put(pasteAction.getValue(Action.NAME), pasteAction);
-		imap.put(pasteStroke, pasteAction.getValue(Action.NAME));
+		// InputMap imap = table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		amap.put(TransferHandler.getCopyAction().getValue(Action.NAME), copyAction);
+		// imap.put(copyStroke, copyAction.getValue(Action.NAME));
+		amap.put(TransferHandler.getPasteAction().getValue(Action.NAME), pasteAction);
+		// imap.put(pasteStroke, pasteAction.getValue(Action.NAME));
 		
 		table.addMouseListener(new TableMouseHandler());
 		table.addKeyListener(new TableKeyListener());
