@@ -34,6 +34,7 @@ import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.msg.PropertiesChanged;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.ThreadUtilities;
+import org.gjt.sp.jedit.textarea.TextAreaPainter;
 //}}}
 
 /** Activity Log Viewer
@@ -124,6 +125,13 @@ public class LogViewer extends JPanel implements DefaultFocusComponent
 		model.removeListDataListener(listModel);
 
 		list = new LogList(listModel);
+		// funa edit
+		TextAreaPainter painter = jEdit.getActiveView().getTextArea().getPainter();
+		list.setBackground(painter.getBackground());
+		list.setForeground(painter.getForeground());
+		list.setSelectionBackground(painter.getSelectionColor());
+		list.setSelectionForeground(painter.getForeground());
+		
 		listModel.setList(list);
 		cellRenderer = new ColorizerCellRenderer(list);
 		list.setCellRenderer(cellRenderer);
@@ -390,6 +398,10 @@ public class LogViewer extends JPanel implements DefaultFocusComponent
 		
 		public void paint(Graphics g) 
 		{
+			// funa edit
+			Graphics2D g2 = (Graphics2D)g;
+			g2.setRenderingHints(jEdit.getActiveView().getTextArea().getPainter().getRenderingHints());
+ 
 			int currentWidth = (int)list.getFontMetrics(list.getFont()).getStringBounds(text, g).getWidth();
 			this.width = Math.max(this.width, currentWidth);
 			g.setColor(getBackground());
@@ -413,34 +425,37 @@ public class LogViewer extends JPanel implements DefaultFocusComponent
 			if (isSelected)
 			{
 				setBackground(list.getSelectionBackground());
-				setForeground(list.getSelectionForeground());
+				// funa edit
+				// setForeground(list.getSelectionForeground());
 			}
 			else
 			{
 				setBackground(list.getBackground());
-				Color color = list.getForeground();
-				if (text.contains("[debug]"))
-				{
-					color = debugColor;
-				}
-				else if (text.contains("[message]"))
-				{
-					color = messageColor;
-				}
-				else if (text.contains("[notice]"))
-				{
-					color = noticeColor;
-				}
-				else if (text.contains("[warning]"))
-				{
-					color = warningColor;
-				}
-				else if (text.contains("[error]"))
-				{
-					color = errorColor;
-				}
-				setForeground(color);
+				// funa edit
 			}
+			Color color = list.getForeground();
+			if (text.contains("[debug]"))
+			{
+				color = debugColor;
+			}
+			else if (text.contains("[message]"))
+			{
+				color = messageColor;
+			}
+			else if (text.contains("[notice]"))
+			{
+				color = noticeColor;
+			}
+			else if (text.contains("[warning]"))
+			{
+				color = warningColor;
+			}
+			else if (text.contains("[error]"))
+			{
+				color = errorColor;
+			}
+			setForeground(color);
+			// }
 			return this;
 		}
 
