@@ -184,7 +184,12 @@ public class DirectoryListSet extends BufferListSet
 		if (result == null || "".equals(result)) {
 			return null;
 		} 
-		return result.split("\n");
+		String[] paths = result.split("\n");
+		if (skipHidden) {
+			paths = skipBackup(paths);
+		}
+		
+		return paths;
 	}
 	
 	private String[] grepForRemote(boolean skipBinary, boolean skipHidden) throws Exception{
@@ -213,7 +218,21 @@ public class DirectoryListSet extends BufferListSet
 			paths[i] = protocolAndHostInfo + paths[i];
 		}
 		
+		if (skipHidden) {
+			paths = skipBackup(paths);
+		}
+		
 		return paths;
+	}
+	
+	private String[] skipBackup(String[] paths) {
+		ArrayList<String> result = new ArrayList<String>();
+		for(String path: paths) {
+			if (!MiscUtilities.isBackup(path)) {
+				result.add(path);
+			}
+		}
+		return result.toArray(new String[]{});
 	}
 	
 	private String createGrepCommand(String searchDirectory, boolean skipBinary, boolean skipHidden) {
@@ -264,7 +283,7 @@ public class DirectoryListSet extends BufferListSet
 			sb.append("-F \"").append(searchString).append("\" ");
 		}
 		
-		sb.append("| sort ");
+		sb.append("| sort -f ");
 		
 		return sb.toString();
 	}
