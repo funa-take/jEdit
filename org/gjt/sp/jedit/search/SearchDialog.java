@@ -315,7 +315,9 @@ public class SearchDialog extends EnhancedDialog
 		focusOrder.add(searchSubDirectories);
 		focusOrder.add(skipHidden);
 		focusOrder.add(skipBinaryFiles);
-		focusOrder.add(useGrep);
+		if (jEdit.getPlugin("funa.util.FunaUtilPlugin") != null) {
+			focusOrder.add(useGrep);
+		}
 	} //}}}
 
 	//{{{ dispose() method
@@ -722,7 +724,9 @@ public class SearchDialog extends EnhancedDialog
 		dirCheckBoxPanel.add(searchSubDirectories);
 		dirCheckBoxPanel.add(skipHidden);
 		dirCheckBoxPanel.add(skipBinaryFiles);
-		dirCheckBoxPanel.add(useGrep);
+		if (jEdit.getPlugin("funa.util.FunaUtilPlugin") != null) {
+			dirCheckBoxPanel.add(useGrep);
+		}
 		
 		cons.insets = new Insets(0, 0, 0, 0);
 		cons.gridy++;
