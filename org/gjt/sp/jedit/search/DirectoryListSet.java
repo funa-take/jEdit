@@ -257,7 +257,8 @@ public class DirectoryListSet extends BufferListSet
 			
 			searchString = searchString.replaceAll("\\\\\\\\", "\\\\\\\\\\\\\\\\");
 			searchString = searchString.replaceAll("'", "\\\\'");
-			sb.append("-P $'").append(searchString).append("' ");
+			sb.append("-E $'").append(searchString).append("' ");
+			// sb.append("-P $'").append(searchString).append("' ");
 		} else {
 			searchString = searchString.replaceAll("\"", "\\\\\"");
 			sb.append("-F \"").append(searchString).append("\" ");
