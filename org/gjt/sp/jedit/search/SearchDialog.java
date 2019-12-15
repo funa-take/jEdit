@@ -315,6 +315,9 @@ public class SearchDialog extends EnhancedDialog
 		focusOrder.add(searchSubDirectories);
 		focusOrder.add(skipHidden);
 		focusOrder.add(skipBinaryFiles);
+		if (jEdit.getPlugin("funa.util.FunaUtilPlugin") != null) {
+			focusOrder.add(useGrep);
+		}
 	} //}}}
 
 	//{{{ dispose() method
@@ -350,6 +353,7 @@ public class SearchDialog extends EnhancedDialog
 	private JCheckBox searchSubDirectories;
 	private JCheckBox skipBinaryFiles;
 	private JCheckBox skipHidden;
+	private JCheckBox useGrep;
 
 	private JButton choose;
 	private JButton synchronize;
@@ -698,7 +702,10 @@ public class SearchDialog extends EnhancedDialog
 		cons.gridy++;
 		cons.gridwidth = 3;
 
-		JPanel dirCheckBoxPanel = new JPanel();
+		JPanel dirCheckBoxPanel = new JPanel(new VariableGridLayout(
+			VariableGridLayout.FIXED_NUM_COLUMNS,3));
+		dirCheckBoxPanel.setBorder(new EmptyBorder(0,0,12,12));
+		
  		searchSubDirectories = new JCheckBox(jEdit.getProperty(
  			"search.subdirs"));
  		String mnemonic = jEdit.getProperty(
@@ -706,13 +713,21 @@ public class SearchDialog extends EnhancedDialog
 		searchSubDirectories.setMnemonic(mnemonic.charAt(0));
 		searchSubDirectories.setSelected(jEdit.getBooleanProperty("search.subdirs.toggle"));
 		skipHidden = new JCheckBox(jEdit.getProperty("search.skipHidden"));
+		skipHidden.setMnemonic(jEdit.getProperty("search.skipHidden.mnemonic").charAt(0));
 		skipHidden.setSelected(jEdit.getBooleanProperty("search.skipHidden.toggle", true));
 		skipBinaryFiles = new JCheckBox(jEdit.getProperty("search.skipBinary"));
+		skipBinaryFiles.setMnemonic(jEdit.getProperty("search.skipBinary.mnemonic").charAt(0));
 		skipBinaryFiles.setSelected(jEdit.getBooleanProperty("search.skipBinary.toggle", true));
+		useGrep = new JCheckBox(jEdit.getProperty("search.useGrep"));
+		useGrep.setMnemonic(jEdit.getProperty("search.useGrep.mnemonic").charAt(0));
+		useGrep.setSelected(jEdit.getBooleanProperty("search.useGrep.toggle", false));
 		dirCheckBoxPanel.add(searchSubDirectories);
 		dirCheckBoxPanel.add(skipHidden);
 		dirCheckBoxPanel.add(skipBinaryFiles);
-
+		if (jEdit.getPlugin("funa.util.FunaUtilPlugin") != null) {
+			dirCheckBoxPanel.add(useGrep);
+		}
+		
 		cons.insets = new Insets(0, 0, 0, 0);
 		cons.gridy++;
 		cons.gridwidth = 4;
@@ -792,6 +807,7 @@ public class SearchDialog extends EnhancedDialog
 		searchSubDirectories.setEnabled(searchDirs);
 		skipHidden.setEnabled(searchDirs);
 		skipBinaryFiles.setEnabled(searchDirs);
+		useGrep.setEnabled(searchDirs);
 
 		synchronize.setEnabled(searchAllBuffers.isSelected()
 			|| searchDirectory.isSelected());
@@ -823,6 +839,7 @@ public class SearchDialog extends EnhancedDialog
 			jEdit.setBooleanProperty("search.subdirs.toggle", searchSubDirectories.isSelected());
 			jEdit.setBooleanProperty("search.skipHidden.toggle", skipHidden.isSelected());
 			jEdit.setBooleanProperty("search.skipBinary.toggle", skipBinaryFiles.isSelected());
+			jEdit.setBooleanProperty("search.useGrep.toggle", useGrep.isSelected());
 
 			String filter = this.filter.getText();
 			this.filter.addCurrentToHistory();
@@ -851,13 +868,13 @@ public class SearchDialog extends EnhancedDialog
 				this.directoryField.addCurrentToHistory();
 				directory = MiscUtilities.constructPath(
 					view.getBuffer().getDirectory(), directory);
-
+				
 				if((VFSManager.getVFSForPath(directory).getCapabilities()
 					& VFS.LOW_LATENCY_CAP) == 0)
 				{
 					if(cancel)
 						return false;
-
+					
 					int retVal = GUIUtilities.confirm(
 						this,"remote-dir-search",
 						null,JOptionPane.YES_NO_OPTION,
@@ -865,7 +882,7 @@ public class SearchDialog extends EnhancedDialog
 					if(retVal != JOptionPane.YES_OPTION)
 						return false;
 				}
-
+				
 				if(fileset instanceof DirectoryListSet)
 				{
 					DirectoryListSet dset = (DirectoryListSet)fileset;
