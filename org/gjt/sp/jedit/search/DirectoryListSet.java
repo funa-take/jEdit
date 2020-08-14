@@ -171,6 +171,7 @@ public class DirectoryListSet extends BufferListSet
 	private String[] grepForLocal(boolean skipBinary, boolean skipHidden) throws Exception {
 		ClassLoader cl = jEdit.getPlugin("funa.util.FunaUtilPlugin").getPluginJAR().getClassLoader();
 		Class miscutil = Class.forName("funa.util.MiscUtil", true, cl);
+		Class execResult = Class.forName("funa.util.ExecResult", true, cl);
 		Method method = miscutil.getDeclaredMethod("exec", List.class, String.class, String.class);
 		
 		ArrayList<String> commands = new ArrayList();
@@ -179,12 +180,19 @@ public class DirectoryListSet extends BufferListSet
 		String command = createGrepCommand(directory, skipBinary, skipHidden);
 		Log.log(Log.MESSAGE,DirectoryListSet.class,command);
 		commands.add(command);
-		String result = (String)method.invoke(null, commands, "", "UTF-8");
+		Object result = method.invoke(null, commands, "", "UTF-8");
 		
-		if (result == null || "".equals(result)) {
+		String stdOut = (String)(execResult.getMethod("getStdOut")).invoke(result);
+		String stdErr = (String)(execResult.getMethod("getStdErr")).invoke(result);
+		
+		if (!"".equals(stdErr)) {
+			Log.log(Log.ERROR,DirectoryListSet.class, stdErr);
+		}
+		
+		if ("".equals(stdOut)) {
 			return null;
 		} 
-		String[] paths = result.split("\n");
+		String[] paths = stdOut.split("\n");
 		if (skipHidden) {
 			paths = skipBackup(paths);
 		}
@@ -195,6 +203,7 @@ public class DirectoryListSet extends BufferListSet
 	private String[] grepForRemote(boolean skipBinary, boolean skipHidden) throws Exception{
 		ClassLoader cl = jEdit.getPlugin("funa.util.FunaUtilPlugin").getPluginJAR().getClassLoader();
 		Class miscutil = Class.forName("funa.util.MiscUtilForSsh", true, cl);
+		Class execResult = Class.forName("funa.util.ExecResult", true, cl);
 		Method method = miscutil.getDeclaredMethod("exec", String.class, List.class, String.class, String.class);
 		
 		int startDir = directory.indexOf("/", "sftp://".length());
@@ -206,12 +215,20 @@ public class DirectoryListSet extends BufferListSet
 		String command = createGrepCommand(remoteDirectory, skipBinary, skipHidden);
 		Log.log(Log.MESSAGE,DirectoryListSet.class,command);
 		commands.add(command);
-		String result = (String)method.invoke(null, hostInfo, commands, "", "UTF-8");
-		if (result == null || "".equals(result)) {
+		Object result = method.invoke(null, hostInfo, commands, "", "UTF-8");
+		
+		String stdOut = (String)(execResult.getMethod("getStdOut")).invoke(result);
+		String stdErr = (String)(execResult.getMethod("getStdErr")).invoke(result);
+		
+		if (!"".equals(stdErr)) {
+			Log.log(Log.ERROR,DirectoryListSet.class, stdErr);
+		}
+		
+		if ("".equals(stdOut)) {
 			return null;
 		}
 		
-		String[] paths = result.split("\n");
+		String[] paths = stdOut.split("\n");
 		
 		String prefix = directory.substring(0, startDir);
 		for(int i = 0; i < paths.length; i++) {

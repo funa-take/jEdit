@@ -1245,4 +1245,8 @@ public class SearchDialog extends EnhancedDialog
 	} //}}}
 
 	//}}}
+	
+	public DirectoryListSet getDirectoryListSet() {
+		return new DirectoryListSet(directoryField.getText(), filter.getText(), searchSubDirectories.isSelected());
+	}
 }
