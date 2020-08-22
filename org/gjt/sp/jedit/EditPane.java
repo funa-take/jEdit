@@ -196,7 +196,7 @@ public class EditPane extends JPanel implements BufferSetListener
 				public void run()
 				{
 					// only do this if we are the current edit pane
-					if(view.getEditPane() == EditPane.this
+					if(jEdit.getActiveView() == view && view.getEditPane() == EditPane.this
 						&& (bufferSwitcher == null
 						|| !bufferSwitcher.isPopupVisible()))
 					{
