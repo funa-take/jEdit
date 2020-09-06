@@ -40,12 +40,12 @@ import org.gjt.sp.jedit.buffer.JEditBuffer;
  * If the requirements above do not apply, this rule does nothing.</p>
  *
  * @author Marcelo Vanzin
- * @version $Id: WhitespaceRule.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: WhitespaceRule.java 25222 2020-04-12 16:07:38Z kpouer $
  * @since jEdit 4.3pre10
  */
 public class WhitespaceRule implements IndentRule
 {
-
+	@Override
 	public void apply(JEditBuffer buffer, int thisLineIndex,
 			  int prevLineIndex, int prevPrevLineIndex,
 			  List<IndentAction> indentActions)

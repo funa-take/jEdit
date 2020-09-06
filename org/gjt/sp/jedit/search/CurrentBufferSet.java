@@ -27,23 +27,26 @@ import org.gjt.sp.jedit.*;
 /**
  * A file set for searching the current buffer.
  * @author Slava Pestov
- * @version $Id: CurrentBufferSet.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: CurrentBufferSet.java 25108 2020-03-31 22:41:49Z kpouer $
  */
 public class CurrentBufferSet implements SearchFileSet
 {
 	//{{{ getFirstFile() method
+	@Override
 	public String getFirstFile(View view)
 	{
 		return view.getBuffer().getPath();
 	} //}}}
 	
 	//{{{ getLastFile() method
+	@Override
 	public String getLastFile(View view)
 	{
 		return view.getBuffer().getPath();
 	} //}}}
 
 	//{{{ getNextFile() method
+	@Override
 	public String getNextFile(View view, String file)
 	{
 		if(file == null)
@@ -53,6 +56,7 @@ public class CurrentBufferSet implements SearchFileSet
 	} //}}}
 	
 	//{{{ getPrevFile() method
+	@Override
 	public String getPrevFile(View view, String file)
 	{
 		if(file == null)
@@ -62,18 +66,21 @@ public class CurrentBufferSet implements SearchFileSet
 	} //}}}
 
 	//{{{ getFiles() method
+	@Override
 	public String[] getFiles(View view)
 	{
 		return new String[] { view.getBuffer().getPath() };
 	} //}}}
 
 	//{{{ getFileCount() method
+	@Override
 	public int getFileCount(View view)
 	{
 		return 1;
 	} //}}}
 
 	//{{{ getCode() method
+	@Override
 	public String getCode()
 	{
 		return "new CurrentBufferSet()";

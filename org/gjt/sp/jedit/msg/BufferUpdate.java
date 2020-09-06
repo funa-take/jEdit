@@ -24,10 +24,13 @@ package org.gjt.sp.jedit.msg;
 
 import org.gjt.sp.jedit.*;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
+
 /**
  * Message sent when a buffer-related change occurs.
  * @author Slava Pestov
- * @version $Id: BufferUpdate.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: BufferUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
  *
  * @since jEdit 2.2pre6
  */
@@ -94,15 +97,11 @@ public class BufferUpdate extends EBMessage
 	 * @param buffer The buffer
 	 * @param what What happened
 	 */
-	public BufferUpdate(Buffer buffer, View view, Object what)
+	public BufferUpdate(Buffer buffer, View view, @Nonnull Object what)
 	{
 		super(buffer);
-
+		Objects.requireNonNull(what);
 		this.view = view;
-
-		if(what == null)
-			throw new NullPointerException("What must be non-null");
-
 		this.what = what;
 	} //}}}
 
@@ -134,6 +133,7 @@ public class BufferUpdate extends EBMessage
 	} //}}}
 
 	//{{{ paramString() method
+	@Override
 	public String paramString()
 	{
 		return "what=" + what + ",view=" + view + ","
@@ -141,7 +141,7 @@ public class BufferUpdate extends EBMessage
 	} //}}}
 
 	//{{{ Private members
-	private Object what;
-	private View view;
+	private final Object what;
+	private final View view;
 	//}}}
 }

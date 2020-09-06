@@ -23,6 +23,8 @@
 package org.gjt.sp.jedit.msg;
 
 import java.io.File;
+import java.util.Objects;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.gjt.sp.jedit.*;
@@ -30,7 +32,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Message sent when plugins are loaded and unloaded.
  * @author Slava Pestov
- * @version $Id: PluginUpdate.java 23320 2013-11-07 11:01:28Z kpouer $
+ * @version $Id: PluginUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
  *
  * @since jEdit 4.2pre1
  */
@@ -79,18 +81,12 @@ public class PluginUpdate extends EBMessage
 	 * @param exit Is the editor exiting?
 	 * @since jEdit 4.2pre3
 	 */
-	public PluginUpdate(PluginJAR jar, Object what, boolean exit)
+	public PluginUpdate(@Nonnull PluginJAR jar, @Nonnull Object what, boolean exit)
 	{
 		super(jar);
-
-		if (jar == null) {
-			throw new IllegalArgumentException("PluginJAR may not be null.");	
-		}
+		Objects.requireNonNull(jar);
+		Objects.requireNonNull(what);
 		this.jar = jar;
-		
-		if(what == null)
-			throw new NullPointerException("What must be non-null");
-
 		EditPlugin plugin = jar.getPlugin();
 		if (plugin != null)
 		{
@@ -110,14 +106,11 @@ public class PluginUpdate extends EBMessage
 	 * @param exit Is the editor exiting?
 	 * @since jEdit 4.2pre3
 	 */
-	public PluginUpdate(File file, Object what, boolean exit)
+	public PluginUpdate(File file, @Nonnull Object what, boolean exit)
 	{
 		super(file);
+		Objects.requireNonNull(what);
 		this.file = file;
-		
-		if(what == null)
-			throw new NullPointerException("What must be non-null");
-
 		this.what = what;
 		this.exit = exit;
 	} //}}}
@@ -176,17 +169,17 @@ public class PluginUpdate extends EBMessage
 	} //}}}
 
 	//{{{ paramString() method
+	@Override
 	public String paramString()
 	{
-		return "what=" + what + ",exit=" + exit + ",version=" + version + ","
-			+ super.paramString();
+		return "what=" + what + ",exit=" + exit + ",version=" + version + "," + super.paramString();
 	} //}}}
 
 	//{{{ Private members
-	private PluginJAR jar = null;
-	private File file = null;
-	private Object what;
-	private boolean exit;
+	private PluginJAR jar;
+	private File file;
+	private final Object what;
+	private final boolean exit;
 	private String version;
 	//}}}
 }

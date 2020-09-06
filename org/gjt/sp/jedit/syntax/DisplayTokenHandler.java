@@ -32,7 +32,7 @@ import java.text.CharacterIterator;
 
 /**
  * Creates {@link Chunk} objects that can be painted on screen.
- * @version $Id: DisplayTokenHandler.java 23912 2015-05-17 19:44:33Z ezust $
+ * @version $Id: DisplayTokenHandler.java 25345 2020-05-29 16:42:56Z kpouer $
  */
 public class DisplayTokenHandler extends DefaultTokenHandler
 {
@@ -149,7 +149,7 @@ public class DisplayTokenHandler extends DefaultTokenHandler
 
 	// Don't have chunks longer than a limit to avoid slowing things down.
 	// For example, too long chunks are hardly clipped out at rendering.
-	private static final int MAX_CHUNK_LEN = 100;
+	public static int MAX_CHUNK_LEN = 1;
 
 	//{{{ Instance variables
 	private SyntaxStyle[] styles;
@@ -192,7 +192,7 @@ public class DisplayTokenHandler extends DefaultTokenHandler
 	 * Merges each adjucent chunks if possible, to reduce the number
 	 * of chunks for rendering performance.
 	 */
-	private void mergeAdjucentChunks(Chunk lineHead, Segment lineText)
+	private static void mergeAdjucentChunks(Chunk lineHead, Segment lineText)
 	{
 		Chunk chunk = lineHead;
 		while(chunk.next != null)
@@ -406,7 +406,7 @@ public class DisplayTokenHandler extends DefaultTokenHandler
 	{
 		public static final int DONE = -1;
 
-		public LineBreaker(Segment lineText, int startOffset)
+		LineBreaker(Segment lineText, int startOffset)
 		{
 			iterator = new LineBreakIterator();
 			iterator.setText(lineText);
@@ -462,7 +462,7 @@ public class DisplayTokenHandler extends DefaultTokenHandler
 	 */
 	private static class LineBreakIterator extends BreakIterator
 	{
-		public LineBreakIterator()
+		LineBreakIterator()
 		{
 			base = BreakIterator.getLineInstance();
 		}

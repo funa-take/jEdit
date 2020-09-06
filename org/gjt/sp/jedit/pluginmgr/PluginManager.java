@@ -38,16 +38,14 @@ import org.gjt.sp.jedit.pluginmgr.PluginList.Plugin;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.StandardUtilities;
-import org.gjt.sp.util.Task;
 import org.gjt.sp.util.ThreadUtilities;
 //}}}
 
 /**
- * @version $Id: PluginManager.java 24426 2016-06-22 20:26:02Z daleanson $
+ * @version $Id: PluginManager.java 25263 2020-04-18 10:21:06Z kpouer $
  */
 public class PluginManager extends JFrame
 {
-
 	//{{{ getInstance() method
 	/**
 	 * Returns the currently visible plugin manager window, or null.
@@ -85,13 +83,10 @@ public class PluginManager extends JFrame
 	{
 		if(!queuedUpdate)
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			SwingUtilities.invokeLater(() ->
 			{
-				public void run()
-				{
-					queuedUpdate = false;
-					manager.update();
-				}
+				queuedUpdate = false;
+				manager.update();
 			});
 			queuedUpdate = true;
 		}
@@ -167,7 +162,6 @@ public class PluginManager extends JFrame
 	{
 		EditBus.addToBus(this);
 
-
 		/* Setup panes */
 		JPanel content = new JPanel(new BorderLayout(12,12));
 		content.setBorder(new EmptyBorder(12,12,12,12));
@@ -188,13 +182,12 @@ public class PluginManager extends JFrame
 		/* Create the buttons */
 		Box buttons = new Box(BoxLayout.X_AXIS);
 
-		ActionListener al = new ActionHandler();
 		mgrOptions = new JButton(jEdit.getProperty("plugin-manager.mgr-options"));
-		mgrOptions.addActionListener(al);
+		mgrOptions.addActionListener(e -> new GlobalOptions(PluginManager.this,"plugin-manager"));
 		pluginOptions = new JButton(jEdit.getProperty("plugin-manager.plugin-options"));
-		pluginOptions.addActionListener(al);
+		pluginOptions.addActionListener(e -> new PluginOptions(PluginManager.this));
 		done = new JButton(jEdit.getProperty("plugin-manager.done"));
-		done.addActionListener(al);
+		done.addActionListener(e -> ok());
 
 		buttons.add(Box.createGlue());
 		buttons.add(mgrOptions);
@@ -250,34 +243,8 @@ public class PluginManager extends JFrame
 		installer.loading();
 		updater.loading();
 
-		ThreadUtilities.runInBackground(new Task()
-		{
-			@Override
-			public void _run()
-			{
-				try
-				{
-					downloadingPluginList = true;
-					setStatus(jEdit.getProperty(
-						"plugin-manager.list-download-connect"));
-					pluginList = new PluginList(this);
-				}
-				finally
-				{
-					downloadingPluginList = false;
-				}
-				ThreadUtilities.runInDispatchThread(new Runnable()
-				{
-					public void run()
-					{
-						pluginListUpdated();
-					}
-				});
-			}
-		});
-
-
-
+		pluginList = new PluginList(this::pluginListUpdated);
+		ThreadUtilities.runInBackground(pluginList);
 	} //}}}
 
 	//{{{ checkForObsoletePlugins()
@@ -292,7 +259,8 @@ public class PluginManager extends JFrame
     */
 	public void checkForObsoletePlugins()
 	{
-		if ((pluginList == null) || (pluginList.plugins == null)) return;
+		if (pluginList == null || pluginList.plugins == null)
+			return;
 		// for each plugin that is installed:			
 		for (PluginJAR jar: jEdit.getPluginJARs())
 		{
@@ -365,29 +333,10 @@ public class PluginManager extends JFrame
 
 	//}}}
 
-	//{{{ Inner classes
-
-	//{{{ ActionHandler class
-	@SuppressWarnings("deprecation")
-	class ActionHandler implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			// TODO: update this, use CombinedOptins instead of GlobalOptions
-			// and PluginOptions
-			Object source = evt.getSource();
-			if(source == done)
-				ok();
-			else if (source == mgrOptions)
-				new GlobalOptions(PluginManager.this,"plugin-manager");
-			else if (source == pluginOptions)
-				new PluginOptions(PluginManager.this);
-		}
-	} //}}}
-
 	//{{{ ListUpdater class
 	class ListUpdater implements ChangeListener
 	{
+		@Override
 		public void stateChanged(ChangeEvent e)
 		{
 			Component selected = tabPane.getSelectedComponent();
@@ -399,6 +348,4 @@ public class PluginManager extends JFrame
 				manager.update();
 		}
 	} //}}}
-
-	//}}}
 }

@@ -95,7 +95,7 @@ import static org.gjt.sp.jedit.help.HelpHistoryModel.HistoryEntry;
  * jEdit's searchable help viewer. It uses a Swing JEditorPane to display the HTML,
  * and implements a URL history.
  * @author Slava Pestov
- * @version $Id: HelpViewer.java 24211 2015-12-10 03:33:28Z daleanson $
+ * @version $Id: HelpViewer.java 25243 2020-04-15 14:51:21Z kpouer $
  */
 public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHistoryModelListener
 {
@@ -211,15 +211,10 @@ public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHisto
 
 		setVisible(true);
 
-		EventQueue.invokeLater(new Runnable()
+		EventQueue.invokeLater(() ->
 		{
-			@Override
-			public void run()
-			{
-				splitter.setDividerLocation(jEdit.getIntegerProperty(
-					"helpviewer.splitter",250));
-				viewer.requestFocus();
-			}
+			splitter.setDividerLocation(jEdit.getIntegerProperty("helpviewer.splitter",250));
+			viewer.requestFocus();
 		});
 	} //}}}
 
@@ -296,11 +291,12 @@ public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHisto
 			   Once jEdit sets JDK 7 as dependency, all this should be
 			   reverted to synchronous code.
 			 */
-			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>()
+			SwingWorker<Void, Void> worker = new SwingWorker<>()
 			{
 				private boolean success;
+
 				@Override
-				protected Void doInBackground() throws Exception
+				protected Void doInBackground()
 				{
 					try
 					{
@@ -457,14 +453,10 @@ public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHisto
 	@Override
 	public void queueTOCReload()
 	{
-		EventQueue.invokeLater(new Runnable()
+		EventQueue.invokeLater(() ->
 		{
-			@Override
-			public void run()
-			{
-				queuedTOCReload = false;
-				toc.load();
-			}
+			queuedTOCReload = false;
+			toc.load();
 		});
 	} //}}}
 
@@ -654,7 +646,7 @@ public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHisto
 
 		private void handlePopupTrigger(MouseEvent me)
 		{
-            int caret = viewer.getUI().viewToModel(viewer, me.getPoint());
+            int caret = viewer.getUI().viewToModel2D(viewer, me.getPoint(), null);
             if (caret >= 0 && viewer.getDocument() instanceof HTMLDocument)
             {
                 HTMLDocument hdoc = (HTMLDocument) viewer.getDocument();
@@ -670,12 +662,10 @@ public class HelpViewer extends JFrame implements HelpViewerInterface, HelpHisto
                         {
 							JPopupMenu popup = new JPopupMenu();
 							JMenuItem copy = popup.add(jEdit.getProperty("helpviewer.copy-link.label"));
-							copy.addActionListener(new ActionListener(){
-								public void actionPerformed(ActionEvent e)
-								{
-									StringSelection url = new StringSelection(href);
-									Toolkit.getDefaultToolkit().getSystemClipboard().setContents(url, url);
-								}
+							copy.addActionListener(e ->
+							{
+								StringSelection url = new StringSelection(href);
+								Toolkit.getDefaultToolkit().getSystemClipboard().setContents(url, url);
 							});
 							popup.show(viewer, me.getX(), me.getY());
                         }

@@ -29,19 +29,19 @@ import org.gjt.sp.util.StandardUtilities;
 
 /**
  * @author Slava Pestov
- * @version $Id: CloseBracketIndentRule.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: CloseBracketIndentRule.java 25222 2020-04-12 16:07:38Z kpouer $
  */
 public class CloseBracketIndentRule extends BracketIndentRule
 {
 	//{{{ CloseBracketIndentRule constructor
 	public CloseBracketIndentRule(char closeBracket, boolean aligned)
 	{
-		super(TextUtilities.getComplementaryBracket(closeBracket,null),
-			closeBracket);
+		super(TextUtilities.getComplementaryBracket(closeBracket,null), closeBracket);
 		this.aligned = aligned;
 	} //}}}
 
 	//{{{ apply() method
+	@Override
 	public void apply(JEditBuffer buffer, int thisLineIndex,
 		int prevLineIndex, int prevPrevLineIndex,
 		List<IndentAction> indentActions)
@@ -97,31 +97,26 @@ public class CloseBracketIndentRule extends BracketIndentRule
 		}
 	} //}}}
 
-	private boolean aligned;
+	private final boolean aligned;
 
 	//{{{ AlignBracket class
 	private static class AlignBracket implements IndentAction
 	{
-		private int line, offset;
-		private int openBracketLine;
+		private final int openBracketLine;
 		private int openBracketColumn;
 		private CharSequence openBracketLineText;
 		private int extraIndent;
 
 		public AlignBracket(JEditBuffer buffer, int line, int offset)
 		{
-			this.line = line;
-			this.offset = offset;
 
-			int openBracketIndex = TextUtilities.findMatchingBracket(
-				buffer,this.line,this.offset);
+			int openBracketIndex = TextUtilities.findMatchingBracket(buffer, line, offset);
 			if(openBracketIndex == -1)
 				openBracketLine = -1;
 			else
 			{
 				openBracketLine = buffer.getLineOfOffset(openBracketIndex);
-				openBracketColumn = openBracketIndex -
-					buffer.getLineStartOffset(openBracketLine);
+				openBracketColumn = openBracketIndex - buffer.getLineStartOffset(openBracketLine);
 				openBracketLineText = buffer.getLineSegment(openBracketLine);
 			}
 		}
@@ -146,8 +141,8 @@ public class CloseBracketIndentRule extends BracketIndentRule
 			return openBracketLine;
 		}
 
-		public int calculateIndent(JEditBuffer buffer, int line, int oldIndent,
-			int newIndent)
+		@Override
+		public int calculateIndent(JEditBuffer buffer, int line, int oldIndent, int newIndent)
 		{
 			if(openBracketLineText == null)
 				return newIndent;
@@ -159,6 +154,7 @@ public class CloseBracketIndentRule extends BracketIndentRule
 			}
 		}
 
+		@Override
 		public boolean keepChecking()
 		{
 			return false;

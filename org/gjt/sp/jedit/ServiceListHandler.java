@@ -31,41 +31,47 @@ import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
 import org.gjt.sp.util.XMLUtilities;
-import org.gjt.sp.util.Log;
+
+import javax.annotation.Nullable;
 //}}}
 
 /**
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: ServiceListHandler.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: ServiceListHandler.java 25152 2020-04-08 19:31:56Z kpouer $
  */
 class ServiceListHandler extends DefaultHandler
 {
+	public static final ServiceManager.Descriptor[] EMPTY_DESCRIPTORS = new ServiceManager.Descriptor[0];
+
 	//{{{ ServiceListHandler constructor
 	ServiceListHandler(PluginJAR plugin, URL uri)
 	{
 		this.plugin = plugin;
 		this.uri = uri;
 		code = new StringBuilder();
-		stateStack = new Stack<String>();
-		cachedServices = new LinkedList<ServiceManager.Descriptor>();
+		stateStack = new Stack<>();
+		cachedServices = new LinkedList<>();
 	} //}}}
 
 	//{{{ resolveEntity() method
+	@Override
 	public InputSource resolveEntity(String publicId, String systemId)
 	{
 		return XMLUtilities.findEntity(systemId, "services.dtd", getClass());
 	} //}}}
 
 	//{{{ characters() method
+	@Override
 	public void characters(char[] c, int off, int len)
 	{
 		String tag = peekElement();
-		if (tag == "SERVICE")
+		if ("SERVICE".equals(tag))
 			code.append(c, off, len);
 	} //}}}
 
 	//{{{ startElement() method
+	@Override
 	public void startElement(String uri, String localName,
 				 String tag, Attributes attrs)
 	{
@@ -75,13 +81,14 @@ class ServiceListHandler extends DefaultHandler
 	} //}}}
 
 	//{{{ endElement() method
+	@Override
 	public void endElement(String uri, String localName, String name)
 	{
 		String tag = peekElement();
 
 		if(name.equals(tag))
 		{
-			if (tag.equals("SERVICE"))
+			if ("SERVICE".equals(tag))
 			{
 				ServiceManager.Descriptor d =
 					new ServiceManager.Descriptor(
@@ -101,51 +108,41 @@ class ServiceListHandler extends DefaultHandler
 	} //}}}
 
 	//{{{ startDocument() method
+	@Override
 	public void startDocument()
 	{
-		try
-		{
-			pushElement(null);
-		}
-		catch (Exception e)
-		{
-			Log.log(Log.ERROR, e, e);
-		}
+		pushElement(null);
 	} //}}}
 
 	//{{{ getCachedServices() method
 	public ServiceManager.Descriptor[] getCachedServices()
 	{
-		return cachedServices.toArray(
-			new ServiceManager.Descriptor[cachedServices.size()]);
+		return cachedServices.toArray(EMPTY_DESCRIPTORS);
 	} //}}}
 
 	//{{{ Private members
 
 	//{{{ Instance variables
-	private PluginJAR plugin;
+	private final PluginJAR plugin;
 	private URL uri;
 
 	private String serviceName;
 	private String serviceClass;
-	private StringBuilder code;
+	private final StringBuilder code;
 
-	private Stack<String> stateStack;
+	private final Stack<String> stateStack;
 
-	private List<ServiceManager.Descriptor> cachedServices;
+	private final List<ServiceManager.Descriptor> cachedServices;
 	//}}}
 
 	//{{{ pushElement() method
-	private String pushElement(String name)
+	private void pushElement(String name)
 	{
-		name = (name == null) ? null : name.intern();
-
 		stateStack.push(name);
-
-		return name;
 	} //}}}
 
 	//{{{ peekElement() method
+	@Nullable
 	private String peekElement()
 	{
 		return stateStack.peek();

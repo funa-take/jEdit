@@ -46,7 +46,7 @@ import org.gjt.sp.jedit.io.EncodingServer;
  * Menu provider for actions to reload the current buffer with a
  * specific encoding.
  *
- * @version $Id: ReloadWithEncodingProvider.java 24425 2016-06-22 19:29:40Z daleanson $
+ * @version $Id: ReloadWithEncodingProvider.java 25326 2020-05-09 10:08:52Z kpouer $
  */
 public class ReloadWithEncodingProvider implements ActionListener, DynamicMenuProvider
 {	
@@ -87,12 +87,12 @@ public class ReloadWithEncodingProvider implements ActionListener, DynamicMenuPr
 		Arrays.sort(encodings);
 
 		int maxItems = jEdit.getIntegerProperty("menu.spillover",20);
-		for (int i = 0; i < encodings.length; i++)
+		for (String encoding : encodings)
 		{
-			JMenuItem mi = new JMenuItem(encodings[i]);
-			mi.setActionCommand("encoding@" + encodings[i]);
+			JMenuItem mi = new JMenuItem(encoding);
+			mi.setActionCommand("encoding@" + encoding);
 			mi.addActionListener(this);
-			if (menu.getMenuComponentCount() >= maxItems && i < encodings.length)
+			if (menu.getMenuComponentCount() >= maxItems)
 			{
 				JMenu newMenu = new JMenu(jEdit.getProperty("common.more"));
 				menu.add(newMenu);
@@ -147,7 +147,7 @@ public class ReloadWithEncodingProvider implements ActionListener, DynamicMenuPr
 
 		if (encoding != null)
 		{
-			props = new Hashtable<String, Object>();
+			props = new Hashtable<>();
 			props.put(JEditBuffer.ENCODING, encoding);
 			// Disable auto-detect because user explicitly
 			// specify an encoding.

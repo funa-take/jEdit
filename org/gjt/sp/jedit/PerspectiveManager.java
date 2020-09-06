@@ -25,8 +25,12 @@ package org.gjt.sp.jedit;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.stream.Collectors;
 
+import org.gjt.sp.jedit.io.VFS;
+import org.gjt.sp.jedit.io.VFSFile;
+import org.gjt.sp.jedit.io.VFSManager;
+import org.gjt.sp.jedit.manager.BufferManager;
 import org.gjt.sp.util.IOUtilities;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.XMLUtilities;
@@ -37,7 +41,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /** Manages persistence of open buffers and views across jEdit sessions.
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: PerspectiveManager.java 24800 2017-12-29 15:38:11Z ezust $
+ * @version $Id: PerspectiveManager.java 25239 2020-04-14 20:00:17Z kpouer $
  */
 public class PerspectiveManager
 {
@@ -123,15 +127,12 @@ public class PerspectiveManager
 		if(jEdit.getBufferCount() == 0)
 			return;
 
-		Buffer[] buffers = jEdit.getBuffers();
-		Collection<Buffer> savedBuffers = new LinkedList<Buffer>();
-		for (Buffer buffer: buffers)
-		{
-			if (!buffer.isNewFile() || buffer.isUntitled())
-			{
-				savedBuffers.add(buffer);
-			}
-		}
+		BufferManager bufferManager = jEdit.getBufferManager();
+		Collection<Buffer> savedBuffers = bufferManager
+			.getBuffers()
+			.stream()
+			.filter(buffer -> !buffer.isNewFile() || buffer.isUntitled())
+			.collect(Collectors.toList());
 
 		if(!autosave)
 			Log.log(Log.MESSAGE,PerspectiveManager.class,"Saving " + perspectiveXML);
@@ -167,7 +168,7 @@ public class PerspectiveManager
 				out.write(lineSep);
 			}
 
-			View[] views = jEdit.getViews();
+			View[] views = jEdit.getViewManager().getViews().toArray(new View[0]);
 			for(int i = 0; i < views.length; i++)
 			{
 				View view = views[i];
@@ -337,14 +338,35 @@ public class PerspectiveManager
 		{
 			if(name.equals("BUFFER"))
 			{
-				if (restoreFiles && !skipRemote(charData.toString()))
+				String bufferPath = charData.toString();
+				if (restoreFiles && !skipRemote(bufferPath))
 				{
-					boolean bufferUntitled = false;
-					if(untitled != null) {
-						bufferUntitled = "TRUE".equals(untitled);
+					boolean fileExists = false;
+					VFS vfs = VFSManager.getVFSForPath(bufferPath);
+					Object session = vfs.createVFSSession(bufferPath, view);
+					try
+					{
+						VFSFile vfsFile = vfs._getFile(session, bufferPath, view);
+						fileExists = vfsFile != null;
 					}
+					catch (IOException e)
+					{
+						Log.log(Log.ERROR, this, e);
+					}
+					finally
+					{
+						try
+						{
+							vfs._endVFSSession(session, view);
+						}
+						catch (IOException e)
+						{
+							Log.log(Log.ERROR, this, e);
+						}
+					}
+					boolean bufferUntitled = !fileExists && "TRUE".equals(untitled);
 
-					Buffer restored = jEdit.openTemporary(null,null, charData.toString(), bufferUntitled, null, bufferUntitled);
+					Buffer restored = jEdit.openTemporary(null,null, bufferPath, bufferUntitled, null, bufferUntitled);
 					// if the autoReload attributes are not present, don't set anything
 					// it's sufficient to check whether they are present on the first BUFFER element
 					if (restored != null)

@@ -25,10 +25,13 @@ package org.gjt.sp.jedit.msg;
 import org.gjt.sp.jedit.gui.DockableWindowManager;
 import org.gjt.sp.jedit.*;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
+
 /**
  * Message sent when dockable window state changes.
  * @author Slava Pestov
- * @version $Id: DockableWindowUpdate.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: DockableWindowUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
  *
  * @since jEdit 4.2pre1
  */
@@ -62,14 +65,10 @@ public class DockableWindowUpdate extends EBMessage
 	 * @param what What happened
 	 * @param dockable The dockable window in question
 	 */
-	public DockableWindowUpdate(DockableWindowManager wm, Object what,
-		String dockable)
+	public DockableWindowUpdate(DockableWindowManager wm, @Nonnull Object what, String dockable)
 	{
 		super(wm);
-
-		if(what == null)
-			throw new NullPointerException("What must be non-null");
-
+		Objects.requireNonNull(what);
 		this.what = what;
 		this.dockable = dockable;
 	} //}}}
@@ -94,15 +93,14 @@ public class DockableWindowUpdate extends EBMessage
 	} //}}}
 
 	//{{{ paramString() method
+	@Override
 	public String paramString()
 	{
-		return "what=" + what
-			+ ",dockable=" + dockable
-			+ "," + super.paramString();
+		return "what=" + what + ",dockable=" + dockable + "," + super.paramString();
 	} //}}}
 
 	//{{{ Private members
-	private Object what;
-	private String dockable;
+	private final Object what;
+	private final String dockable;
 	//}}}
 }

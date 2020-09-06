@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * text substrings without the overhead of creating a new string object.
  *
  * @author Slava Pestov, Mike Dillon
- * @version $Id: KeywordMap.java 23221 2013-09-29 20:03:32Z shlomy $
+ * @version $Id: KeywordMap.java 25244 2020-04-15 15:14:49Z kpouer $
  */
 public class KeywordMap
 {
@@ -149,7 +149,7 @@ loop:
 	 */
 	public String[] getKeywords()
 	{
-		List<String> vector = new ArrayList<String>(100);
+		List<String> vector = new ArrayList<>(100);
 		for (Keyword kw : map)
 		{
 			Keyword keyword = kw;
@@ -206,8 +206,8 @@ loop:
 	//{{{ Private members
 
 	//{{{ Instance variables
-	private int mapLength;
-	private Keyword[] map;
+	private final int mapLength;
+	private final Keyword[] map;
 	private boolean ignoreCase;
 	private StringBuilder noWordSep;
 	//}}}

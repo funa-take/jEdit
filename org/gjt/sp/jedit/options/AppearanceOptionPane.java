@@ -25,16 +25,29 @@ package org.gjt.sp.jedit.options;
 //{{{ Imports
 import javax.swing.*;
 
+import java.awt.Color;
 import java.awt.Font;
+import java.awt.SystemTray;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
+import org.gjt.sp.jedit.gui.ColorWellButton;
 import org.gjt.sp.jedit.gui.FontSelector;
 import org.gjt.sp.jedit.gui.NumericTextField;
 
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.jedit.gui.ScreenRectangleSelectionButton;
+import org.gjt.sp.jedit.gui.tray.JTrayIconManager;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.IOUtilities;
+
+import static java.awt.GridBagConstraints.VERTICAL;
+import static java.awt.event.ItemEvent.SELECTED;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static javax.swing.BorderFactory.createEmptyBorder;
 //}}}
 
 public class AppearanceOptionPane extends AbstractOptionPane implements ItemListener
@@ -71,15 +84,7 @@ public class AppearanceOptionPane extends AbstractOptionPane implements ItemList
 
 		lookAndFeel = new JComboBox<String>(names);
 		lookAndFeel.setSelectedIndex(index);
-		lookAndFeel.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent evt)
-			{
-				updateEnabled();
-			}
-		});
-		lookAndFeel.addItemListener( this );
+		lookAndFeel.addItemListener(this);
 
 		addComponent(jEdit.getProperty("options.appearance.lf"),
 			lookAndFeel);
@@ -99,15 +104,17 @@ public class AppearanceOptionPane extends AbstractOptionPane implements ItemList
 			}
 		}
 
-		/* Primary Metal L&F font */
+		/* Primary Swing font for button, menu, and label components */
 		Font pf = jEdit.getFontProperty("metal.primary.font");
 		primaryFont = new FontSelector(pf);
+		primaryFont.setEnabled(true);
 		addComponent(jEdit.getProperty("options.appearance.primaryFont"),
 			primaryFont);
 
-		/* Secondary Metal L&F font */
+		/* Secondary Swing font for list and textfield components */
 		secondaryFont = new FontSelector(jEdit.getFontProperty(
 			"metal.secondary.font"));
+		secondaryFont.setEnabled(true);
 		addComponent(jEdit.getProperty("options.appearance.secondaryFont"),
 			secondaryFont);
 
@@ -117,14 +124,6 @@ public class AppearanceOptionPane extends AbstractOptionPane implements ItemList
 		addComponent(jEdit.getProperty("options.appearance.helpViewerFont"),
 			helpViewerFont);
 
-		/*
-		antiAliasExtras = new JComboBox(AntiAlias.comboChoices);
-		antiAliasExtras.setSelectedIndex(AntiAlias.appearance().val());
-		antiAliasExtras.setToolTipText(jEdit.getProperty("options.textarea.antiAlias.tooltip"));
-		addComponent(jEdit.getProperty("options.appearance.fonts.antialias"), antiAliasExtras);
-		*/
-		updateEnabled();
-
 		/* History count */
 		history = new NumericTextField(jEdit.getProperty("history"), true);
 		addComponent(jEdit.getProperty("options.appearance.history"),history);
@@ -133,10 +132,154 @@ public class AppearanceOptionPane extends AbstractOptionPane implements ItemList
 		menuSpillover = new NumericTextField(jEdit.getProperty("menu.spillover"), true);
 		addComponent(jEdit.getProperty("options.appearance.menuSpillover"),menuSpillover);
 
-		systemTrayIcon = new JCheckBox(jEdit.getProperty(
-					"options.general.systrayicon", "Show the systray icon"));
-		systemTrayIcon.setSelected(jEdit.getBooleanProperty("systrayicon", true));
+		addSeparator("options.appearance.systrayicon.label");
+
+		systemTrayIcon = new JCheckBox(
+				jEdit.getProperty("options.appearance.systrayicon"),
+				jEdit.getBooleanProperty("systrayicon", true));
+		if (!SystemTray.isSupported())
+		{
+			systemTrayIcon.setSelected(false);
+			systemTrayIcon.setEnabled(false);
+			addComponent(new JLabel(jEdit.getProperty(
+					"options.appearance.systrayicon.not.supported")));
+		}
 		addComponent(systemTrayIcon);
+
+		if (OperatingSystem.isX11())
+		{
+			String systemTrayIconBackground = jEdit
+					.getProperty("systrayicon.background", "autodetect")
+					.toLowerCase();
+
+			systemTrayIconBackgroundDefault = new JRadioButton(
+					jEdit.getProperty("options.appearance.systrayicon.background.default"),
+					systemTrayIconBackground.equals("default"));
+			systemTrayIconBackgroundDefault.setEnabled(systemTrayIcon.isSelected());
+
+			systemTrayIconBackgroundAutodetect = new JRadioButton(
+					jEdit.getProperty("options.appearance.systrayicon.background.autodetect"),
+					systemTrayIconBackground.equals("autodetect"));
+			systemTrayIconBackgroundAutodetect.setEnabled(systemTrayIcon.isSelected());
+
+			systemTrayIconBackgroundFixedColor = new JRadioButton(
+					jEdit.getProperty("options.appearance.systrayicon.background.fixed"),
+					systemTrayIconBackground.equals("fixed"));
+			systemTrayIconBackgroundFixedColor.setEnabled(systemTrayIcon.isSelected());
+
+			systemTrayIconBackgroundPickedRectangle = new JRadioButton(
+					jEdit.getProperty("options.appearance.systrayicon.background.picked"),
+					systemTrayIconBackground.equals("picked"));
+			systemTrayIconBackgroundPickedRectangle.setEnabled(systemTrayIcon.isSelected());
+
+			ButtonGroup systemTrayIconBackgroundButtonGroup = new ButtonGroup();
+			systemTrayIconBackgroundButtonGroup.add(systemTrayIconBackgroundDefault);
+			systemTrayIconBackgroundButtonGroup.add(systemTrayIconBackgroundAutodetect);
+			systemTrayIconBackgroundButtonGroup.add(systemTrayIconBackgroundFixedColor);
+			systemTrayIconBackgroundButtonGroup.add(systemTrayIconBackgroundPickedRectangle);
+
+			addComponent(systemTrayIconBackgroundDefault);
+
+			addComponent(systemTrayIconBackgroundAutodetect);
+
+			addComponent(systemTrayIconBackgroundFixedColor);
+
+			systemTrayIconBackgroundColor = new ColorWellButton(
+					jEdit.getColorProperty("systrayicon.bgColor"));
+			systemTrayIconBackgroundColor.setEnabled(
+					systemTrayIconBackgroundFixedColor.isEnabled()
+							&& systemTrayIconBackgroundFixedColor.isSelected());
+			JLabel systemTrayIconBackgroundColorLabel = newLabel(
+					jEdit.getProperty("options.appearance.systrayicon.background.color.label"),
+					systemTrayIconBackgroundColor);
+			systemTrayIconBackgroundColorLabel.setBorder(createEmptyBorder(0, 0, 0, 12));
+			systemTrayIconBackgroundColorLabel.setEnabled(
+					systemTrayIconBackgroundFixedColor.isEnabled()
+							&& systemTrayIconBackgroundFixedColor.isSelected());
+			addComponent(systemTrayIconBackgroundColorLabel, systemTrayIconBackgroundColor, VERTICAL);
+
+			systemTrayIconBackgroundFixedColor.addItemListener(itemEvent ->
+			{
+				boolean selected = itemEvent.getStateChange() == SELECTED;
+				systemTrayIconBackgroundColorLabel.setEnabled(selected);
+				systemTrayIconBackgroundColor.setEnabled(selected);
+			});
+
+			addComponent(systemTrayIconBackgroundPickedRectangle);
+
+			Color[][] systemTrayIconBackgroundRectangleColorMatrix =
+					jEdit.getColorMatrixProperty("systrayicon.bgPixel");
+			BufferedImage systemTrayIconBackgroundRectangleImage = null;
+			if (systemTrayIconBackgroundRectangleColorMatrix != null)
+			{
+				int[] systemTrayIconBackgroundRectangleColors =
+						Arrays.stream(systemTrayIconBackgroundRectangleColorMatrix)
+								.flatMap(Arrays::stream)
+								.mapToInt(Color::getRGB)
+								.toArray();
+				int width = systemTrayIconBackgroundRectangleColorMatrix[0].length;
+				int height = systemTrayIconBackgroundRectangleColorMatrix.length;
+				systemTrayIconBackgroundRectangleImage =
+						new BufferedImage(width, height, TYPE_INT_RGB);
+				systemTrayIconBackgroundRectangleImage.setRGB(
+						0, 0, width, height,
+						systemTrayIconBackgroundRectangleColors, 0, width);
+			}
+			systemTrayIconBackgroundRectangle = new ScreenRectangleSelectionButton(
+					systemTrayIconBackgroundRectangleImage);
+			JLabel systemTrayBackgroundRectangleLabel = newLabel(
+					jEdit.getProperty("options.appearance.systrayicon.background.pixel.label"),
+					systemTrayIconBackgroundRectangle);
+
+			if (SystemTray.isSupported())
+			{
+				systemTrayIconBackgroundRectangle.setRectangleDimension(
+						SystemTray.getSystemTray().getTrayIconSize());
+				systemTrayIconBackgroundRectangle.setEnabled(
+						systemTrayIconBackgroundPickedRectangle.isEnabled()
+								&& systemTrayIconBackgroundPickedRectangle.isSelected());
+				systemTrayBackgroundRectangleLabel.setBorder(createEmptyBorder(0, 0, 0, 12));
+				systemTrayBackgroundRectangleLabel.setEnabled(
+						systemTrayIconBackgroundPickedRectangle.isEnabled()
+								&& systemTrayIconBackgroundPickedRectangle.isSelected());
+				addComponent(systemTrayBackgroundRectangleLabel, systemTrayIconBackgroundRectangle,
+						VERTICAL);
+			}
+
+			systemTrayIconBackgroundPickedRectangle.addItemListener(itemEvent ->
+			{
+				boolean selected = itemEvent.getStateChange() == SELECTED;
+				systemTrayBackgroundRectangleLabel.setEnabled(selected);
+				systemTrayIconBackgroundRectangle.setEnabled(selected);
+			});
+
+			systemTrayIcon.addItemListener(itemEvent ->
+			{
+				boolean selected = itemEvent.getStateChange() == SELECTED;
+				systemTrayIconBackgroundDefault.setEnabled(selected);
+				systemTrayIconBackgroundAutodetect.setEnabled(selected);
+				systemTrayIconBackgroundFixedColor.setEnabled(selected);
+				systemTrayIconBackgroundPickedRectangle.setEnabled(selected);
+				if (selected)
+				{
+					systemTrayIconBackgroundColorLabel.setEnabled(
+							systemTrayIconBackgroundFixedColor.isSelected());
+					systemTrayIconBackgroundColor.setEnabled(
+							systemTrayIconBackgroundFixedColor.isSelected());
+					systemTrayBackgroundRectangleLabel.setEnabled(
+							systemTrayIconBackgroundPickedRectangle.isSelected());
+					systemTrayIconBackgroundRectangle.setEnabled(
+							systemTrayIconBackgroundPickedRectangle.isSelected());
+				}
+				else
+				{
+					systemTrayIconBackgroundColorLabel.setEnabled(false);
+					systemTrayIconBackgroundColor.setEnabled(false);
+					systemTrayBackgroundRectangleLabel.setEnabled(false);
+					systemTrayIconBackgroundRectangle.setEnabled(false);
+				}
+			});
+		}
 
 		addSeparator("options.appearance.startup.label");
 
@@ -177,7 +320,7 @@ public class AppearanceOptionPane extends AbstractOptionPane implements ItemList
 			"options.appearance.decorateDialogs"));
 		decorateDialogs.setSelected(jEdit.getBooleanProperty("decorate.dialogs"));
 		addComponent(decorateDialogs);
-		
+
 		lnfChanged = false;
 	} //}}}
 
@@ -196,17 +339,82 @@ public class AppearanceOptionPane extends AbstractOptionPane implements ItemList
 		jEdit.setProperty("history",history.getText());
 		jEdit.setProperty("menu.spillover",menuSpillover.getText());
 		jEdit.setBooleanProperty("tip.show",showTips.isSelected());
-		jEdit.setBooleanProperty("systrayicon", systemTrayIcon.isSelected());
+		if (SystemTray.isSupported())
+		{
+			jEdit.setBooleanProperty("systrayicon", systemTrayIcon.isSelected());
+			if (OperatingSystem.isX11())
+			{
+				String systemTrayIconBackgroundOld =
+						jEdit.getProperty("systrayicon.background", "autodetect");
+				String systemTrayIconBackgroundNew;
+				if (systemTrayIconBackgroundDefault.isSelected())
+					systemTrayIconBackgroundNew = "default";
+				else if (systemTrayIconBackgroundAutodetect.isSelected())
+					systemTrayIconBackgroundNew = "autodetect";
+				else if (systemTrayIconBackgroundFixedColor.isSelected())
+					systemTrayIconBackgroundNew = "fixed";
+				else if (systemTrayIconBackgroundPickedRectangle.isSelected())
+					systemTrayIconBackgroundNew = "picked";
+				else
+					systemTrayIconBackgroundNew = "autodetect";
+				jEdit.setProperty(
+						"systrayicon.background",
+						systemTrayIconBackgroundNew);
+
+				Color systemTrayIconBackgroundColorOld =
+						jEdit.getColorProperty("systrayicon.bgColor");
+				Color systemTrayIconBackgroundColorNew =
+						systemTrayIconBackgroundColor.getSelectedColor();
+				jEdit.setColorProperty(
+						"systrayicon.bgColor",
+						systemTrayIconBackgroundColorNew);
+
+				Color[][] systemTrayIconBackgroundRectangleColorMatrixOld =
+						jEdit.getColorMatrixProperty("systrayicon.bgPixel");
+				BufferedImage systemTrayIconBackgroundRectangleImage =
+						systemTrayIconBackgroundRectangle.getSelectedImage();
+				Color[][] systemTrayIconBackgroundRectangleColorMatrixNew = null;
+				if (systemTrayIconBackgroundRectangleImage != null) {
+					int width = systemTrayIconBackgroundRectangleImage.getWidth();
+					int height = systemTrayIconBackgroundRectangleImage.getHeight();
+					Color[] systemTrayIconBackgroundRectangleColors =
+							Arrays.stream(systemTrayIconBackgroundRectangleImage
+									.getRGB(0, 0, width, height, null, 0, width))
+									.mapToObj(Color::new)
+									.toArray(Color[]::new);
+					systemTrayIconBackgroundRectangleColorMatrixNew = IntStream
+							.range(0, height)
+							.mapToObj(i -> Arrays.copyOfRange(
+									systemTrayIconBackgroundRectangleColors,
+									i * width,
+									(i + 1) * width))
+							.toArray(Color[][]::new);
+				}
+				jEdit.setColorMatrixProperty(
+						"systrayicon.bgPixel",
+						systemTrayIconBackgroundRectangleColorMatrixNew);
+
+				// replace tray icon if changes need to be applied
+				if (!systemTrayIconBackgroundOld.equals(systemTrayIconBackgroundNew)
+						|| (systemTrayIconBackgroundNew.equals("fixed")
+							&& !systemTrayIconBackgroundColorOld.equals(
+									systemTrayIconBackgroundColorNew))
+						|| (systemTrayIconBackgroundNew.equals("picked")
+							&& !Arrays.deepEquals(
+									systemTrayIconBackgroundRectangleColorMatrixOld,
+									systemTrayIconBackgroundRectangleColorMatrixNew)))
+				{
+					JTrayIconManager.removeTrayIcon();
+					JTrayIconManager.addTrayIcon();
+				}
+			}
+		}
+
 		IconTheme.set(iconThemes.getSelectedItem().toString());
 
-
-		/* AntiAlias nv = AntiAlias.appearance();
-		 int idx = antiAliasExtras.getSelectedIndex();
-		nv.set(idx);
-		primaryFont.setAntiAliasEnabled(idx > 0);
-		secondaryFont.setAntiAliasEnabled(idx > 0);
-		primaryFont.repaint();
-		secondaryFont.repaint(); */
+		// adjust swing properties for button, menu, and label, and list and
+		// textfield fonts
+		setFonts();
 
 		// This is handled a little differently from other jEdit settings
 		// as this flag needs to be known very early in the
@@ -236,28 +444,13 @@ public class AppearanceOptionPane extends AbstractOptionPane implements ItemList
 	private JCheckBox decorateDialogs;
 	private JComboBox<String> iconThemes;
 	private JCheckBox systemTrayIcon;
+	private JRadioButton systemTrayIconBackgroundDefault;
+	private JRadioButton systemTrayIconBackgroundAutodetect;
+	private JRadioButton systemTrayIconBackgroundFixedColor;
+	private JRadioButton systemTrayIconBackgroundPickedRectangle;
+	private ColorWellButton systemTrayIconBackgroundColor;
+	private ScreenRectangleSelectionButton systemTrayIconBackgroundRectangle;
 	private boolean lnfChanged = false;
-	//}}}
-
-	//{{{ updateEnabled() method
-	private void updateEnabled()
-	{
-		String className = lfs[lookAndFeel.getSelectedIndex()]
-			.getClassName();
-
-		if(className.equals("javax.swing.plaf.metal.MetalLookAndFeel")
-			|| className.equals("com.incors.plaf.kunststoff.KunststoffLookAndFeel"))
-		{
-			primaryFont.setEnabled(true);
-			secondaryFont.setEnabled(true);
-		}
-		else
-		{
-			primaryFont.setEnabled(false);
-			secondaryFont.setEnabled(false);
-		}
-	} //}}}
-
 	//}}}
 
 	//{{{ setFileFlag() method
@@ -291,9 +484,54 @@ public class AppearanceOptionPane extends AbstractOptionPane implements ItemList
 			}
 		}
 	} //}}}
-	
-	// {{{ itemStateChanged() methos
-    public final void itemStateChanged( ItemEvent evt ) 
+
+	//{{{ setFonts() method
+	private void setFonts() {
+		// "primary" font, for buttons, labels, menus, etc, components that just
+		// display text
+		UIManager.put("Button.font", primaryFont.getFont());
+		UIManager.put("CheckBox.font", primaryFont.getFont());
+		UIManager.put("CheckBoxMenuItem.font", primaryFont.getFont());
+		UIManager.put("ColorChooser.font", primaryFont.getFont());
+		UIManager.put("DesktopIcon.font", primaryFont.getFont());
+		UIManager.put("Label.font", primaryFont.getFont());
+		UIManager.put("Menu.font", primaryFont.getFont());
+		UIManager.put("MenuBar.font", primaryFont.getFont());
+		UIManager.put("MenuItem.font", primaryFont.getFont());
+		UIManager.put("OptionPane.font", primaryFont.getFont());
+		UIManager.put("Panel.font", primaryFont.getFont());
+		UIManager.put("PopupMenu.font", primaryFont.getFont());
+		UIManager.put("ProgressBar.font", primaryFont.getFont());
+		UIManager.put("RadioButton.font", primaryFont.getFont());
+		UIManager.put("RadioButtonMenuItem.font", primaryFont.getFont());
+		UIManager.put("ScrollPane.font", primaryFont.getFont());
+		UIManager.put("Slider.font", primaryFont.getFont());
+		UIManager.put("TabbedPane.font", primaryFont.getFont());
+		UIManager.put("Table.font", primaryFont.getFont());
+		UIManager.put("TableHeader.font", primaryFont.getFont());
+		UIManager.put("TitledBorder.font", primaryFont.getFont());
+		UIManager.put("ToggleButton.font", primaryFont.getFont());
+		UIManager.put("ToolBar.font", primaryFont.getFont());
+		UIManager.put("ToolTip.font", primaryFont.getFont());
+		UIManager.put("Tree.font", primaryFont.getFont());
+		UIManager.put("Viewport.font", primaryFont.getFont());
+
+		// "secondary" font, for components the user can type into
+		UIManager.put("ComboBox.font", secondaryFont.getFont());
+		UIManager.put("EditorPane.font", secondaryFont.getFont());
+		UIManager.put("FormattedTextField.font", secondaryFont.getFont());
+		UIManager.put("List.font", secondaryFont.getFont());
+		UIManager.put("PasswordField.font", secondaryFont.getFont());
+		UIManager.put("Spinner.font", secondaryFont.getFont());
+		UIManager.put("TextArea.font", secondaryFont.getFont());
+		UIManager.put("TextField.font", secondaryFont.getFont());
+		UIManager.put("TextPane.font", secondaryFont.getFont());
+	} //}}}
+
+    //}}}
+
+	// {{{ itemStateChanged() methods
+    public final void itemStateChanged( ItemEvent evt )
     {
 		lnfChanged = true;
     } // }}}

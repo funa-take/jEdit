@@ -27,8 +27,11 @@ import java.net.URL;
 import java.util.*;
 
 import org.gjt.sp.jedit.input.AbstractInputHandler;
+import org.gjt.sp.util.StandardUtilities;
 import org.jedit.keymap.Keymap;
 import org.gjt.sp.util.Log;
+
+import javax.annotation.Nonnull;
 //}}}
 
 /**
@@ -139,7 +142,7 @@ import org.gjt.sp.util.Log;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: ActionSet.java 24851 2018-03-27 16:26:50Z vampire0 $
+ * @version $Id: ActionSet.java 25221 2020-04-12 16:00:17Z kpouer $
  * @since jEdit 4.0pre1
  */
 public class ActionSet extends JEditActionSet<EditAction> implements Comparable
@@ -196,6 +199,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	} //}}}
 
 	//{{{ getArray() method
+	@Override
 	protected EditAction[] getArray(int size)
 	{
 		return new EditAction[size];
@@ -221,7 +225,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	 * @param label The label, shown in the shortcuts option pane
 	 * @since jEdit 4.0pre1
 	 */
-	public ActionSet(String label)
+	public ActionSet(@Nonnull String label)
 	{
 		this();
 		setLabel(label);
@@ -243,10 +247,9 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	 * @param label The label
 	 * @since jEdit 4.0pre1
 	 */
-	public void setLabel(String label)
+	public void setLabel(@Nonnull String label)
 	{
-		if(label == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(label);
 		this.label = label;
 	} //}}}
 
@@ -282,10 +285,11 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 			else if(obj instanceof BeanShellAction)
 				retVal.add(((BeanShellAction)obj).getName());
 		}
-		return retVal.toArray(new String[retVal.size()]);
+		return retVal.toArray(StandardUtilities.EMPTY_STRING_ARRAY);
 	} //}}}
 
 	//{{{ getProperty() method
+	@Override
 	public String getProperty(String name)
 	{
 		Keymap keymap = jEdit.getKeymapManager().getKeymap();
@@ -293,12 +297,14 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	} //}}}
 
 	//{{{ getInputHandler() method
+	@Override
 	public AbstractInputHandler getInputHandler()
 	{
 		return jEdit.getInputHandler();
 	} //}}}
 
 	//{{{ compareTo() method
+	@Override
 	public int compareTo(Object o)
 	{
 		return label.compareTo(((ActionSet)o).label);
@@ -316,6 +322,7 @@ public class ActionSet extends JEditActionSet<EditAction> implements Comparable
 	 * Creates a BeanShellAction.
 	 * @since 4.3pre13
 	 */
+	 @Override
 	 protected EditAction createBeanShellAction(String actionName,
 						    String code,
 						    String selected,

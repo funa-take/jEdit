@@ -27,6 +27,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
 import javax.swing.*;
 
+import static java.awt.event.InputEvent.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.io.IOException;
@@ -43,7 +44,7 @@ import org.gjt.sp.util.ThreadUtilities;
 /**
  * VFS browser tree view.
  * @author Slava Pestov
- * @version $Id: BrowserView.java 24428 2016-06-23 02:49:29Z daleanson $
+ * @version $Id: BrowserView.java 25190 2020-04-11 16:58:12Z kpouer $
  */
 @SuppressWarnings({"unchecked"})	// TODO: need to check on ParentDirectoryList and make it generic
 class BrowserView extends JPanel
@@ -53,14 +54,14 @@ class BrowserView extends JPanel
 	{
 		this.browser = browser;
 
-		tmpExpanded = new HashSet<String>();
+		tmpExpanded = new HashSet<>();
 		DockableWindowManager dwm = jEdit.getActiveView().getDockableWindowManager();
 		KeyListener keyListener = dwm.closeListener(VFSBrowser.NAME);
 
 		parentDirectories = new ParentDirectoryList();
 		parentDirectories.addKeyListener(keyListener);
 		parentDirectories.setName("parent");
-		
+
 		parentDirectories.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		parentDirectories.setCellRenderer(new ParentDirectoryRenderer());
 		parentDirectories.setVisibleRowCount(5);
@@ -83,15 +84,7 @@ class BrowserView extends JPanel
 			parentScroller, tableScroller);
 		splitPane.setOneTouchExpandable(true);
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				parentDirectories.ensureIndexIsVisible(
-					parentDirectories.getModel()
-					.getSize());
-			}
-		});
+		EventQueue.invokeLater(() -> parentDirectories.ensureIndexIsVisible(parentDirectories.getModel().getSize()));
 
 		if(browser.isMultipleSelectionEnabled())
 			table.getSelectionModel().setSelectionMode(
@@ -168,14 +161,15 @@ class BrowserView extends JPanel
 		}
 
 		final Object[] loadInfo = new Object[2];
-		Runnable awtRunnable = new Runnable()
+		Runnable awtRunnable = () ->
 		{
-			public void run()
-			{
-				browser.directoryLoaded(node,loadInfo,addToHistory);
-				if (delayedAWTTask != null)
-					delayedAWTTask.run();
-			}
+			browser.directoryLoaded(node,loadInfo,addToHistory);
+			if (delayedAWTTask != null)
+				delayedAWTTask.run();
+
+			// -1 means the divider should be reset to a value that attempts
+			// to honor the preferred size of the left/top component
+			splitPane.setDividerLocation(-1);
 		};
 		ThreadUtilities.runInBackground(new ListDirectoryBrowserTask(browser,
 			session, vfs, path, loadInfo, awtRunnable));
@@ -187,7 +181,7 @@ class BrowserView extends JPanel
 	 *
 	 * @param node
 	 * @param path
-	 * @param directory  
+	 * @param directory
 	 */
 	public void directoryLoaded(Object node, String path, java.util.List<VFSFile> directory)
 	{
@@ -198,7 +192,7 @@ class BrowserView extends JPanel
 
 			String parent = path;
 
-			for(;;)
+			while (true)
 			{
 				VFS _vfs = VFSManager.getVFSForPath(parent);
 				VFSFile file = null;
@@ -240,8 +234,7 @@ class BrowserView extends JPanel
 				parentList.insertElementAt(file,0);
 				String newParent = _vfs.getParentOfPath(parent);
 
-				if(newParent == null ||
-					MiscUtilities.pathsEqual(parent,newParent))
+				if(MiscUtilities.pathsEqual(parent,newParent))
 					break;
 				else
 					parent = newParent;
@@ -362,10 +355,13 @@ class BrowserView extends JPanel
 		// currently showing directory.
 		popup.addPopupMenuListener(new PopupMenuListener()
 		{
+			@Override
 			public void popupMenuCanceled(PopupMenuEvent e) {}
 
+			@Override
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
 
+			@Override
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
 			{
 				// we use SwingUtilities.invokeLater()
@@ -478,7 +474,7 @@ class BrowserView extends JPanel
 		public void mouseReleased(MouseEvent evt)
 		{
 			if(evt.getClickCount() % 2 != 0 &&
-				!GenericGUIUtilities.isMiddleButton(evt.getModifiers()))
+				!GenericGUIUtilities.isMiddleButton(evt))
 				return;
 
 			int row = parentDirectories.locationToIndex(evt.getPoint());
@@ -555,14 +551,14 @@ class BrowserView extends JPanel
 				}
 			}
 
-			if((evt.getModifiers() & InputEvent.BUTTON1_MASK) != 0
+			if(GenericGUIUtilities.isLeftButton(evt)
 				&& evt.getClickCount() % 2 == 0)
 			{
 				browser.filesActivated(evt.isShiftDown()
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN,true);
 			}
-			else if(GenericGUIUtilities.isMiddleButton(evt.getModifiers()))
+			else if(GenericGUIUtilities.isMiddleButton(evt))
 			{
 				if(evt.isShiftDown())
 					table.getSelectionModel().addSelectionInterval(row,row);
@@ -600,7 +596,7 @@ class BrowserView extends JPanel
 				}
 			}
 
-			if(GenericGUIUtilities.isMiddleButton(evt.getModifiers()))
+			if(GenericGUIUtilities.isMiddleButton(evt))
 			{
 				if(row == -1)
 					return;
@@ -643,16 +639,9 @@ class BrowserView extends JPanel
 
 	private static class LoadingPlaceholder {}
 	//}}}
-	
+
 	class ParentDirectoryList extends JList
 	{
-		@Override
-		public Dimension getPreferredSize() {
-			Dimension d = super.getPreferredSize();
-			splitPane.setDividerLocation(browser.isHorizontalLayout() ? d.width + 3 : d.height + 3);
-			return d;
-		}
-		
 		@Override
 		protected void processKeyEvent(KeyEvent evt)
 		{
@@ -663,12 +652,12 @@ class BrowserView extends JPanel
 				switch(evt.getKeyCode())
 				{
 				case KeyEvent.VK_DOWN:
-					evt.consume();			
-					if (row < parentDirectories.getSize().height-1) 
+					evt.consume();
+					if (row < parentDirectories.getSize().height-1)
 						parentDirectories.setSelectedIndex(++row);
 					break;
 				case KeyEvent.VK_LEFT:
-					if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+					if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
 					{
 						evt.consume();
 						browser.previousDirectory();
@@ -676,7 +665,7 @@ class BrowserView extends JPanel
 					else super.processEvent(evt);
 					break;
 				case KeyEvent.VK_RIGHT:
-					if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+					if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
 					{
 						evt.consume();
 						browser.nextDirectory();
@@ -685,7 +674,7 @@ class BrowserView extends JPanel
 					break;
 				case KeyEvent.VK_TAB:
 					evt.consume();
-					if ((evt.getModifiers() & InputEvent.SHIFT_MASK) > 0)
+					if ((evt.getModifiersEx() & SHIFT_DOWN_MASK) == SHIFT_DOWN_MASK)
 						browser.focusOnDefaultComponent();
 					else
 						table.requestFocus();
@@ -702,12 +691,12 @@ class BrowserView extends JPanel
 					EditAction up = ac.getAction("vfs.browser.up");
 					ac.invokeAction(evt, up);
 					break;
-				case KeyEvent.VK_F5: 
+				case KeyEvent.VK_F5:
 					evt.consume();
 					EditAction reload = ac.getAction("vfs.browser.reload");
 					ac.invokeAction(evt, reload);
 					break;
-				case KeyEvent.VK_ENTER: 
+				case KeyEvent.VK_ENTER:
 					evt.consume();
 					if(row != -1)
 					{
@@ -725,13 +714,13 @@ class BrowserView extends JPanel
 					break;
 /* These actions don't work because they look at the EntryTable for the current selected
  * 	item. We need actions that look at the parentDirectoryList item instead.
- * 					
+ *
 				case KeyEvent.VK_DELETE:
 					evt.consume();
 					ea = ac.getAction("vfs.browser.delete");
 					ac.invokeAction(evt, ea);
-					break; 
-				case KeyEvent.CTRL_MASK | KeyEvent.VK_N:  
+					break;
+				case KeyEvent.CTRL_MASK | KeyEvent.VK_N:
 					evt.consume();
 					ea = ac.getAction("vfs.browser.new-file");
 					ac.invokeAction(evt, ea);
@@ -740,7 +729,7 @@ class BrowserView extends JPanel
 					evt.consume();
 					ea = ac.getAction("vfs.browser.new-directory");
 					ac.invokeAction(evt, ea);
-					break; */					
+					break; */
 				}
 			}
 			else if(evt.getID() == KeyEvent.KEY_TYPED)
@@ -777,7 +766,7 @@ class BrowserView extends JPanel
 			}
 			if (!evt.isConsumed())
 				super.processKeyEvent(evt);
-		}	
+		}
 	}
-	
+
 }

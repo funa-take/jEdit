@@ -33,7 +33,7 @@ import org.gjt.sp.util.GenericGUIUtilities;
 /**
  * Text area with a history.
  * @author Slava Pestov
- * @version $Id: HistoryTextArea.java 24411 2016-06-19 11:02:53Z kerik-sf $
+ * @version $Id: HistoryTextArea.java 24859 2018-04-10 23:06:33Z daleanson $
  */
 public class HistoryTextArea extends JTextArea
 {
@@ -50,7 +50,7 @@ public class HistoryTextArea extends JTextArea
 			KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,
 			Collections.singleton(
 				KeyStroke.getKeyStroke(KeyEvent.VK_TAB,
-					InputEvent.SHIFT_MASK)));
+					InputEvent.SHIFT_DOWN_MASK)));
 	} //}}}
 
 	//{{{ getModel() method

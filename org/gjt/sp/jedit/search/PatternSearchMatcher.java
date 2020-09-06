@@ -31,7 +31,7 @@ import org.gjt.sp.util.ReverseCharSequence;
  * @see java.util.regex.Pattern
  *
  * @author Marcelo Vanzin
- * @version $Id: PatternSearchMatcher.java 24166 2015-11-28 22:18:41Z daleanson $
+ * @version $Id: PatternSearchMatcher.java 25301 2020-05-01 16:38:04Z kpouer $
  * @since jEdit 4.3pre5
  */
 public class PatternSearchMatcher extends SearchMatcher
@@ -314,7 +314,7 @@ public class PatternSearchMatcher extends SearchMatcher
 	}
 
 	//{{{ Private members
-	private int flags;
+	private final int flags;
 	private Pattern	re;
 	private final String pattern;
 	//}}}

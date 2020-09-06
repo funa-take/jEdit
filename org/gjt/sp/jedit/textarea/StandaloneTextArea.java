@@ -27,7 +27,6 @@ package org.gjt.sp.jedit.textarea;
 //{{{ Imports
 import java.awt.Color;
 import java.awt.Font;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,8 +34,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
 import org.gjt.sp.jedit.IPropertyManager;
 import org.gjt.sp.jedit.JEditBeanShellAction;
@@ -58,7 +56,6 @@ import org.gjt.sp.jedit.syntax.ModeProvider;
 import org.gjt.sp.jedit.syntax.ParserRuleSet;
 import org.gjt.sp.jedit.syntax.SyntaxStyle;
 import org.gjt.sp.jedit.syntax.TokenMarker;
-import org.gjt.sp.util.IOUtilities;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.SyntaxUtilities;
 //}}}
@@ -97,7 +94,7 @@ import org.gjt.sp.util.SyntaxUtilities;
  * @author Slava Pestov
  * @author John Gellene (API documentation)
    @author Matthieu Casanova
- * @version $Id: StandaloneTextArea.java 23821 2015-01-04 14:31:09Z ezust $
+ * @version $Id: StandaloneTextArea.java 25104 2020-03-31 22:25:46Z kpouer $
  */
 public class StandaloneTextArea extends TextArea
 {
@@ -231,15 +228,15 @@ public class StandaloneTextArea extends TextArea
 			"view.gutter.numberAlignment");
 		if ("right".equals(alignment))
 		{
-			gutter.setLineNumberAlignment(Gutter.RIGHT);
+			gutter.setLineNumberAlignment(SwingConstants.RIGHT);
 		}
 		else if ("center".equals(alignment))
 		{
-			gutter.setLineNumberAlignment(Gutter.CENTER);
+			gutter.setLineNumberAlignment(SwingConstants.CENTER);
 		}
 		else // left == default case
 		{
-			gutter.setLineNumberAlignment(Gutter.LEFT);
+			gutter.setLineNumberAlignment(SwingConstants.LEFT);
 		}
 
 		gutter.setFont(getFontProperty("view.gutter.font"));
@@ -270,7 +267,8 @@ public class StandaloneTextArea extends TextArea
 		painter.setEOLMarkersPainted(getBooleanProperty(
 			"view.eolMarkers"));
 		String emc = getProperty("view.eolMarkerChar");
-		if (emc.length() > 0) painter.setEOLMarkerChar(emc);
+		if (!emc.isEmpty())
+			painter.setEOLMarkerChar(emc);
 		painter.setEOLMarkerColor(
 			getColorProperty("view.eolMarkerColor"));
 		painter.setWrapGuidePainted(getBooleanProperty(
@@ -541,13 +539,7 @@ public class StandaloneTextArea extends TextArea
 		final Properties props = new Properties();
 		props.putAll(loadProperties("/keymaps/jEdit_keys.props"));
 		props.putAll(loadProperties("/org/gjt/sp/jedit/jedit.props"));
-		StandaloneTextArea textArea = new StandaloneTextArea(new IPropertyManager()
-		{
-			public String getProperty(String name)
-			{
-				return props.getProperty(name);
-			}
-		});
+		StandaloneTextArea textArea = new StandaloneTextArea(props::getProperty);
 		textArea.getBuffer().setProperty("folding", "explicit");
 		return textArea;
 	} // }}}
@@ -562,26 +554,14 @@ public class StandaloneTextArea extends TextArea
 		else
 			file = new File(fileName);
 
-		InputStream in = null;
-		try
+		try(InputStream in = file.isFile() ? new FileInputStream(file) : TextArea.class.getResourceAsStream(fileName))
 		{
-			if (file.isFile())
-			{
-				in = new FileInputStream(file);
-			}
-			else
-			{
-				in = TextArea.class.getResourceAsStream(fileName);
-			}
+
 			props.load(in);
 		}
 		catch (IOException e)
 		{
 			Log.log(Log.ERROR, TextArea.class, e);
-		}
-		finally
-		{
-			IOUtilities.closeQuietly((Closeable)in);
 		}
 		return props;
 	} //}}}
@@ -615,6 +595,7 @@ public class StandaloneTextArea extends TextArea
 			return iPropertyManager.getProperty(name);
 		}
 
+		@Override
 		public AbstractInputHandler getInputHandler()
 		{
 			return textArea.getInputHandler();
@@ -639,7 +620,6 @@ public class StandaloneTextArea extends TextArea
 	}
 
 	//{{{ main() method
-
 	public static void main(String[] args)
 	{
 		JFrame frame = new JFrame();

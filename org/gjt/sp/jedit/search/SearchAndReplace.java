@@ -63,7 +63,7 @@ import org.gjt.sp.util.*;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: SearchAndReplace.java 24211 2015-12-10 03:33:28Z daleanson $
+ * @version $Id: SearchAndReplace.java 24989 2020-03-10 07:55:36Z kpouer $
  */
 public class SearchAndReplace
 {
@@ -398,7 +398,7 @@ public class SearchAndReplace
 	{
 		// component that will parent any dialog boxes
 		Component comp = SearchDialog.getSearchDialog(view);
-		if(comp == null)
+		if(!comp.isShowing())
 			comp = view;
 
 		record(view,"hyperSearch(view," + selection + ')',false,
@@ -456,7 +456,7 @@ public class SearchAndReplace
 	{
 		// component that will parent any dialog boxes
 		Component comp = SearchDialog.getSearchDialog(view);
-		if(comp == null || !comp.isShowing())
+		if(!comp.isShowing())
 			comp = view;
 
 		String path = fileset.getNextFile(view,null);
@@ -572,7 +572,7 @@ loop:		for(;;)
 				}
 				else
 				{
-					Integer[] args = {Integer.valueOf(reverse ? 1 : 0)};
+					Integer[] args = {reverse ? 1 : 0};
 					int result = GUIUtilities.confirm(comp,
 						"keepsearching",args,
 						JOptionPane.YES_NO_OPTION,
@@ -705,7 +705,7 @@ loop:		for(;;)
 	{
 		// component that will parent any dialog boxes
 		Component comp = SearchDialog.getSearchDialog(view);
-		if(comp == null)
+		if(!comp.isShowing())
 			comp = view;
 
 		JEditTextArea textArea = view.getTextArea();
@@ -766,8 +766,7 @@ loop:		for(;;)
 
 			if(!BeanShell.isScriptRunning())
 			{
-				Object[] args = {Integer.valueOf(retVal),
-				                 Integer.valueOf(1)};
+				Object[] args = {retVal, 1};
 				view.getStatus().setMessageAndClear(jEdit.getProperty(
 					"view.status.replace-all",args));
 			}
@@ -808,7 +807,7 @@ loop:		for(;;)
 
 		// component that will parent any dialog boxes
 		Component comp = SearchDialog.getSearchDialog(view);
-		if(comp == null)
+		if(!comp.isShowing())
 			comp = view;
 
 		boolean smartCaseReplace = getSmartCaseReplace();
@@ -867,7 +866,7 @@ loop:		for(;;)
 	{
 		// component that will parent any dialog boxes
 		Component comp = SearchDialog.getSearchDialog(view);
-		if(comp == null)
+		if(!comp.isShowing())
 			comp = view;
 
 		if(fileset.getFileCount(view) == 0)
@@ -962,8 +961,7 @@ loop:		while(path != null)
 		/* Don't do this when playing a macro, cos it's annoying */
 		if(!BeanShell.isScriptRunning())
 		{
-			Object[] args = {Integer.valueOf(occurCount),
-			                 Integer.valueOf(fileCount)};
+			Object[] args = {occurCount, fileCount};
 			view.getStatus().setMessageAndClear(jEdit.getProperty(
 				"view.status.replace-all",args));
 			if(occurCount == 0)
@@ -1072,7 +1070,7 @@ loop:		while(path != null)
 	 */
 	private static void initReplace() throws Exception
 	{
-		if(beanshell && replace.length() != 0)
+		if(beanshell && !replace.isEmpty())
 		{
 			String text;
 			if( replace.trim().startsWith( "{" ) )

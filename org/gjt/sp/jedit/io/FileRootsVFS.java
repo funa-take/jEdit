@@ -25,6 +25,7 @@
 package org.gjt.sp.jedit.io;
 
 //{{{ Imports
+import javax.annotation.Nonnull;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.Component;
 import java.io.File;
@@ -36,7 +37,7 @@ import org.gjt.sp.jedit.OperatingSystem;
 /**
  * A VFS that lists local root filesystems.
  * @author Slava Pestov
- * @version $Id: FileRootsVFS.java 23221 2013-09-29 20:03:32Z shlomy $
+ * @version $Id: FileRootsVFS.java 25330 2020-05-09 14:21:52Z kpouer $
  */
 public class FileRootsVFS extends VFS
 {
@@ -51,14 +52,16 @@ public class FileRootsVFS extends VFS
 	} //}}}
 
 	//{{{ getParentOfPath() method
+	@Override
+	@Nonnull
 	public String getParentOfPath(String path)
 	{
 		return PROTOCOL + ':';
 	} //}}}
 
 	//{{{ _listFiles() method
-	public VFSFile[] _listFiles(Object session, String url,
-		Component comp)
+	@Override
+	public VFSFile[] _listFiles(Object session, String url, Component comp)
 	{
 		File[] roots = listRoots();
 
@@ -73,14 +76,14 @@ public class FileRootsVFS extends VFS
 	} //}}}
 
 	//{{{ _getFile() method
-	public VFSFile _getFile(Object session, String path,
-		Component comp)
+	@Override
+	public VFSFile _getFile(Object session, String path, Component comp)
 	{
 		return new Root(new File(path));
 	} //}}}
 
 	//{{{ Private members
-	private static FileSystemView fsView = FileSystemView.getFileSystemView();
+	private static final FileSystemView fsView = FileSystemView.getFileSystemView();
 
 	//{{{ listRoots() method
 	private static File[] listRoots()
@@ -89,7 +92,8 @@ public class FileRootsVFS extends VFS
 		{
 			// Nasty hardcoded values
 			File[] volumes = new File("/Volumes").listFiles();
-			LinkedList<File> roots = new LinkedList<File>();
+			assert volumes != null : "Volumes cannot be null on MacOS";
+			LinkedList<File> roots = new LinkedList<>();
 
 			roots.add(new File("/"));
 
@@ -100,7 +104,7 @@ public class FileRootsVFS extends VFS
 					roots.add(volume);
 			}
 
-			return roots.toArray(new File[roots.size()]);
+			return roots.toArray(new File[0]);
 		}
 		else
 		{
@@ -159,6 +163,7 @@ public class FileRootsVFS extends VFS
 				setType(VFSFile.FILE);
 		}
 
+		@Override
 		public String getExtendedAttribute(String name)
 		{
 			if(name.equals(EA_TYPE))

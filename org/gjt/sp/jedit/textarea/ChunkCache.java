@@ -42,7 +42,7 @@ import org.gjt.sp.util.Log;
  * The array is resized when the TextArea geometry changes  
  *
  * @author Slava Pestov
- * @version $Id: ChunkCache.java 24373 2016-05-05 03:02:43Z daleanson $
+ * @version $Id: ChunkCache.java 25338 2020-05-16 16:47:21Z kpouer $
  */
 class ChunkCache
 {
@@ -50,7 +50,7 @@ class ChunkCache
 	ChunkCache(TextArea textArea)
 	{
 		this.textArea = textArea;
-		outFull = new ArrayList<Chunk>();
+		outFull = new ArrayList<>();
 		outFullPhysicalLine = -1;
 		tokenHandler = new DisplayTokenHandler();
 	} //}}}
@@ -65,10 +65,9 @@ class ChunkCache
 	int getMaxHorizontalScrollWidth()
 	{
 		int max = 0;
-		for(int i = 0; i < lineInfo.length; i++)
+		for (LineInfo info : lineInfo)
 		{
-			LineInfo info = lineInfo[i];
-			if(info.width > max)
+			if (info.width > max)
 				max = info.width;
 		}
 		return max;
@@ -507,14 +506,16 @@ class ChunkCache
 
 		assert physicalLine == outFullPhysicalLine;
 
-		List<Chunk> chunkList = null;
-		if(outFull.isEmpty()) {
-			chunkList = new ArrayList<Chunk>();
+		List<Chunk> chunkList;
+		if (outFull.isEmpty())
+		{
+			chunkList = new ArrayList<>();
 			chunkList.add(null);
-		} else
+		}
+		else
 			chunkList = outFull;
 
-		List<LineInfo> returnValue = new ArrayList<LineInfo>(chunkList.size());
+		List<LineInfo> returnValue = new ArrayList<>(chunkList.size());
 		getLineInfosForPhysicalLine(physicalLine,returnValue, chunkList);
 		return returnValue.toArray(new LineInfo[chunkList.size()]);
 	} //}}}
@@ -656,7 +657,7 @@ class ChunkCache
 		if(Debug.CHUNK_CACHE_DEBUG)
 		{
 			Log.log(Log.DEBUG,this,"Updating chunks from " + firstScreenLine
-				+ " to " + lastScreenLine);
+				+ " to " + lastScreenLine + " firstInvalidLine " + firstInvalidLine);
 		}
 
 		// Below comment is not true any more (at least partly):
@@ -664,8 +665,7 @@ class ChunkCache
 		// invalidated, all screen lines/subregions of that line are
 		// invalidated as well. See below comment for code that tries
 		// to uphold this assumption.
-		List<Chunk> out = new ArrayList<Chunk>(0);
-
+		List<Chunk> out = new ArrayList<>(0);
 		int offset;
 		int length;
 
@@ -814,7 +814,8 @@ class ChunkCache
 	{
 		assert physicalLine >= 0;
 
-		if(outFullPhysicalLine != physicalLine) {
+		if(outFullPhysicalLine != physicalLine)
+		{
 			TextAreaPainter painter = textArea.getPainter();
 			TabExpander expander= textArea.getTabExpander();
 			tokenHandler.init(painter.getStyles(),
@@ -846,11 +847,11 @@ class ChunkCache
 		/**
 		 * The offset where begins the line.
 		 */
-		int offset = 0;;
+		int offset;
 		/**
 		 * The line length.
 		 */
-		int length = 0;
+		int length;
 		/**
 		 * true if it is the first subregion of a line.
 		 */
@@ -859,10 +860,10 @@ class ChunkCache
 		 * True if it is the last subregion of a line.
 		 */
 		boolean lastSubregion;
-		Chunk chunks = null;
+		Chunk chunks;
 		/** The line width. */
-		int width = 0;
-		TokenMarker.LineContext lineContext = null;
+		int width;
+		TokenMarker.LineContext lineContext;
 
 		@Override
 		public String toString()

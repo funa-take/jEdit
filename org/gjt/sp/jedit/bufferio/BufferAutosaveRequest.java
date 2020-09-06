@@ -34,7 +34,7 @@ import org.gjt.sp.util.*;
 /**
  * A buffer autosave request.
  * @author Slava Pestov
- * @version $Id: BufferAutosaveRequest.java 24725 2017-07-14 14:41:01Z ezust $
+ * @version $Id: BufferAutosaveRequest.java 25270 2020-04-18 19:11:28Z kpouer $
  */
 public class BufferAutosaveRequest extends BufferIORequest
 {
@@ -54,6 +54,7 @@ public class BufferAutosaveRequest extends BufferIORequest
 	} //}}}
 
 	//{{{ run() method
+	@Override
 	public void _run()
 	{
 		OutputStream out = null;
@@ -103,11 +104,11 @@ public class BufferAutosaveRequest extends BufferIORequest
 		}
 		finally
 		{
-			IOUtilities.closeQuietly((Closeable)out);
+			IOUtilities.closeQuietly(out);
 		}
 	} //}}}
 
-	private void cleanUpIncomplete(OutputStream out)
+	private void cleanUpIncomplete(Closeable out)
 	{
 		// Incomplete autosave file should not exist.
 		if(out != null)
@@ -115,7 +116,6 @@ public class BufferAutosaveRequest extends BufferIORequest
 			try
 			{
 				out.close();
-				out = null;
 				vfs._delete(session,path,view);
 			}
 			catch(IOException ioe)

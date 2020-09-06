@@ -41,10 +41,10 @@ import org.gjt.sp.util.*;
 
 @Deprecated
 /**
- * @version $Id: BufferPrintable.java 24592 2017-01-20 02:34:44Z vampire0 $
+ * @version $Id: BufferPrintable.java 24918 2019-08-13 14:18:47Z vampire0 $
  * @deprecated
  * Replaced by BufferPrinter1_7. All the workarounds for java 1.3 and 1.4 don't
- * matter any more since jEdit requires java 1.8 at minimum.
+ * matter any more since jEdit requires java 11 at minimum.
  * Leaving this in place rather than removing it since it might be needed by the
  * stand-alone text area.
  */

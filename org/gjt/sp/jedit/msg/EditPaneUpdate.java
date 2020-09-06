@@ -21,10 +21,13 @@ package org.gjt.sp.jedit.msg;
 
 import org.gjt.sp.jedit.*;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
+
 /**
  * Message sent when an edit pane-related change occurs. 
  * @author Slava Pestov
- * @version $Id: EditPaneUpdate.java 14916 2009-04-12 15:49:33Z ezust $
+ * @version $Id: EditPaneUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
  *
  * @since jEdit 2.5pre1
  */
@@ -65,12 +68,10 @@ public class EditPaneUpdate extends EBMessage
 	 * @param editPane The edit pane
 	 * @param what What happened
 	 */
-	public EditPaneUpdate(EditPane editPane, Object what)
+	public EditPaneUpdate(EditPane editPane, @Nonnull Object what)
 	{
 		super(editPane);
-		if(what == null)
-			throw new NullPointerException("What must be non-null");
-
+		Objects.requireNonNull(what);
 		this.what = what;
 	}
 
@@ -90,12 +91,13 @@ public class EditPaneUpdate extends EBMessage
 		return (EditPane)getSource();
 	}
 
+	@Override
 	public String paramString()
 	{
 		return "what=" + what + "," + super.paramString();
 	}
 	
 	// private members
-	private Object what;
+	private final Object what;
 
 }

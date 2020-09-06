@@ -35,7 +35,7 @@ import org.gjt.sp.util.Log;
  * Known plugins to be using this: BufferLocal, Navigator.
  * 
  * @since jEdit 4.3pre4
- * @version $Id: BufferChanging.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: BufferChanging.java 25325 2020-05-09 08:34:40Z kpouer $
  */
 public class BufferChanging extends PositionChanging
 {
@@ -62,5 +62,5 @@ public class BufferChanging extends PositionChanging
 		return m_buffer;
 	}
 
-	private Buffer m_buffer;
+	private final Buffer m_buffer;
 }

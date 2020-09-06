@@ -16,20 +16,14 @@
 
 package org.gjt.sp.jedit.gui;
 
+import javax.annotation.Nonnull;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager2;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 import static java.awt.Component.CENTER_ALIGNMENT;
 
@@ -54,51 +48,51 @@ import static org.gjt.sp.jedit.gui.ExtendedGridLayoutConstraints.REMAINDER;
   * <a href="http://download.oracle.com/javase/6/docs/api/java/awt/GridBagLayout.html">{@code java.awt.GridBagLayout}</a>
   * with the difference of vertical and horizontal gaps that can be configured:
   * <hr>
-  * <blockquote><pre><font color="#000000">
-  * <font color="#000000">   1:</font><font color="#009966"><strong>import</strong></font> java.awt.Button;
-  * <font color="#000000">   2:</font><font color="#009966"><strong>import</strong></font> java.awt.Dimension;
-  * <font color="#000000">   3:</font>
-  * <font color="#000000">   4:</font><font color="#009966"><strong>import</strong></font> javax.swing.JDialog;
-  * <font color="#990066">   5:</font>
-  * <font color="#000000">   6:</font><font color="#009966"><strong>import</strong></font> org.gjt.sp.jedit.gui.ExtendedGridLayout;
-  * <font color="#000000">   7:</font><font color="#009966"><strong>import</strong></font> org.gjt.sp.jedit.gui.ExtendedGridLayoutConstraints;
-  * <font color="#000000">   8:</font>
-  * <font color="#000000">   9:</font><font color="#009966"><strong>import</strong></font> <font color="#006699"><strong>static</strong></font> org.gjt.sp.jedit.gui.ExtendedGridLayoutConstraints.REMAINDER;
-  * <font color="#990066">  10:</font>
-  * <font color="#000000">  11:</font><font color="#006699"><strong>public</strong></font> <font color="#0099ff"><strong>class</strong></font> ExampleDialog <font color="#006699"><strong>extends</strong></font> JDialog <font color="#000000"><strong>{</strong></font>
-  * <font color="#000000">  12:</font>    <font color="#006699"><strong>public</strong></font> <font color="#9966ff">ExampleDialog</font>() <font color="#000000"><strong>{</strong></font>
-  * <font color="#000000">  13:</font>        <font color="#cc00cc">super</font>(<font color="#cc00cc">null</font>,<font color="#ff00cc">&quot;</font><font color="#ff00cc">Example</font><font color="#ff00cc"> </font><font color="#ff00cc">Dialog</font><font color="#ff00cc">&quot;</font>,<font color="#cc00cc">true</font>);
-  * <font color="#000000">  14:</font>        <font color="#9966ff">setLayout</font>(<font color="#006699"><strong>new</strong></font> <font color="#9966ff">ExtendedGridLayout</font>(<font color="#ff0000">5</font>,<font color="#ff0000">5</font>,<font color="#006699"><strong>new</strong></font> <font color="#9966ff">Insets</font>(<font color="#ff0000">5</font>,<font color="#ff0000">5</font>,<font color="#ff0000">5</font>,<font color="#ff0000">5</font>)));
-  * <font color="#990066">  15:</font>
-  * <font color="#000000">  16:</font>        <font color="#9966ff">add</font>(<font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button1</font><font color="#ff00cc">&quot;</font>));
-  * <font color="#000000">  17:</font>        <font color="#9966ff">add</font>(<font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button2</font><font color="#ff00cc">&quot;</font>));
-  * <font color="#000000">  18:</font>        <font color="#9966ff">add</font>(<font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button3</font><font color="#ff00cc">&quot;</font>));
-  * <font color="#000000">  19:</font>        <font color="#9966ff">add</font>(<font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button4</font><font color="#ff00cc">&quot;</font>));
-  * <font color="#990066">  20:</font>        Button button <font color="#000000"><strong>=</strong></font> <font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button5</font><font color="#ff00cc">&quot;</font>);
-  * <font color="#000000">  21:</font>        <font color="#9966ff">add</font>(button,<font color="#006699"><strong>new</strong></font> <font color="#9966ff">ExtendedGridLayoutConstraints</font>(<font color="#ff0000">1</font>,REMAINDER,<font color="#ff0000">1</font>,button));
-  * <font color="#000000">  22:</font>        button <font color="#000000"><strong>=</strong></font> <font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button6</font><font color="#ff00cc">&quot;</font>);
-  * <font color="#000000">  23:</font>        <font color="#9966ff">add</font>(button,<font color="#006699"><strong>new</strong></font> <font color="#9966ff">ExtendedGridLayoutConstraints</font>(<font color="#ff0000">2</font>,<font color="#ff0000">3</font>,<font color="#ff0000">1</font>,button));
-  * <font color="#000000">  24:</font>        button <font color="#000000"><strong>=</strong></font> <font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button7</font><font color="#ff00cc">&quot;</font>);
-  * <font color="#990066">  25:</font>        <font color="#9966ff">add</font>(button,<font color="#006699"><strong>new</strong></font> <font color="#9966ff">ExtendedGridLayoutConstraints</font>(<font color="#ff0000">2</font>,button));
-  * <font color="#000000">  26:</font>        button <font color="#000000"><strong>=</strong></font> <font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button8</font><font color="#ff00cc">&quot;</font>);
-  * <font color="#000000">  27:</font>        <font color="#9966ff">add</font>(button,<font color="#006699"><strong>new</strong></font> <font color="#9966ff">ExtendedGridLayoutConstraints</font>(<font color="#ff0000">3</font>,<font color="#ff0000">1</font>,<font color="#ff0000">2</font>,button));
-  * <font color="#000000">  28:</font>        button <font color="#000000"><strong>=</strong></font> <font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button9</font><font color="#ff00cc">&quot;</font>);
-  * <font color="#000000">  29:</font>        <font color="#9966ff">add</font>(button,<font color="#006699"><strong>new</strong></font> <font color="#9966ff">ExtendedGridLayoutConstraints</font>(<font color="#ff0000">3</font>,<font color="#ff0000">3</font>,<font color="#ff0000">1</font>,button));
-  * <font color="#990066">  30:</font>        button <font color="#000000"><strong>=</strong></font> <font color="#9966ff">makeButton</font>(<font color="#ff00cc">&quot;</font><font color="#ff00cc">Button10</font><font color="#ff00cc">&quot;</font>);
-  * <font color="#000000">  31:</font>        <font color="#9966ff">add</font>(button,<font color="#006699"><strong>new</strong></font> <font color="#9966ff">ExtendedGridLayoutConstraints</font>(<font color="#ff0000">4</font>,REMAINDER,<font color="#ff0000">1</font>,button));
-  * <font color="#000000">  32:</font>
-  * <font color="#000000">  33:</font>        <font color="#9966ff">pack</font>();
-  * <font color="#000000">  34:</font>        <font color="#9966ff">setLocationRelativeTo</font>(<font color="#cc00cc">null</font>);
-  * <font color="#990066">  35:</font>        <font color="#9966ff">setVisible</font>(<font color="#cc00cc">true</font>);
-  * <font color="#000000">  36:</font>    <font color="#000000"><strong>}</strong></font>
-  * <font color="#000000">  37:</font>
-  * <font color="#000000">  38:</font>    <font color="#006699"><strong>private</strong></font> Button <font color="#9966ff">makeButton</font>(String name) <font color="#000000"><strong>{</strong></font>
-  * <font color="#000000">  39:</font>        Button button <font color="#000000"><strong>=</strong></font> <font color="#006699"><strong>new</strong></font> <font color="#9966ff">Button</font>(name);
-  * <font color="#990066">  40:</font>        button.<font color="#9966ff">setMaximumSize</font>(<font color="#006699"><strong>new</strong></font> <font color="#9966ff">Dimension</font>(Integer.MAX_VALUE,Integer.MAX_VALUE));
-  * <font color="#000000">  41:</font>        <font color="#006699"><strong>return</strong></font> button;
-  * <font color="#000000">  42:</font>    <font color="#000000"><strong>}</strong></font>
-  * <font color="#000000">  43:</font><font color="#000000"><strong>}</strong></font>
-  * </font></pre></blockquote>
+  * <blockquote><pre><span style="color:#000000">
+  * <span style="color:#000000">   1:</span><span style="color:#009966"><strong>import</strong></span> java.awt.Button;
+  * <span style="color:#000000">   2:</span><span style="color:#009966"><strong>import</strong></span> java.awt.Dimension;
+  * <span style="color:#000000">   3:</span>
+  * <span style="color:#000000">   4:</span><span style="color:#009966"><strong>import</strong></span> javax.swing.JDialog;
+  * <span style="color:#990066">   5:</span>
+  * <span style="color:#000000">   6:</span><span style="color:#009966"><strong>import</strong></span> org.gjt.sp.jedit.gui.ExtendedGridLayout;
+  * <span style="color:#000000">   7:</span><span style="color:#009966"><strong>import</strong></span> org.gjt.sp.jedit.gui.ExtendedGridLayoutConstraints;
+  * <span style="color:#000000">   8:</span>
+  * <span style="color:#000000">   9:</span><span style="color:#009966"><strong>import</strong></span> <span style="color:#006699"><strong>static</strong></span> org.gjt.sp.jedit.gui.ExtendedGridLayoutConstraints.REMAINDER;
+  * <span style="color:#990066">  10:</span>
+  * <span style="color:#000000">  11:</span><span style="color:#006699"><strong>public</strong></span> <span style="color:#0099ff"><strong>class</strong></span> ExampleDialog <span style="color:#006699"><strong>extends</strong></span> JDialog <span style="color:#000000"><strong>{</strong></span>
+  * <span style="color:#000000">  12:</span>    <span style="color:#006699"><strong>public</strong></span> <span style="color:#9966ff">ExampleDialog</span>() <span style="color:#000000"><strong>{</strong></span>
+  * <span style="color:#000000">  13:</span>        <span style="color:#cc00cc">super</span>(<span style="color:#cc00cc">null</span>,<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Example</span><span style="color:#ff00cc"> </span><span style="color:#ff00cc">Dialog</span><span style="color:#ff00cc">&quot;</span>,<span style="color:#cc00cc">true</span>);
+  * <span style="color:#000000">  14:</span>        <span style="color:#9966ff">setLayout</span>(<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">ExtendedGridLayout</span>(<span style="color:#ff0000">5</span>,<span style="color:#ff0000">5</span>,<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">Insets</span>(<span style="color:#ff0000">5</span>,<span style="color:#ff0000">5</span>,<span style="color:#ff0000">5</span>,<span style="color:#ff0000">5</span>)));
+  * <span style="color:#990066">  15:</span>
+  * <span style="color:#000000">  16:</span>        <span style="color:#9966ff">add</span>(<span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button1</span><span style="color:#ff00cc">&quot;</span>));
+  * <span style="color:#000000">  17:</span>        <span style="color:#9966ff">add</span>(<span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button2</span><span style="color:#ff00cc">&quot;</span>));
+  * <span style="color:#000000">  18:</span>        <span style="color:#9966ff">add</span>(<span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button3</span><span style="color:#ff00cc">&quot;</span>));
+  * <span style="color:#000000">  19:</span>        <span style="color:#9966ff">add</span>(<span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button4</span><span style="color:#ff00cc">&quot;</span>));
+  * <span style="color:#990066">  20:</span>        Button button <span style="color:#000000"><strong>=</strong></span> <span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button5</span><span style="color:#ff00cc">&quot;</span>);
+  * <span style="color:#000000">  21:</span>        <span style="color:#9966ff">add</span>(button,<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">ExtendedGridLayoutConstraints</span>(<span style="color:#ff0000">1</span>,REMAINDER,<span style="color:#ff0000">1</span>,button));
+  * <span style="color:#000000">  22:</span>        button <span style="color:#000000"><strong>=</strong></span> <span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button6</span><span style="color:#ff00cc">&quot;</span>);
+  * <span style="color:#000000">  23:</span>        <span style="color:#9966ff">add</span>(button,<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">ExtendedGridLayoutConstraints</span>(<span style="color:#ff0000">2</span>,<span style="color:#ff0000">3</span>,<span style="color:#ff0000">1</span>,button));
+  * <span style="color:#000000">  24:</span>        button <span style="color:#000000"><strong>=</strong></span> <span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button7</span><span style="color:#ff00cc">&quot;</span>);
+  * <span style="color:#990066">  25:</span>        <span style="color:#9966ff">add</span>(button,<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">ExtendedGridLayoutConstraints</span>(<span style="color:#ff0000">2</span>,button));
+  * <span style="color:#000000">  26:</span>        button <span style="color:#000000"><strong>=</strong></span> <span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button8</span><span style="color:#ff00cc">&quot;</span>);
+  * <span style="color:#000000">  27:</span>        <span style="color:#9966ff">add</span>(button,<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">ExtendedGridLayoutConstraints</span>(<span style="color:#ff0000">3</span>,<span style="color:#ff0000">1</span>,<span style="color:#ff0000">2</span>,button));
+  * <span style="color:#000000">  28:</span>        button <span style="color:#000000"><strong>=</strong></span> <span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button9</span><span style="color:#ff00cc">&quot;</span>);
+  * <span style="color:#000000">  29:</span>        <span style="color:#9966ff">add</span>(button,<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">ExtendedGridLayoutConstraints</span>(<span style="color:#ff0000">3</span>,<span style="color:#ff0000">3</span>,<span style="color:#ff0000">1</span>,button));
+  * <span style="color:#990066">  30:</span>        button <span style="color:#000000"><strong>=</strong></span> <span style="color:#9966ff">makeButton</span>(<span style="color:#ff00cc">&quot;</span><span style="color:#ff00cc">Button10</span><span style="color:#ff00cc">&quot;</span>);
+  * <span style="color:#000000">  31:</span>        <span style="color:#9966ff">add</span>(button,<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">ExtendedGridLayoutConstraints</span>(<span style="color:#ff0000">4</span>,REMAINDER,<span style="color:#ff0000">1</span>,button));
+  * <span style="color:#000000">  32:</span>
+  * <span style="color:#000000">  33:</span>        <span style="color:#9966ff">pack</span>();
+  * <span style="color:#000000">  34:</span>        <span style="color:#9966ff">setLocationRelativeTo</span>(<span style="color:#cc00cc">null</span>);
+  * <span style="color:#990066">  35:</span>        <span style="color:#9966ff">setVisible</span>(<span style="color:#cc00cc">true</span>);
+  * <span style="color:#000000">  36:</span>    <span style="color:#000000"><strong>}</strong></span>
+  * <span style="color:#000000">  37:</span>
+  * <span style="color:#000000">  38:</span>    <span style="color:#006699"><strong>private</strong></span> Button <span style="color:#9966ff">makeButton</span>(String name) <span style="color:#000000"><strong>{</strong></span>
+  * <span style="color:#000000">  39:</span>        Button button <span style="color:#000000"><strong>=</strong></span> <span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">Button</span>(name);
+  * <span style="color:#990066">  40:</span>        button.<span style="color:#9966ff">setMaximumSize</span>(<span style="color:#006699"><strong>new</strong></span> <span style="color:#9966ff">Dimension</span>(Integer.MAX_VALUE,Integer.MAX_VALUE));
+  * <span style="color:#000000">  41:</span>        <span style="color:#006699"><strong>return</strong></span> button;
+  * <span style="color:#000000">  42:</span>    <span style="color:#000000"><strong>}</strong></span>
+  * <span style="color:#000000">  43:</span><span style="color:#000000"><strong>}</strong></span>
+  * </span></pre></blockquote>
   * <hr>
   * If you use {@code REMAINDER} as colspan or rowspan then a component takes
   * up the remaining space in that column or row. Any additional components in
@@ -242,6 +236,7 @@ public class ExtendedGridLayout implements LayoutManager2
 	  * @throws IllegalArgumentException if {@code constraints} is not the right one for the component
 	  * @see ExtendedGridLayoutConstraints
 	  */
+	@Override
 	public void addLayoutComponent(Component component, Object constraints)
 	{
 		if (null == constraints)
@@ -277,12 +272,9 @@ public class ExtendedGridLayout implements LayoutManager2
 	  * @throws NullPointerException if {@code component} is {@code null}
 	  * @see ExtendedGridLayoutConstraints
 	  */
-	private ExtendedGridLayoutConstraints lookupConstraints(Component component)
+	private ExtendedGridLayoutConstraints lookupConstraints(@Nonnull Component component)
 	{
-		if (null == component)
-		{
-			throw new NullPointerException("component must not be null");
-		}
+		Objects.requireNonNull(component);
 		ExtendedGridLayoutConstraints constraints = comptable.get(component);
 		if (null == constraints)
 		{
@@ -297,6 +289,7 @@ public class ExtendedGridLayout implements LayoutManager2
 	  *
 	  * @param component The component to be removed
 	  */
+	@Override
 	public void removeLayoutComponent(Component component)
 	{
 		comptable.remove(component);
@@ -312,6 +305,7 @@ public class ExtendedGridLayout implements LayoutManager2
 	  * @param container The container for which the alignment should be returned
 	  * @return {@code java.awt.Component.CENTER_ALIGNMENT}
 	  */
+	@Override
 	public float getLayoutAlignmentX(Container container)
 	{
 		return CENTER_ALIGNMENT;
@@ -327,6 +321,7 @@ public class ExtendedGridLayout implements LayoutManager2
 	  * @param container The container for which the alignment should be returned
 	  * @return {@code java.awt.Component.CENTER_ALIGNMENT}
 	  */
+	@Override
 	public float getLayoutAlignmentY(Container container)
 	{
 		return CENTER_ALIGNMENT;
@@ -341,16 +336,10 @@ public class ExtendedGridLayout implements LayoutManager2
 	  * @see #maximumLayoutSize
 	  * @see #preferredLayoutSize
 	  */
+	@Override
 	public Dimension minimumLayoutSize(Container parent)
 	{
-		synchronized (parent.getTreeLock())
-		{
-			List<List<ExtendedGridLayoutConstraints>> gridRows = new ArrayList<List<ExtendedGridLayoutConstraints>>();
-			Set<ExtendedGridLayoutConstraints> colspans = new HashSet<ExtendedGridLayoutConstraints>();
-			Set<ExtendedGridLayoutConstraints> rowspans = new HashSet<ExtendedGridLayoutConstraints>();
-			Dimension gridSize = buildGrid(parent,gridRows,colspans,rowspans);
-			return getSize(parent,LayoutSize.MINIMUM,false,gridSize,gridRows,colspans,rowspans,new int[0][0]);
-		}
+		return computeLayoutSize(parent, LayoutSize.MINIMUM);
 	}
 
 	/**
@@ -362,16 +351,10 @@ public class ExtendedGridLayout implements LayoutManager2
 	  * @see #maximumLayoutSize
 	  * @see #minimumLayoutSize
 	  */
+	@Override
 	public Dimension preferredLayoutSize(Container parent)
 	{
-		synchronized (parent.getTreeLock())
-		{
-			List<List<ExtendedGridLayoutConstraints>> gridRows = new ArrayList<List<ExtendedGridLayoutConstraints>>();
-			Set<ExtendedGridLayoutConstraints> colspans = new HashSet<ExtendedGridLayoutConstraints>();
-			Set<ExtendedGridLayoutConstraints> rowspans = new HashSet<ExtendedGridLayoutConstraints>();
-			Dimension gridSize = buildGrid(parent,gridRows,colspans,rowspans);
-			return getSize(parent,LayoutSize.PREFERRED,false,gridSize,gridRows,colspans,rowspans,new int[0][0]);
-		}
+		return computeLayoutSize(parent, LayoutSize.PREFERRED);
 	}
 
 	/**
@@ -383,15 +366,22 @@ public class ExtendedGridLayout implements LayoutManager2
 	  * @see #minimumLayoutSize
 	  * @see #preferredLayoutSize
 	  */
+	@Override
 	public Dimension maximumLayoutSize(Container parent)
+	{
+		return computeLayoutSize(parent, LayoutSize.MAXIMUM);
+	}
+
+	@Nonnull
+	private Dimension computeLayoutSize(Container parent, LayoutSize layoutSize)
 	{
 		synchronized (parent.getTreeLock())
 		{
-			List<List<ExtendedGridLayoutConstraints>> gridRows = new ArrayList<List<ExtendedGridLayoutConstraints>>();
-			Set<ExtendedGridLayoutConstraints> colspans = new HashSet<ExtendedGridLayoutConstraints>();
-			Set<ExtendedGridLayoutConstraints> rowspans = new HashSet<ExtendedGridLayoutConstraints>();
-			Dimension gridSize = buildGrid(parent,gridRows,colspans,rowspans);
-			return getSize(parent,LayoutSize.MAXIMUM,false,gridSize,gridRows,colspans,rowspans,new int[0][0]);
+			List<List<ExtendedGridLayoutConstraints>> gridRows = new ArrayList<>();
+			Collection<ExtendedGridLayoutConstraints> colspans = new HashSet<>();
+			Collection<ExtendedGridLayoutConstraints> rowspans = new HashSet<>();
+			Dimension gridSize = buildGrid(parent, gridRows, colspans, rowspans);
+			return getSize(parent, layoutSize, false, gridSize, gridRows, colspans, rowspans, new int[0][0]);
 		}
 	}
 
@@ -401,6 +391,7 @@ public class ExtendedGridLayout implements LayoutManager2
 	  *
 	  * @param container The container for which the cached information should be discarded
 	  */
+	@Override
 	public void invalidateLayout(Container container)
 	{
 	}
@@ -410,14 +401,15 @@ public class ExtendedGridLayout implements LayoutManager2
 	  *
 	  * @param parent The container to be laid out
 	  */
+	@Override
 	public void layoutContainer(Container parent)
 	{
 		synchronized (parent.getTreeLock())
 		{
 			// Pass 1: build the grid
-			List<List<ExtendedGridLayoutConstraints>> gridRows = new ArrayList<List<ExtendedGridLayoutConstraints>>();
-			Set<ExtendedGridLayoutConstraints> colspans = new HashSet<ExtendedGridLayoutConstraints>();
-			Set<ExtendedGridLayoutConstraints> rowspans = new HashSet<ExtendedGridLayoutConstraints>();
+			List<List<ExtendedGridLayoutConstraints>> gridRows = new ArrayList<>();
+			Collection<ExtendedGridLayoutConstraints> colspans = new HashSet<>();
+			Collection<ExtendedGridLayoutConstraints> rowspans = new HashSet<>();
 			Dimension gridSize = buildGrid(parent,gridRows,colspans,rowspans);
 
 			// Pass 2: compute minimum, preferred and maximum column widths / row heights
@@ -520,11 +512,11 @@ public class ExtendedGridLayout implements LayoutManager2
 	  * @param minimumElementSizes   The minimumSizes of the rows or columns
 	  * @param maximumElementSizes   The maximumSizes of the rows or columns
 	  */
-	private void redistributeSpace(int totalSize, int freeSize,
-				       int start, int stop,
-				       int[] preferredElementSizes,
-				       int[] minimumElementSizes,
-				       int[] maximumElementSizes)
+	private static void redistributeSpace(int totalSize, int freeSize,
+					      int start, int stop,
+					      int[] preferredElementSizes,
+					      int[] minimumElementSizes,
+					      int[] maximumElementSizes)
 	{
 		if (totalSize != freeSize)
 		{
@@ -648,8 +640,8 @@ public class ExtendedGridLayout implements LayoutManager2
 	  */
 	private Dimension getSize(Container parent, LayoutSize layoutSize, boolean fillRawSizes,
 				  Dimension gridSize, List<List<ExtendedGridLayoutConstraints>> gridRows,
-				  Set<ExtendedGridLayoutConstraints> colspans,
-				  Set<ExtendedGridLayoutConstraints> rowspans,
+				  Collection<ExtendedGridLayoutConstraints> colspans,
+				  Collection<ExtendedGridLayoutConstraints> rowspans,
 				  int[][] resultArrays)
 	{
 		if (fillRawSizes && (resultArrays.length < 6))
@@ -1007,11 +999,13 @@ public class ExtendedGridLayout implements LayoutManager2
 	  *                 of a rowspan get stored
 	  * @return The amount of rows and columns in the grid
 	  */
-	private Dimension buildGrid(Container parent, List<List<ExtendedGridLayoutConstraints>> gridRows,
-				    Set<ExtendedGridLayoutConstraints> colspans, Set<ExtendedGridLayoutConstraints> rowspans)
+	private Dimension buildGrid(Container parent,
+				    List<List<ExtendedGridLayoutConstraints>> gridRows,
+				    Collection<ExtendedGridLayoutConstraints> colspans,
+				    Collection<ExtendedGridLayoutConstraints> rowspans)
 	{
 		// put the parent's components in source rows
-		List<List<ExtendedGridLayoutConstraints>> rows = new ArrayList<List<ExtendedGridLayoutConstraints>>();
+		List<List<ExtendedGridLayoutConstraints>> rows = new ArrayList<>();
 		Component[] components = parent.getComponents();
 		for (Component component : components)
 		{
@@ -1021,7 +1015,7 @@ public class ExtendedGridLayout implements LayoutManager2
 				int rowNumber = constraints.getRow();
 				for (int i=rowNumber, c=rows.size() ; i>=c ; i--)
 				{
-					rows.add(new ArrayList<ExtendedGridLayoutConstraints>());
+					rows.add(new ArrayList<>());
 				}
 				List<ExtendedGridLayoutConstraints> row = rows.get(rowNumber);
 				row.add(constraints);
@@ -1029,8 +1023,8 @@ public class ExtendedGridLayout implements LayoutManager2
 		}
 
 		// initialize the rowIterators, gridRowIterators and gridRows
-		List<Iterator<ExtendedGridLayoutConstraints>> rowIterators = new ArrayList<Iterator<ExtendedGridLayoutConstraints>>();
-		List<ListIterator<ExtendedGridLayoutConstraints>> gridRowIterators = new ArrayList<ListIterator<ExtendedGridLayoutConstraints>>();
+		List<Iterator<ExtendedGridLayoutConstraints>> rowIterators = new ArrayList<>();
+		List<ListIterator<ExtendedGridLayoutConstraints>> gridRowIterators = new ArrayList<>();
 		boolean haveNext = false;
 		for (List<ExtendedGridLayoutConstraints> row : rows)
 		{
@@ -1040,7 +1034,7 @@ public class ExtendedGridLayout implements LayoutManager2
 			{
 				haveNext = true;
 			}
-			List<ExtendedGridLayoutConstraints> gridRow = new ArrayList<ExtendedGridLayoutConstraints>();
+			List<ExtendedGridLayoutConstraints> gridRow = new ArrayList<>();
 			gridRows.add(gridRow);
 			gridRowIterators.add(gridRow.listIterator());
 		}
@@ -1168,7 +1162,7 @@ public class ExtendedGridLayout implements LayoutManager2
 				haveNext = false;
 				ListIterator<ExtendedGridLayoutConstraints> gridRowIterator =
 					gridRows.get(gridRows.size()-1).listIterator();
-				List<ExtendedGridLayoutConstraints> gridRow = new ArrayList<ExtendedGridLayoutConstraints>();
+				List<ExtendedGridLayoutConstraints> gridRow = new ArrayList<>();
 				gridRows.add(gridRow);
 				ListIterator<ExtendedGridLayoutConstraints> newGridRowIterator = gridRow.listIterator();
 				while (gridRowIterator.hasNext())

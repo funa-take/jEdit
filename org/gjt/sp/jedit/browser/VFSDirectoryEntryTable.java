@@ -26,9 +26,11 @@ package org.gjt.sp.jedit.browser;
 import javax.swing.event.*;
 import javax.swing.table.*;
 import javax.swing.*;
+import static java.awt.event.InputEvent.*;
 import java.awt.event.*;
 import java.awt.font.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -49,7 +51,7 @@ import org.gjt.sp.util.ThreadUtilities;
 
 /**
  * @author Slava Pestov
- * @version $Id: VFSDirectoryEntryTable.java 24774 2017-10-29 23:31:27Z ezust $
+ * @version $Id: VFSDirectoryEntryTable.java 25189 2020-04-11 16:57:06Z kpouer $
  * @since jEdit 4.2pre1
  */
 public class VFSDirectoryEntryTable extends JTable
@@ -83,9 +85,9 @@ public class VFSDirectoryEntryTable extends JTable
 	@Override
 	protected JTableHeader createDefaultTableHeader()
 	{
-		/**
+		/*
 		 * Set up column hook in a way that it survives switching of LAF
-		 * */
+		 */
 		JTableHeader header = new JTableHeader(getColumnModel())
 		{
 			ColumnDragHook hook;
@@ -125,7 +127,7 @@ public class VFSDirectoryEntryTable extends JTable
 	//{{{ doTypeSelect() method
 	public void doTypeSelect(String str, boolean dirsOnly)
 	{
-		if(str.length() == 0)
+		if(str.isEmpty())
 			clearSelection();
 		else if(getSelectedRow() == -1)
 			doTypeSelect(str,0,getRowCount(),dirsOnly);
@@ -150,11 +152,11 @@ public class VFSDirectoryEntryTable extends JTable
 		VFSDirectoryEntryTableModel model
 			= (VFSDirectoryEntryTableModel)getModel();
 
-		java.util.List<VFSFile> returnValue = new LinkedList<VFSFile>();
+		java.util.List<VFSFile> returnValue = new LinkedList<>();
 		int[] selectedRows = getSelectedRows();
 		for (int selectedRow : selectedRows)
 			returnValue.add(model.files[selectedRow].dirEntry);
-		return returnValue.toArray(new VFSFile[returnValue.size()]);
+		return returnValue.toArray(new VFSFile[0]);
 	} //}}}
 
 	//{{{ getExpandedDirectories() method
@@ -183,29 +185,19 @@ public class VFSDirectoryEntryTable extends JTable
 		if(entry.dirEntry.getType() == VFSFile.FILE)
 			return;
 
-		Runnable delayedAwtTask = new Runnable()
-		{
-			public void run()
-			{
-				setSelectedRow(row);
-			}
-		};
 		if(entry.expanded)
 		{
 			model.collapse(VFSManager.getVFSForPath(
 				entry.dirEntry.getPath()),row);
 			resizeColumns();
-			ThreadUtilities.runInDispatchThread(delayedAwtTask);
+			ThreadUtilities.runInDispatchThread(() -> setSelectedRow(row));
 		}
 		else
 		{
 			browserView.clearExpansionState();
 			browserView.loadDirectory(entry,entry.dirEntry.getPath(),
-				false, delayedAwtTask);
+				false, () -> setSelectedRow(row));
 		}
-
-
-
 	} //}}}
 
 	//{{{ setDirectory() method
@@ -315,7 +307,7 @@ public class VFSDirectoryEntryTable extends JTable
 			{
 			case KeyEvent.VK_LEFT:
 				evt.consume();
-				if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+				if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
 				{
 					browser.previousDirectory();
 				}
@@ -348,7 +340,7 @@ public class VFSDirectoryEntryTable extends JTable
 				break;
 			case KeyEvent.VK_TAB:
 				evt.consume();
-				if ((evt.getModifiers() & InputEvent.SHIFT_MASK) > 0)
+				if ((evt.getModifiersEx() & SHIFT_DOWN_MASK) == SHIFT_DOWN_MASK)
 				{
 					browserView.getParentDirectoryList().requestFocus();
 				}
@@ -362,7 +354,7 @@ public class VFSDirectoryEntryTable extends JTable
 				ac.invokeAction(evt, browserUp);
 				break;
 			case KeyEvent.VK_UP:
-				if ((evt.getModifiers() & InputEvent.ALT_MASK) >0)
+				if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
 				{
 					evt.consume();
 					ac.invokeAction(evt, browserUp);
@@ -374,7 +366,7 @@ public class VFSDirectoryEntryTable extends JTable
 				ac.invokeAction(evt, deleteAct);
 				break;
 			case KeyEvent.VK_N:
-				if ((evt.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
+				if ((evt.getModifiersEx() & CTRL_DOWN_MASK) == CTRL_DOWN_MASK)
 				{
 					evt.consume();
 					EditAction ea = ac.getAction("vfs.browser.new-file");
@@ -403,7 +395,7 @@ public class VFSDirectoryEntryTable extends JTable
 			case KeyEvent.VK_F6:
 			case KeyEvent.VK_RIGHT:
 				evt.consume();
-				if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+				if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
 				{
 					browser.nextDirectory();
 				}
@@ -496,7 +488,7 @@ public class VFSDirectoryEntryTable extends JTable
 	private final JTableHeader header;
 	private final FileCellRenderer renderer;
 	private final StringBuffer typeSelectBuffer = new StringBuffer();
-	private final Timer timer = new Timer(0,new ClearTypeSelect());
+	private final Timer timer = new Timer(0, e -> typeSelectBuffer.setLength(0));
 	private boolean resizingColumns;
 
 	//{{{ doTypeSelect() method
@@ -587,25 +579,21 @@ public class VFSDirectoryEntryTable extends JTable
 
 	//}}}
 
-	//{{{ ClearTypeSelect class
-	class ClearTypeSelect implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			typeSelectBuffer.setLength(0);
-		}
-	} //}}}
-
 	//{{{ ColumnHandler class
-	class ColumnHandler implements TableColumnModelListener
+	private class ColumnHandler implements TableColumnModelListener
 	{
+		@Override
 		public void columnAdded(TableColumnModelEvent e) {}
+		@Override
 		public void columnRemoved(TableColumnModelEvent e) {}
+		@Override
 		public void columnMoved(TableColumnModelEvent e) {
 			((VFSDirectoryEntryTableModel)getModel()).columnMoved(e.getFromIndex(), e.getToIndex()); // view indexes
 		}
+		@Override
 		public void columnSelectionChanged(ListSelectionEvent e) {}
 
+		@Override
 		public void columnMarginChanged(ChangeEvent e)
 		{
 			saveWidths();
@@ -613,9 +601,8 @@ public class VFSDirectoryEntryTable extends JTable
 	} //}}}
 
 	//{{{ class MainMouseHandler
-	class MainMouseHandler extends MouseInputAdapter
+	private class MainMouseHandler extends MouseInputAdapter
 	{
-
 		@Override
 		public void mouseClicked(MouseEvent e)
 		{
@@ -629,11 +616,10 @@ public class VFSDirectoryEntryTable extends JTable
 			EditBus.send(new VFSPathSelected(browserView.getBrowser().getView(),
 							 node.dirEntry.getPath(), isDir));
 		}
-
 	} //}}}
 
 	//{{{ MouseHandler class
-	class MouseHandler extends MouseInputAdapter
+	private class MouseHandler extends MouseInputAdapter
 	{
 		@Override
 		public void mouseClicked(MouseEvent evt)
@@ -667,7 +653,7 @@ public class VFSDirectoryEntryTable extends JTable
 	} //}}}
 
 	//{{{ HeaderRenderer
-	static class HeaderRenderer extends DefaultTableCellRenderer
+	private static class HeaderRenderer extends DefaultTableCellRenderer
 	{
 		private final DefaultTableCellRenderer tcr;
 
@@ -710,14 +696,15 @@ public class VFSDirectoryEntryTable extends JTable
 	 * column over the first.
 	 *
 	 */
-	public static class ColumnDragHook implements MouseInputListener {
-
-		private JTableHeader header;
+	private static class ColumnDragHook implements MouseInputListener
+	{
+		private final JTableHeader header;
 		private MouseListener mouseDelegate;
 		private MouseMotionListener mouseMotionDelegate;
 		private int minMouseX;
 
-		public ColumnDragHook(JTableHeader header) {
+		ColumnDragHook(JTableHeader header)
+		{
 			this.header = header;
 			installHook();
 		}
@@ -731,23 +718,27 @@ public class VFSDirectoryEntryTable extends JTable
 		 *
 		 */
 		@Override
-		public void mousePressed(MouseEvent e) {
+		public void mousePressed(MouseEvent e)
+		{
 			int index = header.columnAtPoint(e.getPoint());
 
 			boolean reorderingAllowed = header.getReorderingAllowed();
 
-			if (index == 0) {
+			if (index == 0)
+			{
 				// temporarily disable re-ordering
 				header.setReorderingAllowed(false);
 			}
 			mouseDelegate.mousePressed(e);
-			if (index == 0) {
+			if (index == 0)
+			{
 				// re-enable re-ordering
 				header.setReorderingAllowed(reorderingAllowed);
 			}
 
 			// Calculate minimum X for a column (all except the first one) when dragging
-			if (header.getDraggedColumn() != null) {
+			if (header.getDraggedColumn() != null)
+			{
 				int draggedColumnX = header.getHeaderRect(index).x;
 				int firstColumnWidth = header.getColumnModel().getColumn(0).getWidth();
 				minMouseX = firstColumnWidth + (e.getX() - draggedColumnX)- 1;
@@ -759,14 +750,17 @@ public class VFSDirectoryEntryTable extends JTable
 		 * mouseX doesn't lead to dragging the column over the first.
 		 */
 		@Override
-		public void mouseDragged(MouseEvent e) {
+		public void mouseDragged(MouseEvent e)
+		{
 			TableColumn dragged = header.getDraggedColumn();
 
 			if (dragged != null)
 			{
 				int index = header.getTable().convertColumnIndexToView(dragged.getModelIndex());
 
-				if (index == 1) { // dragged column is at second position...
+				if (index == 1)
+				{
+					// dragged column is at second position...
 					if (e.getX() < minMouseX) return; // allow only drags to the right
 				}
 			}
@@ -799,72 +793,73 @@ public class VFSDirectoryEntryTable extends JTable
 		}
 
 
-		protected void installHook() {
+		protected void installHook()
+		{
 			installMouseHook();
 			installMouseMotionHook();
 		}
 
-		protected void installMouseMotionHook() {
+		protected void installMouseMotionHook()
+		{
 			MouseMotionListener[] listeners = header.getMouseMotionListeners();
 			for (int i = 0; i < listeners.length; i++) {
 				MouseMotionListener l = listeners[i];
-				if (l.getClass().getName().contains("TableHeaderUI")) {
-					this.mouseMotionDelegate = l;
+				if (l.getClass().getName().contains("TableHeaderUI"))
+				{
+					mouseMotionDelegate = l;
 					listeners[i] = this;
 				}
 				header.removeMouseMotionListener(l);
 			}
-			for (MouseMotionListener l : listeners) {
-				header.addMouseMotionListener(l);
-			}
+			Arrays.stream(listeners).forEach(header::addMouseMotionListener);
 		}
 
-		protected void installMouseHook() {
+		protected void installMouseHook()
+		{
 			MouseListener[] listeners = header.getMouseListeners();
-			for (int i = 0; i < listeners.length; i++) {
+			for (int i = 0; i < listeners.length; i++)
+			{
 				MouseListener l = listeners[i];
-				if (l.getClass().getName().contains("TableHeaderUI")) {
-					this.mouseDelegate = l;
+				if (l.getClass().getName().contains("TableHeaderUI"))
+				{
+					mouseDelegate = l;
 					listeners[i] = this;
 				}
 				header.removeMouseListener(l);
 			}
-			for (MouseListener l : listeners) {
-				header.addMouseListener(l);
-			}
+			Arrays.stream(listeners).forEach(header::addMouseListener);
 		}
 
-		public void uninstallHook() {
+		public void uninstallHook()
+		{
 			uninstallMouseHook();
 			uninstallMouseMotionHook();
 		}
 
-		protected void uninstallMouseMotionHook() {
+		protected void uninstallMouseMotionHook()
+		{
 			MouseMotionListener[] listeners = header.getMouseMotionListeners();
-			for (int i = 0; i < listeners.length; i++) {
+			for (int i = 0; i < listeners.length; i++)
+			{
 				MouseMotionListener l = listeners[i];
-				if (l == this) {
+				if (l == this)
 					listeners[i] = mouseMotionDelegate;
-				}
 				header.removeMouseMotionListener(l);
 			}
-			for (MouseMotionListener l : listeners) {
-				header.addMouseMotionListener(l);
-			}
+			Arrays.stream(listeners).forEach(header::addMouseMotionListener);
 		}
 
-		protected void uninstallMouseHook() {
+		protected void uninstallMouseHook()
+		{
 			MouseListener[] listeners = header.getMouseListeners();
-			for (int i = 0; i < listeners.length; i++) {
+			for (int i = 0; i < listeners.length; i++)
+			{
 				MouseListener l = listeners[i];
-				if (l == this) {
+				if (l == this)
 					listeners[i] = mouseDelegate;
-				}
 				header.removeMouseListener(l);
 			}
-			for (MouseListener l : listeners) {
-				header.addMouseListener(l);
-			}
+			Arrays.stream(listeners).forEach(header::addMouseListener);
 		}
 	}
 }

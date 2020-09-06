@@ -35,14 +35,16 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 //}}}
 
 /**
  * XML utility methods that only depend on the JDK.
  *
  * @author Marcelo Vanzin
- * @version $Id: XMLUtilities.java 22883 2013-03-23 17:58:56Z thomasmey $
+ * @version $Id: XMLUtilities.java 24859 2018-04-10 23:06:33Z daleanson $
  * @since 4.3pre6
  */
 public class XMLUtilities
@@ -129,7 +131,7 @@ public class XMLUtilities
 	{
 		try
 		{
-			XMLReader parser = XMLReaderFactory.createXMLReader();
+			XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 			InputSource isrc = new InputSource(
 				new BufferedInputStream(in));
 			isrc.setSystemId("jedit.jar");
@@ -146,7 +148,7 @@ public class XMLUtilities
 				"while parsing from " + in + ": SAXParseException: line " + line + ": " , se);
 			return true;
 		}
-		catch(SAXException e)
+		catch(SAXException | ParserConfigurationException e)
 		{
 			Log.log(Log.ERROR,XMLUtilities.class,e);
 			return true;

@@ -29,6 +29,7 @@ import org.gjt.sp.jedit.gui.EnhancedButton;
 import org.gjt.sp.jedit.gui.FloatingWindowContainer;
 import org.gjt.sp.jedit.gui.SplashScreen;
 import org.gjt.sp.jedit.gui.VariableGridLayout;
+import org.gjt.sp.jedit.textarea.TextAreaMouseHandler;
 import org.jedit.keymap.Keymap;
 import org.gjt.sp.jedit.menu.EnhancedCheckBoxMenuItem;
 import org.gjt.sp.jedit.menu.EnhancedMenu;
@@ -45,6 +46,7 @@ import java.util.*;
 import java.util.List;
 import java.lang.ref.SoftReference;
 
+import javax.annotation.Nonnull;
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -73,7 +75,6 @@ import java.awt.font.FontRenderContext;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 //}}}
@@ -95,7 +96,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * </ul>
  *
  * @author Slava Pestov
- * @version $Id: GUIUtilities.java 24428 2016-06-23 02:49:29Z daleanson $
+ * @version $Id: GUIUtilities.java 25221 2020-04-12 16:00:17Z kpouer $
  */
 public class GUIUtilities
 {
@@ -126,7 +127,7 @@ public class GUIUtilities
 			return null;
 
 		// * Enable old icon naming scheme support
-		if(deprecatedIcons != null && deprecatedIcons.containsKey(iconName))
+		if(deprecatedIcons.containsKey(iconName))
 			iconName = deprecatedIcons.get(iconName);
 
 		// check if there is a cached version first
@@ -137,8 +138,8 @@ public class GUIUtilities
 		}
 		if(cache == null)
 		{
-			cache = new Hashtable<String, Icon>();
-			iconCache = new SoftReference<Map<String, Icon>>(cache);
+			cache = new Hashtable<>();
+			iconCache = new SoftReference<>(cache);
 		}
 		Icon icon = cache.get(iconName);
 		if(icon != null)
@@ -370,12 +371,12 @@ public class GUIUtilities
 	 */
 	public static List<JMenuItem> getServiceContextMenuItems(JEditTextArea textArea, MouseEvent evt)
 	{
-		List<JMenuItem> list = new ArrayList<JMenuItem>();
+		List<JMenuItem> list = new ArrayList<>();
 		String serviceClassName =  DynamicContextMenuService.class.getName();
 		String[] menuServiceList = ServiceManager.getServiceNames(serviceClassName);
 		for (String menuServiceName : menuServiceList)
 		{
-			if (menuServiceName != null && menuServiceName.trim().length() > 0)
+			if (menuServiceName != null && !menuServiceName.trim().isEmpty())
 			{
 				DynamicContextMenuService dcms = (DynamicContextMenuService)
 						ServiceManager.getService(serviceClassName, menuServiceName);
@@ -493,8 +494,7 @@ public class GUIUtilities
 				else
 				{
 					JButton b = loadToolButton(context,button);
-					if(b != null)
-						toolB.add(b);
+					toolB.add(b);
 				}
 			}
 		}
@@ -512,6 +512,7 @@ public class GUIUtilities
 	 * @param name The name of the button
 	 * @return a button
 	 */
+	@Nonnull
 	public static EnhancedButton loadToolButton(String name)
 	{
 		return loadToolButton(jEdit.getActionContext(),name);
@@ -531,6 +532,7 @@ public class GUIUtilities
 	 * @return the button
 	 * @since jEdit 4.2pre1
 	 */
+	@Nonnull
 	public static EnhancedButton loadToolButton(ActionContext context,
 		String name)
 	{
@@ -571,6 +573,7 @@ public class GUIUtilities
 	 * @return a pretty label
 	 * @deprecated use {@link GenericGUIUtilities#prettifyMenuLabel(String)}
 	 */
+	@Deprecated
 	public static String prettifyMenuLabel(String label)
 	{
 		return GenericGUIUtilities.prettifyMenuLabel(label);
@@ -584,7 +587,7 @@ public class GUIUtilities
 	*/
 	public static String getPlatformShortcutLabel(String label)
 	{
-		if( !OperatingSystem.isMacOSLF() || label == null || label.length() == 0)
+		if( !OperatingSystem.isMacOSLF() || label == null || label.isEmpty())
 			return label;
 
 		String[] strokes = label.split(" +");
@@ -618,16 +621,16 @@ public class GUIUtilities
 			shortcut1 = platform ? getPlatformShortcutLabel(shortcut1) : shortcut1;
 			shortcut2 = platform ? getPlatformShortcutLabel(shortcut2) : shortcut2;
 
-			if(shortcut1 == null || shortcut1.length() == 0)
+			if(shortcut1 == null || shortcut1.isEmpty())
 			{
-				if(shortcut2 == null || shortcut2.length() == 0)
+				if(shortcut2 == null || shortcut2.isEmpty())
 					return null;
 				else
 					return shortcut2;
 			}
 			else
 			{
-				if(shortcut2 == null || shortcut2.length() == 0)
+				if(shortcut2 == null || shortcut2.isEmpty())
 					return shortcut1;
 				else
 					return shortcut1 + " or " + shortcut2;
@@ -643,6 +646,7 @@ public class GUIUtilities
 	 * @since jEdit 5.1
 	 * @deprecated use {@link GenericGUIUtilities#setAutoMnemonic(AbstractButton)}
 	 */
+	@Deprecated
 	public static void setAutoMnemonic(AbstractButton button)
 	{
 		GenericGUIUtilities.setAutoMnemonic(button);
@@ -680,14 +684,7 @@ public class GUIUtilities
                 {
                         try
                         {
-                            EventQueue.invokeAndWait(new Runnable()
-                            {
-                                    @Override
-                                    public void run()
-                                    {
-                                            message(comp, name, args);
-                                    }
-                            });
+                            EventQueue.invokeAndWait(() -> message(comp, name, args));
                         }
                         catch (Exception e)		// NOPMD
                         {
@@ -724,14 +721,7 @@ public class GUIUtilities
                 {
                         try
                         {
-                                EventQueue.invokeAndWait(new Runnable()
-                                {
-                                        @Override
-                                        public void run()
-                                        {
-                                                error(comp, name, args);
-                                        }
-                                });
+                                EventQueue.invokeAndWait(() -> error(comp, name, args));
                         }
                         catch (Exception e)		// NOPMD
                         {
@@ -848,14 +838,7 @@ public class GUIUtilities
 		final String[] retValue = new String[1];
 		try
 		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					retValue[0] = inputProperty(comp, name, args, def);
-				}
-			});
+			EventQueue.invokeAndWait(() -> retValue[0] = inputProperty(comp, name, args, def));
 		}
 		catch (Exception e)
 		{
@@ -895,14 +878,7 @@ public class GUIUtilities
 		final int [] retValue = new int[1];
 		try
 		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					retValue[0] = confirm(comp, name, args, buttons, type);
-				}
-			});
+			EventQueue.invokeAndWait(() -> retValue[0] = confirm(comp, name, args, buttons, type));
 		}
 		catch (Exception e)
 		{
@@ -943,14 +919,7 @@ public class GUIUtilities
 		final int[] retValue = new int[1];
 		try
 		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					retValue[0] = option(comp, name, args, type, options, initialValue);
-				}
-			});
+			EventQueue.invokeAndWait(() -> retValue[0] = option(comp, name, args, type, options, initialValue));
 		}
 		catch (Exception e)
 		{
@@ -979,7 +948,7 @@ public class GUIUtilities
 	{
 		if (EventQueue.isDispatchThread())
 		{
-			JList<Object> list = new JList<Object>(listModel);
+			JList<Object> list = new JList<>(listModel);
 			list.setVisibleRowCount(8);
 
 			Object[] message = {
@@ -996,14 +965,7 @@ public class GUIUtilities
 		final int [] retValue = new int[1];
 		try
 		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					retValue[0] = listConfirm(comp, name, args, listModel);
-				}
-			});
+			EventQueue.invokeAndWait(() -> retValue[0] = listConfirm(comp, name, args, listModel));
 		}
 		catch (Exception e)
 		{
@@ -1057,14 +1019,7 @@ public class GUIUtilities
 		final int [] retValue = new int[1];
 		try
 		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					retValue[0] = listConfirm(comp, name, args, listModel, selectedItems);
-				}
-			});
+			EventQueue.invokeAndWait(() -> retValue[0] = listConfirm(comp, name, args, listModel, selectedItems));
 		}
 		catch (Exception e)
 		{
@@ -1087,6 +1042,7 @@ public class GUIUtilities
 	 * @return The selected file(s)
 	 * @since jEdit 2.6pre2
 	 */
+	@Nonnull
 	public static String[] showVFSFileDialog(View view, String path,
 		int type, boolean multipleSelection)
 	{
@@ -1119,6 +1075,7 @@ public class GUIUtilities
 	 * @return The selected file(s)
 	 * @since jEdit 4.3pre10
 	 */
+	@Nonnull
 	public static String[] showVFSFileDialog(Dialog parent, View view,
 		String path, int type, boolean multipleSelection)
 	{
@@ -1144,6 +1101,7 @@ public class GUIUtilities
 	 * @return The selected file(s)
 	 * @since jEdit 4.3pre10
 	 */
+	@Nonnull
 	public static String[] showVFSFileDialog(Frame parent, View view,
 		String path, int type, boolean multipleSelection)
 	{
@@ -1172,11 +1130,13 @@ public class GUIUtilities
 				return new Font("Monospaced", Font.PLAIN, 12);
 			}
 			else {
-				Font font2 = new Font("Lucida Sans Typewriter", Font.PLAIN, font1.getSize());
+				Font font2 =
+					new Font(OperatingSystem.isWindows() ? "Lucida Console" : "Monospaced",
+						Font.PLAIN, font1.getSize());
 				FontRenderContext frc = new FontRenderContext(null, true, false);
 				float scale =
 					font1.getLineMetrics("", frc).getHeight() / font2.getLineMetrics("", frc).getHeight();
-				return new Font(font2.getFamily(), font2.getStyle(), (int)(scale * font1.getSize()));
+				return new Font(font2.getFamily(), font2.getStyle(), (int)(scale * font1.getSize() * 0.85));
 			}
 		}
 	} //}}}
@@ -1192,6 +1152,7 @@ public class GUIUtilities
 	 * @param name The color name
 	 * @deprecated use {@link SyntaxUtilities#parseColor(String, Color)}
 	 */
+	@Deprecated
 	public static Color parseColor(String name)
 	{
 		return SyntaxUtilities.parseColor(name, Color.black);
@@ -1207,6 +1168,7 @@ public class GUIUtilities
 	 * @since jEdit 3.2pre6
 	 * @deprecated use {@link SyntaxUtilities#parseStyle(String, String, int, boolean)}
 	 */
+	@Deprecated
 	public static SyntaxStyle parseStyle(String str, String family, int size)
 		throws IllegalArgumentException
 	{
@@ -1321,6 +1283,7 @@ public class GUIUtilities
 	 * @since jEdit 4.2pre3
 	 * @deprecated use {@link GenericGUIUtilities#adjustForScreenBounds(Rectangle)}
 	 */
+	@Deprecated
 	public static void adjustForScreenBounds(Rectangle desired)
 	{
 		GenericGUIUtilities.adjustForScreenBounds(desired);
@@ -1574,6 +1537,7 @@ public class GUIUtilities
 	 * @param comp The component
 	 * @deprecated use {@link GenericGUIUtilities#requestFocus(Window, Component)}
 	 */
+	@Deprecated
 	public static void requestFocus(final Window win, final Component comp)
 	{
 		GenericGUIUtilities.requestFocus(win, comp);
@@ -1588,6 +1552,7 @@ public class GUIUtilities
 	 * @since jEdit 3.2pre8
 	 * @deprecated use {@link GenericGUIUtilities#requestFocus(Window, Component)}
 	 */
+	@Deprecated
 	public static boolean isPopupTrigger(MouseEvent evt)
 	{
 		return GenericGUIUtilities.isPopupTrigger(evt);
@@ -1597,22 +1562,24 @@ public class GUIUtilities
 	/**
 	 * @param modifiers The modifiers flag from a mouse event
 	 * @since jEdit 4.1pre9
-	 * @deprecated use {@link GenericGUIUtilities#isMiddleButton(int)}
+	 * @deprecated use {@link TextAreaMouseHandler#isMiddleButton(MouseEvent)}
 	 */
+	@Deprecated
 	public static boolean isMiddleButton(int modifiers)
 	{
-		return GenericGUIUtilities.isMiddleButton(modifiers);
+		return TextAreaMouseHandler.isMiddleButton(modifiers);
 	} //}}}
 
 	//{{{ isRightButton() method
 	/**
 	 * @param modifiers The modifiers flag from a mouse event
 	 * @since jEdit 4.1pre9
-	 * @deprecated use {@link GenericGUIUtilities#isRightButton(int)}
+	 * @deprecated use {@link TextAreaMouseHandler#isRightButton(MouseEvent)}
 	 */
+	@Deprecated
 	public static boolean isRightButton(int modifiers)
 	{
-		return GenericGUIUtilities.isRightButton(modifiers);
+		return TextAreaMouseHandler.isRightButton(modifiers);
 	} //}}}
 
 	//{{{ getScreenBounds() method
@@ -1622,6 +1589,7 @@ public class GUIUtilities
 	 * @since jEdit 4.3pre18
 	 * @deprecated use {@link GenericGUIUtilities#getScreenBounds()}
 	 */
+	@Deprecated
 	public static Rectangle getScreenBounds()
 	{
 		return GenericGUIUtilities.getScreenBounds();
@@ -1641,6 +1609,7 @@ public class GUIUtilities
 	 * show/hide popups in response to mouse events anymore.
 	 * @deprecated use {@link GenericGUIUtilities#showPopupMenu(JPopupMenu, Component, int, int)}
 	 */
+	@Deprecated
 	public static void showPopupMenu(JPopupMenu popup, Component comp,
 		int x, int y)
 	{
@@ -1662,6 +1631,7 @@ public class GUIUtilities
 	 * @since jEdit 4.1pre1
 	 * @deprecated use {@link GenericGUIUtilities#showPopupMenu(JPopupMenu, Component, int, int, boolean)}
 	 */
+	@Deprecated
 	public static void showPopupMenu(JPopupMenu popup, Component comp,
 		int x, int y, boolean point)
 	{
@@ -1679,6 +1649,7 @@ public class GUIUtilities
 	 * @since jEdit 4.1pre5
 	 * @deprecated use {@link GenericGUIUtilities#isAncestorOf(Component, Component)}
 	 */
+	@Deprecated
 	public static boolean isAncestorOf(Component comp1, Component comp2)
 	{
 		return GenericGUIUtilities.isAncestorOf(comp1, comp2);
@@ -1691,6 +1662,7 @@ public class GUIUtilities
 	 * @param c The component
 	 * @deprecated use {@link GenericGUIUtilities#getParentDialog(Component)}
 	 */
+	@Deprecated
 	public static JDialog getParentDialog(Component c)
 	{
 		return GenericGUIUtilities.getParentDialog(c);
@@ -1742,6 +1714,7 @@ public class GUIUtilities
 	 * @since jEdit 4.3pre17
 	 * @deprecated use {@link GenericGUIUtilities#setEnabledRecursively(Container, boolean)}
 	 */
+	@Deprecated
 	public static void setEnabledRecursively(Container c, boolean enabled)
 	{
 		GenericGUIUtilities.setEnabledRecursively(c, enabled);
@@ -1767,6 +1740,7 @@ public class GUIUtilities
 	 * @since jEdit 5.3
 	 * @deprecated use {@link GenericGUIUtilities#setButtonContentMargin(AbstractButton, Insets)}
 	 */
+	@Deprecated
 	public static void setButtonContentMargin(AbstractButton button, Insets margin)
 	{
 		GenericGUIUtilities.setButtonContentMargin(button, margin);
@@ -1780,6 +1754,7 @@ public class GUIUtilities
  	 * @param components The components to make the same size.
  	 * @deprecated use {@link GenericGUIUtilities#makeSameSize(Component...)}
  	 */
+ 	@Deprecated
 	public static void makeSameSize(Component... components) 
 	{
 		GenericGUIUtilities.makeSameSize(components);
@@ -1790,6 +1765,7 @@ public class GUIUtilities
 	 * JTable cell size, based on global defaults.
 	 * @deprecated use {@link GenericGUIUtilities#defaultTableCellSize()}
 	 */
+	@Deprecated
 	public static Dimension defaultTableCellSize()
 	{
 		return GenericGUIUtilities.defaultTableCellSize();
@@ -1800,6 +1776,7 @@ public class GUIUtilities
 	 * Column width for JTable, based on global defaults.
 	 * @deprecated use {@link GenericGUIUtilities#defaultColumnWidth()}
 	 */
+	@Deprecated
 	public static int defaultColumnWidth()
 	{
 		return GenericGUIUtilities.defaultColumnWidth();
@@ -1810,6 +1787,7 @@ public class GUIUtilities
 	 * Row height for JTable, based on global defaults.
 	 * @deprecated use {@link GenericGUIUtilities#defaultRowHeight()}
 	 */
+	@Deprecated
 	public static int defaultRowHeight()
 	{
 		return GenericGUIUtilities.defaultRowHeight();
@@ -1824,7 +1802,7 @@ public class GUIUtilities
 	 * @since jEdit 4.3pre6
 	 * @see #saveGeometry(Window,String)
 	 */
-	public static void addSizeSaver(Frame frame, String name)
+	public static void addSizeSaver(@Nonnull Frame frame, @Nonnull String name)
 	{
 		addSizeSaver(frame,frame.getParent(),name);
 	} //}}}
@@ -1839,7 +1817,7 @@ public class GUIUtilities
 	 * @since jEdit 4.3pre7
 	 * @see #saveGeometry(Window,Container,String)
 	 */
-	public static void addSizeSaver(Frame frame, Container parent, String name)
+	public static void addSizeSaver(@Nonnull Frame frame, Container parent, @Nonnull String name)
 	{
 		SizeSaver ss = new SizeSaver(frame,parent,name);
 		frame.addWindowStateListener(ss);
@@ -1954,13 +1932,7 @@ public class GUIUtilities
 		// Have to do it in the EDT, since it creates gui components
 		try
 		{
-			SwingUtilities.invokeAndWait(new Runnable()
-			{
-				public void run()
-				{
-					splash = new SplashScreen();
-				}
-			});
+			SwingUtilities.invokeAndWait(() -> splash = new SplashScreen());
 		}
 		catch (Exception e)
 		{
@@ -1990,7 +1962,7 @@ public class GUIUtilities
 	private static SoftReference<Map<String, Icon>> iconCache;
 	private static String iconPath = "jeditresource:/org/gjt/sp/jedit/icons/themes/";
 	private static final String defaultIconPath = "jeditresource:/org/gjt/sp/jedit/icons/themes/";
-	private static final HashMap<String, String> deprecatedIcons = new HashMap<String, String>();
+	private static final HashMap<String, String> deprecatedIcons = new HashMap<>();
 
 	//{{{ _loadMenuItem() method
 	private static JMenuItem _loadMenuItem(String name, ActionContext context, boolean setMnemonic)
@@ -2127,21 +2099,15 @@ public class GUIUtilities
 	//{{{ Inner classes
 
 	private static final AtomicLong executorThreadsCounter = new AtomicLong();
-	private static final ScheduledExecutorService schedExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory()
-	{
-		@Override
-		public Thread newThread(Runnable r)
-		{
-			return new Thread(r, "SizeSaver-" + executorThreadsCounter.incrementAndGet());
-		}
-	});
+	private static final ScheduledExecutorService schedExecutor =
+		Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "SizeSaver-" + executorThreadsCounter.incrementAndGet()));
 	//{{{ SizeSaver class
 	/**
 	 * A combined ComponentListener and WindowStateListener to continually save a Frames size.<br />
 	 * For non-Frame's use {@link GUIUtilities#saveGeometry(Window,String)}
 	 *
 	 * @author Björn Kautler
-	 * @version $Id: GUIUtilities.java 24428 2016-06-23 02:49:29Z daleanson $
+	 * @version $Id: GUIUtilities.java 25221 2020-04-12 16:00:17Z kpouer $
 	 * @since jEdit 4.3pre6
 	 * @see GUIUtilities#saveGeometry(Window,Container,String)
 	 */
@@ -2160,12 +2126,10 @@ public class GUIUtilities
 		 * @param parent The parent to be relative to.
 		 * @param name The prefix for the settings
 		 */
-		SizeSaver(Frame frame, Container parent, String name)
+		SizeSaver(@Nonnull Frame frame, Container parent, @Nonnull String name)
 		{
-			if (frame == null || name == null)
-			{
-				throw new NullPointerException();
-			}
+			Objects.requireNonNull(frame);
+			Objects.requireNonNull(name);
 			this.frame = frame;
 			this.parent = parent;
 			this.name = name;
@@ -2226,21 +2190,7 @@ public class GUIUtilities
 		public void componentMoved(ComponentEvent ce)
 		{
 			final Rectangle bounds = frame.getBounds();
-			final Runnable sizeSaver = new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							save(frame.getExtendedState(), bounds);
-						}
-					});
-				}
-			};
+			final Runnable sizeSaver = () -> EventQueue.invokeLater(() -> save(frame.getExtendedState(), bounds));
 
 			cancelResizeSave();
 			resizeDelayFuture = schedExecutor.schedule(sizeSaver, 500, TimeUnit.MILLISECONDS);

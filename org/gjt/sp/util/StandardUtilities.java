@@ -24,7 +24,6 @@
 
 package org.gjt.sp.util;
 
-
 //{{{ Imports
 import javax.annotation.Nullable;
 import javax.swing.text.Segment;
@@ -40,11 +39,13 @@ import java.util.Stack;
  * Several tools that depends on JDK only.
  *
  * @author Matthieu Casanova
- * @version $Id: StandardUtilities.java 24072 2015-09-16 19:52:05Z kerik-sf $
+ * @version $Id: StandardUtilities.java 25030 2020-03-25 20:30:05Z kpouer $
  * @since 4.3pre5
  */
 public class StandardUtilities
 {
+	public static final String[] EMPTY_STRING_ARRAY = new String[0];
+
 	//{{{ charsToEscapes() methods
 	/**
 	 * Escapes newlines, tabs, backslashes, and quotes in the specified

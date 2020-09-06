@@ -26,7 +26,7 @@ import org.gjt.sp.jedit.Registers;
 /**
  * Message sent when a register is updated.
  * @author Nicholas O'Leary
- * @version $Id: RegisterChanged.java 12504 2008-04-22 23:12:43Z ezust $
+ * @version $Id: RegisterChanged.java 25325 2020-05-09 08:34:40Z kpouer $
  *
  * @since jEdit 4.3pre1
  */
@@ -54,6 +54,7 @@ public class RegisterChanged extends EBMessage
 		 return Registers.getRegister(registerName).toString();
 	 }
 	 
+	 @Override
 	 public String paramString()
 	 {
 		 return "register=" + registerName + "," + super.paramString();

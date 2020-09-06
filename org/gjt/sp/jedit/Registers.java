@@ -27,6 +27,7 @@ package org.gjt.sp.jedit;
 import java.awt.datatransfer.*;
 import java.awt.Toolkit;
 import java.io.*;
+import java.util.Arrays;
 
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.datatransfer.JEditDataFlavor;
@@ -36,6 +37,8 @@ import org.gjt.sp.jedit.gui.HistoryModel;
 import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.jedit.textarea.Selection;
 import org.gjt.sp.util.Log;
+
+import javax.annotation.Nullable;
 //}}}
 
 /**
@@ -61,7 +64,7 @@ import org.gjt.sp.util.Log;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: Registers.java 24429 2016-06-23 03:08:58Z daleanson $
+ * @version $Id: Registers.java 25316 2020-05-08 08:04:09Z kpouer $
  */
 public class Registers
 {
@@ -110,7 +113,7 @@ public class Registers
 			textArea.setSelectedText("");
 		}
 		else
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 	} //}}}
 
 	//{{{ append() methods
@@ -150,7 +153,7 @@ public class Registers
 	{
 		if(cut && !textArea.isEditable())
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 			return;
 		}
 
@@ -168,13 +171,10 @@ public class Registers
 				try
 				{
 					String registerContents = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-					if(registerContents != null)
-					{
-						if(registerContents.endsWith(separator))
-							selection = registerContents + selection;
-						else
-							selection = registerContents + separator + selection;
-					}
+					if(registerContents.endsWith(separator))
+						selection = registerContents + selection;
+					else
+						selection = registerContents + separator + selection;
 				}
 				catch (UnsupportedFlavorException e)
 				{
@@ -210,7 +210,7 @@ public class Registers
 	 * @param textArea The text area
 	 * @param register The register
 	 * @param preferredDataFlavor the preferred dataflavor. If not available
-	 * <tt>DataFlavor.stringFlavor</tt> will be used
+	 * {@code DataFlavor.stringFlavor} will be used
 	 * @since jEdit 4.4pre1
 	 */
 	public static void paste(TextArea textArea, char register, DataFlavor preferredDataFlavor)
@@ -230,7 +230,7 @@ public class Registers
 	{
 		if(!textArea.isEditable())
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 			return;
 		}
 
@@ -238,7 +238,7 @@ public class Registers
 
 		if(reg == null)
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 			return;
 		}
 		Transferable transferable = reg.getTransferable();
@@ -252,11 +252,7 @@ public class Registers
 				mode = data.getMode();
 				selection = data.getText();
 			}
-			catch (UnsupportedFlavorException e)
-			{
-				Log.log(Log.ERROR, Registers.class, e);
-			}
-			catch (IOException e)
+			catch (UnsupportedFlavorException | IOException e)
 			{
 				Log.log(Log.ERROR, Registers.class, e);
 			}
@@ -267,7 +263,7 @@ public class Registers
 		}
 		if(selection == null)
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 			return;
 		}
 		JEditBuffer buffer = textArea.getBuffer();
@@ -281,7 +277,7 @@ public class Registers
 	 * @param register The register
 	 * @param vertical Vertical (columnar) paste
 	 * @param preferredDataFlavor the preferred dataflavor. If not available
-	 * <tt>DataFlavor.stringFlavor</tt> will be used
+	 * {@code DataFlavor.stringFlavor} will be used
 	 * @since jEdit 4.4pre1
 	 */
 	public static void paste(TextArea textArea, char register,
@@ -294,7 +290,7 @@ public class Registers
 		}
 		if(!textArea.isEditable())
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 			return;
 		}
 
@@ -302,7 +298,7 @@ public class Registers
 
 		if(reg == null)
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 			return;
 		}
 		Transferable transferable = reg.getTransferable();
@@ -317,7 +313,7 @@ public class Registers
 		}
 		if(selection == null)
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
 			return;
 		}
 		JEditBuffer buffer = textArea.getBuffer();
@@ -414,11 +410,7 @@ public class Registers
 			Object data = transferable.getTransferData(dataFlavor);
 			return stripEOLChars(data.toString());
 		}
-		catch (UnsupportedFlavorException e)
-		{
-			Log.log(Log.ERROR, Registers.class, e);
-		}
-		catch (IOException e)
+		catch (UnsupportedFlavorException | IOException e)
 		{
 			Log.log(Log.ERROR, Registers.class, e);
 		}
@@ -456,11 +448,7 @@ public class Registers
 
 		if(name >= registers.length)
 		{
-			Register[] newRegisters = new Register[
-				Math.min(1<<16, name<<1)];
-			System.arraycopy(registers,0,newRegisters,0,
-				registers.length);
-			registers = newRegisters;
+			registers = Arrays.copyOf(registers, Math.min(1<<16, name<<1));
 		}
 
 		registers[name] = newRegister;
@@ -541,6 +529,7 @@ public class Registers
 	 * (eg, "a b $ % ^").
 	 * @since jEdit 4.2pre2
 	 */
+	@Nullable
 	public static String getRegisterNameString()
 	{
 		if(!loaded)
@@ -617,8 +606,7 @@ public class Registers
 	{
 		registers = new Register[256];
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		registers['$'] = new ClipboardRegister(
-			toolkit.getSystemClipboard());
+		registers['$'] = new ClipboardRegister(toolkit.getSystemClipboard());
 		Clipboard selection = toolkit.getSystemSelection();
 		if(selection != null)
 			registers['%'] = new ClipboardRegister(selection);
@@ -825,11 +813,7 @@ public class Registers
 				{
 					return transferable.getTransferData(DataFlavor.stringFlavor).toString();
 				}
-				catch (UnsupportedFlavorException e)
-				{
-					Log.log(Log.ERROR, this, e);
-				}
-				catch (IOException e)
+				catch (UnsupportedFlavorException | IOException e)
 				{
 					Log.log(Log.ERROR, this, e);
 				}

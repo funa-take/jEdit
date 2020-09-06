@@ -29,11 +29,8 @@ import org.gjt.sp.jedit.browser.VFSBrowser;
 import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.io.VFS;
 import org.gjt.sp.jedit.io.VFSManager;
-import org.gjt.sp.util.GenericGUIUtilities;
-import org.gjt.sp.util.Log;
-import org.gjt.sp.util.StandardUtilities;
-import org.gjt.sp.util.StringList;
-import org.gjt.sp.util.XMLUtilities;
+import org.gjt.sp.util.*;
+import org.gjt.sp.util.swing.event.UniqueActionDocumentListener;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -42,8 +39,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
@@ -53,6 +48,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -63,11 +59,10 @@ import java.util.List;
 //}}}
 
 /**
- * @version $Id: InstallPanel.java 24799 2017-12-29 15:17:38Z ezust $
+ * @version $Id: InstallPanel.java 25285 2020-04-22 19:08:46Z kpouer $
  */
 class InstallPanel extends JPanel implements EBComponent
 {
-
 	//{{{ Variables
 	private final JTable table;
 	private final JScrollPane scrollpane;
@@ -81,7 +76,7 @@ class InstallPanel extends JPanel implements EBComponent
 	private boolean hideInstalled;
 	private boolean isLoading;
 
-	private final Collection<String> pluginSet = new HashSet<String>();
+	private final Collection<String> pluginSet = new HashSet<>();
 	//}}}
 
 	//{{{ InstallPanel constructor
@@ -110,7 +105,7 @@ class InstallPanel extends JPanel implements EBComponent
 		ActionMap tableActionMap = table.getActionMap();
 		tableInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,0),"tabOutForward");
 		tableActionMap.put("tabOutForward",new KeyboardAction(KeyboardCommand.TAB_OUT_FORWARD));
-		tableInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,InputEvent.SHIFT_MASK),"tabOutBack");
+		tableInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,InputEvent.SHIFT_DOWN_MASK),"tabOutBack");
 		tableActionMap.put("tabOutBack",new KeyboardAction(KeyboardCommand.TAB_OUT_BACK));
 		tableInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,0),"editPlugin");
 		tableActionMap.put("editPlugin",new KeyboardAction(KeyboardCommand.EDIT_PLUGIN));
@@ -144,19 +139,11 @@ class InstallPanel extends JPanel implements EBComponent
 		split.setTopComponent(scrollpane);
 
 		/* Create description */
-		JScrollPane infoPane = new JScrollPane(
-			infoBox = new PluginInfoBox());
+		JScrollPane infoPane = new JScrollPane(infoBox = new PluginInfoBox());
 		infoPane.setPreferredSize(new Dimension(500,100));
 		split.setBottomComponent(infoPane);
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				split.setDividerLocation(0.75);
-			}
-		});
+		EventQueue.invokeLater(() -> split.setDividerLocation(0.75));
 
 		searchField = new JTextField();
 		searchField.addKeyListener(new KeyAdapter()
@@ -171,31 +158,7 @@ class InstallPanel extends JPanel implements EBComponent
 				}
 			}
 		});
-		searchField.getDocument().addDocumentListener(new DocumentListener()
-		{
-			void update()
-			{
-				pluginModel.setFilterString(searchField.getText());
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e)
-			{
-				update();
-			}
-
-			@Override
-			public void insertUpdate(DocumentEvent e)
-			{
-				update();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e)
-			{
-				update();
-			}
-		});
+		searchField.getDocument().addDocumentListener(new UniqueActionDocumentListener(e -> pluginModel.setFilterString(searchField.getText())));
 		table.addKeyListener(new KeyAdapter()
 		{
 			@Override
@@ -223,15 +186,10 @@ class InstallPanel extends JPanel implements EBComponent
 		});
 		hideInstalled = !updates;
 		final JCheckBox hideInstalledCB = new JCheckBox("Hide installed plugins", hideInstalled);
-		hideInstalledCB.addActionListener(new ActionListener()
+		hideInstalledCB.addActionListener(e ->
 		{
-
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				InstallPanel.this.hideInstalled = hideInstalledCB.isSelected();
-				updateModel();
-			}
+			hideInstalled = hideInstalledCB.isSelected();
+			updateModel();
 		});
 		hideInstalledCB.setAlignmentX(0);
 
@@ -241,7 +199,8 @@ class InstallPanel extends JPanel implements EBComponent
 		filterBox.setAlignmentX(0);
 		Box topBox = new Box(BoxLayout.PAGE_AXIS);
 		topBox.add(filterBox);
-		if(!updates){
+		if(!updates)
+		{
 			topBox.add(hideInstalledCB);
 		}
 
@@ -284,35 +243,47 @@ class InstallPanel extends JPanel implements EBComponent
 		String path = jEdit.getProperty(PluginManager.PROPERTY_PLUGINSET, "");
 		if (!path.isEmpty())
 		{
-			loadPluginSet(path);
+			try
+			{
+				loadPluginSet(path);
+			}
+			catch (IOException e)
+			{
+				Log.log(Log.WARNING, this, "Loading Pluginset failed:" + e.getMessage());
+			}
 		}
 	} //}}}
 
-	//{{{ loadPluginSet() method
-	/** loads a pluginSet xml file and updates the model to reflect
-	    certain checked selections
-	    @since jEdit 4.3pre10
-	    @author Alan Ezust
-	*/
-	boolean loadPluginSet(String path)
+	//{{{ loadPluginSet() methods
+	/**
+	 * loads a pluginSet xml file and updates the model to reflect
+	 * certain checked selections
+	 * @since jEdit 4.3pre10
+	 * @author Alan Ezust
+	 */
+	void loadPluginSet(String path) throws IOException
+	{
+		loadPluginSet(path, null);
+	}
+
+	/**
+	 * loads a pluginSet xml file and updates the model to reflect
+	 * certain checked selections
+	 * @param path the path of the pluginset to load
+	 * @param edtTask a task that will be executed in the Event dispatcher thread after the plugin set was loaded
+	 * @since jEdit 5.6pre1
+	 * @author Alan Ezust
+	 */
+	void loadPluginSet(String path, Runnable edtTask) throws IOException
 	{
 		pluginSet.clear();
 		pluginModel.clearSelection();
 
 		VFS vfs = VFSManager.getVFSForPath(path);
 		Object session = vfs.createVFSSession(path, InstallPanel.this);
-		try
-		{
-			InputStream is = vfs._createInputStream(session, path, false, InstallPanel.this);
-			XMLUtilities.parseXML(is, new StringMapHandler());
-		}
-		catch (Exception e)
-		{
-			Log.log(Log.WARNING, this, "Loading Pluginset failed:" + e.getMessage());
-			return false;
-		}
-		pluginModel.update();
-		return true;
+		InputStream is = vfs._createInputStream(session, path, false, InstallPanel.this);
+		XMLUtilities.parseXML(is, new StringMapHandler());
+		pluginModel.update(edtTask);
 	} //}}}
 
 	//{{{ updateModel() method
@@ -322,26 +293,22 @@ class InstallPanel extends JPanel implements EBComponent
 	public void updateModel()
 	{
 		infoBox.setText(null);
-		pluginModel.update();
-		if (pluginModel.getRowCount() == 0)
+		pluginModel.update(() ->
 		{
-			if (updates)
+			if (pluginModel.getRowCount() == 0)
+			{
+				if (updates)
 				layout.show(InstallPanel.this, "PLUGIN_ARE_UP_TO_DATE");
 			else
 				layout.show(InstallPanel.this, "NO_PLUGIN_AVAILABLE");
-		}
-		else
-		{
-			layout.show(InstallPanel.this, "INSTALL");
-			EventQueue.invokeLater(new Runnable()
+			}
+			else
 			{
-				public void run()
-				{
-					searchField.requestFocusInWindow();
-				}
-			});
-		}
-		isLoading = false;
+				layout.show(InstallPanel.this, "INSTALL");
+				EventQueue.invokeLater(searchField::requestFocusInWindow);
+			}
+			isLoading = false;
+		});
 	} //}}}
 
 	//{{{ handleMessage() method
@@ -351,11 +318,20 @@ class InstallPanel extends JPanel implements EBComponent
 		 if (message.getSource() == PluginManager.getInstance())
 		 {
 			 chooseButton.path = jEdit.getProperty(PluginManager.PROPERTY_PLUGINSET, "");
-			 if (chooseButton.path.length() > 0)
+			 if (!chooseButton.path.isEmpty())
 			 {
-				 loadPluginSet(chooseButton.path);
-				 pluginModel.clearSelection();
-				 chooseButton.updateUI();
+				 try
+				 {
+					 loadPluginSet(chooseButton.path, () ->
+					 {
+						 pluginModel.clearSelection();
+						 chooseButton.updateUI();
+					 });
+				 }
+				 catch (IOException e)
+				 {
+					 Log.log(Log.WARNING, this, "Loading Pluginset failed:" + e.getMessage());
+				 }
 			 }
 		}
 	} //}}}
@@ -397,8 +373,8 @@ class InstallPanel extends JPanel implements EBComponent
 	//{{{ PluginTableModel class
 	private class PluginTableModel extends AbstractTableModel
 	{
-		private final List<Entry> entries = new ArrayList<Entry>();
-		private final List<Entry> filteredEntries = new ArrayList<Entry>();
+		private List<Entry> entries = new ArrayList<>();
+		private final List<Entry> filteredEntries = new ArrayList<>();
 		private int sortType = EntryCompare.COLUMN_NAME;
 		private String filterString;
 		int sortDirection = 1;
@@ -457,7 +433,7 @@ class InstallPanel extends JPanel implements EBComponent
 							word = word.substring(1);
 							negative = true;
 						}
-						if (word.length() == 0)
+						if (word.isEmpty())
 							continue;
 
 						if (negative == s.contains(word))
@@ -524,37 +500,25 @@ class InstallPanel extends JPanel implements EBComponent
 		@Override
 		public Object getValueAt(int rowIndex,int columnIndex)
 		{
-			Object obj = filteredEntries.get(rowIndex);
-			if(obj instanceof String)
+			Entry entry = filteredEntries.get(rowIndex);
+			switch (columnIndex)
 			{
-				if(columnIndex == 1)
-					return obj;
-				else
-					return null;
-			}
-			else
-			{
-				Entry entry = (Entry)obj;
-
-				switch (columnIndex)
-				{
-					case 0:
-						return entry.install;
-					case 1:
-						return entry.name;
-					case 2:
-						return entry.set;
-					case 3:
-						if ((entry.installedVersion != null) && !entry.installedVersion.equals(entry.version))
-							return entry.installedVersion + "->" + entry.version;
-						return entry.version;
-					case 4:
-						return formatSize(entry.size);
-					case 5:
-						return entry.date;
-					default:
-						throw new Error("Column out of range");
-				}
+				case 0:
+					return entry.install;
+				case 1:
+					return entry.name;
+				case 2:
+					return entry.set;
+				case 3:
+					if ((entry.installedVersion != null) && !entry.installedVersion.equals(entry.version))
+						return entry.installedVersion + "->" + entry.version;
+					return entry.version;
+				case 4:
+					return formatSize(entry.size);
+				case 5:
+					return entry.date;
+				default:
+					throw new Error("Column out of range");
 			}
 		} //}}}
 
@@ -578,8 +542,8 @@ class InstallPanel extends JPanel implements EBComponent
 					setValueAt(Boolean.TRUE,i,0);
 				else
 				{
-					Entry entry = (Entry)filteredEntries.get(i);
-					entry.dependents = new LinkedList<Entry>();
+					Entry entry = filteredEntries.get(i);
+					entry.dependents = new LinkedList<>();
 					entry.install = false;
 				}
 			}
@@ -659,13 +623,13 @@ class InstallPanel extends JPanel implements EBComponent
 			 * really checked by the user.
 			 * Removes dependencies no longer required and such */
 
-			List<Entry> selected = new ArrayList<Entry>(entries.size());
+			Collection<Entry> selected = new ArrayList<>(entries.size());
 			for(Entry temp: entries)
 			{
 				if(temp.install)selected.add(temp);
 			}
 
-			List<Entry> toRemove = new ArrayList<Entry>(selected.size());
+			Collection<Entry> toRemove = new ArrayList<>(selected.size());
 			boolean changed;
 			do{
 				changed = false;
@@ -702,7 +666,6 @@ class InstallPanel extends JPanel implements EBComponent
 		 */
 		private void updateDeps(Entry entry)
 		{
-
 			List<PluginList.Dependency> deps = entry.plugin.getCompatibleBranch().deps;
 
 			for (PluginList.Dependency dep: deps)
@@ -718,11 +681,7 @@ class InstallPanel extends JPanel implements EBComponent
 								temp.dependents.add(entry);
 								if(!temp.install)
 								{
-									if(temp.installedVersion == null)
-									{
-										temp.install = true;
-									}
-									else if(!temp.plugin.loaded)
+									if (temp.installedVersion == null || !temp.plugin.loaded)
 									{
 										temp.install = true;
 									}
@@ -743,8 +702,8 @@ class InstallPanel extends JPanel implements EBComponent
 		//{{{ sort() method
 		public void sort(int type)
 		{
-			Set<String> savedChecked = new HashSet<String>();
-			Set<String> savedSelection = new HashSet<String>();
+			Set<String> savedChecked = new HashSet<>();
+			Set<String> savedSelection = new HashSet<>();
 			saveSelection(savedChecked,savedSelection);
 
 			if (sortType != type)
@@ -753,7 +712,7 @@ class InstallPanel extends JPanel implements EBComponent
 			}
 			sortType = type;
 
-			Collections.sort(entries,new EntryCompare(type, sortDirection));
+			entries.sort(new EntryCompare(type, sortDirection));
 			updateFilteredEntries();
 			restoreSelection(savedChecked,savedSelection);
 			table.getTableHeader().repaint();
@@ -761,48 +720,50 @@ class InstallPanel extends JPanel implements EBComponent
 		//}}}
 
 		//{{{ update() method
-		public void update()
+		public void update(Runnable edtTask)
 		{
-			Set<String> savedChecked = new HashSet<String>();
-			Set<String> savedSelection = new HashSet<String>();
-			saveSelection(savedChecked,savedSelection);
-
-			PluginList pluginList = window.getPluginList();
-
-			if (pluginList == null) return;
-
-			entries.clear();
-
-			for(PluginList.PluginSet set : pluginList.pluginSets)
-			{
-				for(int j = 0; j < set.plugins.size(); j++)
-				{
-					PluginList.Plugin plugin = pluginList.pluginHash.get(set.plugins.get(j));
-					PluginList.Branch branch = plugin.getCompatibleBranch();
-					String installedVersion =
-						plugin.getInstalledVersion();
-					if (updates)
-					{
-						if(branch != null
-							&& branch.canSatisfyDependencies()
-							&& installedVersion != null
-							&& StandardUtilities.compareStrings(branch.version,
-							installedVersion,false) > 0)
-						{
-							entries.add(new Entry(plugin, set.name));
-						}
-					}
-					else
-					{
-						if(plugin.canBeInstalled())
-							entries.add(new Entry(plugin,set.name));
-					}
-				}
-			}
-
-			sort(sortType);
-			restoreSelection(savedChecked, savedSelection);
+			ThreadUtilities.runInBackground(new UpdateModelTask(edtTask));
 		} //}}}
+
+		public List<Entry> buildEntryList()
+		{
+			PluginList pluginList = window.getPluginList();
+			if (pluginList == null)
+				return null;
+
+			List<Entry> entries = Collections.synchronizedList(new ArrayList<>());
+			pluginList.pluginSets
+				.stream()
+				.parallel()
+				.forEach(set ->
+				{
+					set.plugins
+						.stream()
+						.parallel()
+						.map(pluginList.pluginHash::get).forEach(plugin ->
+					{
+						PluginList.Branch branch = plugin.getCompatibleBranch();
+						String installedVersion = plugin.getInstalledVersion();
+						if (updates)
+						{
+							if (branch != null
+								&& branch.canSatisfyDependencies()
+								&& installedVersion != null
+								&& StandardUtilities.compareStrings(branch.version,
+								installedVersion, false) > 0)
+							{
+								entries.add(new Entry(plugin, set.name));
+							}
+						}
+						else
+						{
+							if (plugin.canBeInstalled())
+								entries.add(new Entry(plugin, set.name));
+						}
+					});
+				});
+			return entries;
+		}
 
 		//{{{ saveSelection() method
 		public void saveSelection(Set<String> savedChecked, Set<String> savedSelection)
@@ -826,7 +787,7 @@ class InstallPanel extends JPanel implements EBComponent
 		//{{{ clearSelection() method
 		public void clearSelection()
 		{
-			restoreSelection(Collections.<String>emptySet(), Collections.<String>emptySet());
+			restoreSelection(Collections.emptySet(), Collections.emptySet());
 		} //}}}
 
 		//{{{ restoreSelection() method
@@ -834,12 +795,8 @@ class InstallPanel extends JPanel implements EBComponent
 		{
 			for (int i=0, c=getRowCount() ; i<c ; i++)
 			{
-				Object obj = filteredEntries.get(i);
-				String name = obj.toString();
-				if (obj instanceof Entry)
-				{
-					name = ((Entry)obj).plugin.jar;
-				}
+				Entry entry = filteredEntries.get(i);
+				String name = entry.plugin.jar;
 				if (pluginSet.contains(name))
 					setValueAt(true, i, 0);
 				else setValueAt(savedChecked.contains(name), i, 0);
@@ -878,6 +835,37 @@ class InstallPanel extends JPanel implements EBComponent
 				scrollbar.setValue(scrollbar.getMinimum());
 			}
 		} //}}}
+
+		private class UpdateModelTask extends Task
+		{
+			private final Runnable edtTask;
+
+			UpdateModelTask(Runnable edtTask)
+			{
+				this.edtTask = edtTask;
+			}
+
+			@Override
+			public void _run()
+			{
+				List<Entry> newEntries = buildEntryList();
+				if (newEntries == null)
+					return;
+
+				ThreadUtilities.runInDispatchThread(() ->
+				{
+					Set<String> savedChecked = new HashSet<>();
+					Set<String> savedSelection = new HashSet<>();
+					saveSelection(savedChecked,savedSelection);
+
+					entries = newEntries;
+					sort(sortType);
+					restoreSelection(savedChecked, savedSelection);
+					if (edtTask != null)
+						edtTask.run();
+				});
+			}
+		}
 	} //}}}
 
 	//{{{ Entry class
@@ -890,7 +878,7 @@ class InstallPanel extends JPanel implements EBComponent
 		boolean checked;
 		boolean install;
 		PluginList.Plugin plugin;
-		List<Entry> dependents = new LinkedList<Entry>();
+		List<Entry> dependents = new LinkedList<>();
 
 		Entry(PluginList.Plugin plugin, String set)
 		{
@@ -898,17 +886,17 @@ class InstallPanel extends JPanel implements EBComponent
 			boolean downloadSource = jEdit.getBooleanProperty("plugin-manager.downloadSource");
 			int size = downloadSource ? branch.downloadSourceSize : branch.downloadSize;
 
-			this.name = plugin.name;
-			this.author = plugin.author;
-			this.installedVersion = plugin.getInstalledVersion();
-			this.version = branch.version;
+			name = plugin.name;
+			author = plugin.author;
+			installedVersion = plugin.getInstalledVersion();
+			version = branch.version;
 			this.size = size;
-			this.date = branch.date;
-			this.description = plugin.description;
-			this.dependencies = branch.depsToString();
+			date = branch.date;
+			description = plugin.description;
+			dependencies = branch.depsToString();
 			this.set = set;
-			this.install = false;
-			this.checked = false;
+			install = false;
+			checked = false;
 			this.plugin = plugin;
 			SimpleDateFormat format = new SimpleDateFormat("d MMMM yyyy", Locale.ENGLISH);
 			try
@@ -935,10 +923,10 @@ class InstallPanel extends JPanel implements EBComponent
 
 		Entry[] getTransitiveDependents()
 		{
-			List<Entry> list = new ArrayList<Entry>();
+			List<Entry> list = new ArrayList<>();
 			getTransitiveDependents(list);
-			Entry[] array = list.toArray(new Entry[list.size()]);
-			Arrays.sort(array,new StandardUtilities.StringCompare<Entry>(true));
+			Entry[] array = list.toArray(new Entry[0]);
+			Arrays.sort(array,new StandardUtilities.StringCompare<>(true));
 			return array;
 		}
 
@@ -972,10 +960,9 @@ class InstallPanel extends JPanel implements EBComponent
 			String text = getText();
 			if (table.getSelectedRowCount() == 1)
 			{
-				Entry entry = (Entry) pluginModel.filteredEntries
-					.get(table.getSelectedRow());
+				Entry entry = pluginModel.filteredEntries.get(table.getSelectedRow());
 				String pattern = "<b>{0}</b>: {1}<br><b>{2}</b>: {3}<br><br>{4}";
-				List<String> params = new ArrayList<String>();
+				Collection<String> params = new ArrayList<>();
 				params.add(jEdit.getProperty("install-plugins.info.author", "Author"));
 				params.add(entry.author);
 				params.add(jEdit.getProperty("install-plugins.info.released", "Released"));
@@ -1021,8 +1008,7 @@ class InstallPanel extends JPanel implements EBComponent
 				int length = pluginModel.entries.size();
 				for (int i = 0; i < length; i++)
 				{
-					Entry entry = (Entry)pluginModel
-						.entries.get(i);
+					Entry entry = pluginModel.entries.get(i);
 					if (entry.install)
 					{
 						nbPlugins++;
@@ -1068,7 +1054,7 @@ class InstallPanel extends JPanel implements EBComponent
 			{
 				int length = pluginModel.getRowCount();
 				for (int i = 0; i < length; i++)
-					if (!((Boolean)pluginModel.getValueAt(i,0)).booleanValue())
+					if (!(Boolean) pluginModel.getValueAt(i, 0))
 					{
 						setSelected(false);
 						return;
@@ -1125,20 +1111,27 @@ class InstallPanel extends JPanel implements EBComponent
 		@Override
 		public void actionPerformed(ActionEvent ae)
 		{
-
 			path = jEdit.getProperty(PluginManager.PROPERTY_PLUGINSET,
 				jEdit.getSettingsDirectory() + File.separator);
 			String[] selectedFiles = GUIUtilities.showVFSFileDialog(InstallPanel.this.window,
 				jEdit.getActiveView(), path, VFSBrowser.OPEN_DIALOG, false);
-			if (selectedFiles == null || selectedFiles.length != 1) return;
+			if (selectedFiles.length != 1)
+				return;
 
 			path = selectedFiles[0];
-			boolean success = loadPluginSet(path);
-			if (success)
+			try
 			{
+				loadPluginSet(path, () ->
+				{
+					jEdit.setProperty(PluginManager.PROPERTY_PLUGINSET, path);
+					updateUI();
+				});
 				jEdit.setProperty(PluginManager.PROPERTY_PLUGINSET, path);
 			}
-			updateUI();
+			catch (IOException e)
+			{
+				Log.log(Log.WARNING, this, "Loading Pluginset failed:" + e.getMessage());
+			}
 		} //}}}
 	}//}}}
 
@@ -1202,7 +1195,7 @@ class InstallPanel extends JPanel implements EBComponent
 			int instcount = 0;
 			for (int i = 0; i < length; i++)
 			{
-				Entry entry = (Entry)pluginModel.entries.get(i);
+				Entry entry = pluginModel.entries.get(i);
 				if (entry.install)
 				{
 					entry.plugin.install(roster,installDirectory,downloadSource, !entry.checked);
@@ -1230,7 +1223,7 @@ class InstallPanel extends JPanel implements EBComponent
 				new PluginManagerProgress(window,roster);
 
 				roster.performOperationsInAWTThread(window);
-				pluginModel.update();
+				pluginModel.update(null);
 			}
 		}
 
@@ -1244,7 +1237,7 @@ class InstallPanel extends JPanel implements EBComponent
 			{
 				int length = pluginModel.getRowCount();
 				for (int i = 0; i < length; i++)
-					if (((Boolean)pluginModel.getValueAt(i,0)).booleanValue())
+					if ((Boolean) pluginModel.getValueAt(i, 0))
 					{
 						setEnabled(true);
 						return;
@@ -1299,18 +1292,10 @@ class InstallPanel extends JPanel implements EBComponent
 					result = StandardUtilities.compareStrings(e1.version, e2.version, true);
 					break;
 				case COLUMN_SIZE:
-					result = (e1.size < e2.size)
-						 ? -1
-						 : ((e1.size == e2.size)
-						    ? 0
-						    : 1);
+					result = Integer.compare(e1.size, e2.size);
 					break;
 				case COLUMN_RELEASE:
-					result = (e1.timestamp < e2.timestamp)
-						 ? -1
-						 : ((e1.timestamp == e2.timestamp)
-						    ? 0
-						    : 1);
+					result = Long.compare(e1.timestamp, e2.timestamp);
 					break;
 				default:
 					result = 0;
@@ -1356,7 +1341,7 @@ class InstallPanel extends JPanel implements EBComponent
 	//{{{ KeyboardAction class
 	private class KeyboardAction extends AbstractAction
 	{
-		private KeyboardCommand command = KeyboardCommand.NONE;
+		private final KeyboardCommand command;
 
 		KeyboardAction(KeyboardCommand command)
 		{

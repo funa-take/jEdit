@@ -23,7 +23,6 @@
 package org.gjt.sp.jedit.textarea;
 
 //{{{ Imports
-import java.awt.Toolkit;
 import java.util.*;
 import org.gjt.sp.jedit.buffer.*;
 import org.gjt.sp.jedit.Debug;
@@ -35,7 +34,7 @@ import org.gjt.sp.util.Log;
  * 
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: DisplayManager.java 24211 2015-12-10 03:33:28Z daleanson $
+ * @version $Id: DisplayManager.java 25337 2020-05-16 07:11:05Z kpouer $
  */
 public class DisplayManager
 {
@@ -45,12 +44,7 @@ public class DisplayManager
 	static DisplayManager getDisplayManager(JEditBuffer buffer,
 		TextArea textArea)
 	{
-		List<DisplayManager> l = bufferMap.get(buffer);
-		if(l == null)
-		{
-			l = new LinkedList<DisplayManager>();
-			bufferMap.put(buffer,l);
-		}
+		List<DisplayManager> l = bufferMap.computeIfAbsent(buffer, k -> new LinkedList<>());
 
 		/* An existing display manager's fold visibility map
 		that a new display manager will inherit */
@@ -106,7 +100,7 @@ public class DisplayManager
 		}
 	} //}}}
 
-	private static final Map<JEditBuffer, List<DisplayManager>> bufferMap = new HashMap<JEditBuffer, List<DisplayManager>>();
+	private static final Map<JEditBuffer, List<DisplayManager>> bufferMap = new HashMap<>();
 	//}}}
 
 	//{{{ getBuffer() method
@@ -124,7 +118,7 @@ public class DisplayManager
 	 * @param line A physical line index
 	 * @since jEdit 4.2pre1
 	 */
-	public final boolean isLineVisible(int line)
+	public boolean isLineVisible(int line)
 	{
 		return folds.search(line) % 2 == 0;
 	} //}}}
@@ -225,7 +219,7 @@ public class DisplayManager
 	 * @param line the physical line
 	 * @return the screen line count
 	 */
-	public final int getScreenLineCount(int line)
+	public int getScreenLineCount(int line)
 	{
 		updateScreenLineCount(line);
 		return screenLineMgr.getScreenLineCount(line);
@@ -239,7 +233,7 @@ public class DisplayManager
 	 * the foldings are collapsed
 	 * @return the number of displayable lines
 	 */
-	public final int getScrollLineCount()
+	public int getScrollLineCount()
 	{
 		return scrollLineCount.getScrollLine();
 	} //}}}
@@ -525,7 +519,8 @@ public class DisplayManager
 				scrollLineCount.reset();
 				//FIXME: Why here?
 				firstLine.ensurePhysicalLineIsVisible();
-			} else if(scrollLineCount.isCallChanged())
+			}
+			else if(scrollLineCount.isCallChanged())
 				scrollLineCount.changed();
 
 			if(firstLine.isCallChanged() ||
@@ -556,22 +551,22 @@ public class DisplayManager
 
 		if(newFirstLine >= currentFirstLine + visibleLines)
 		{
-			this.firstLine.scrollDown(newFirstLine - currentFirstLine);
+			firstLine.scrollDown(newFirstLine - currentFirstLine);
 			textArea.chunkCache.invalidateAll();
 		}
 		else if(newFirstLine <= currentFirstLine - visibleLines)
 		{
-			this.firstLine.scrollUp(currentFirstLine - newFirstLine);
+			firstLine.scrollUp(currentFirstLine - newFirstLine);
 			textArea.chunkCache.invalidateAll();
 		}
 		else if(newFirstLine > currentFirstLine)
 		{
-			this.firstLine.scrollDown(newFirstLine - currentFirstLine);
+			firstLine.scrollDown(newFirstLine - currentFirstLine);
 			textArea.chunkCache.scrollDown(newFirstLine - currentFirstLine);
 		}
 		else if(newFirstLine < currentFirstLine)
 		{
-			this.firstLine.scrollUp(currentFirstLine - newFirstLine);
+			firstLine.scrollUp(currentFirstLine - newFirstLine);
 			textArea.chunkCache.scrollUp(currentFirstLine - newFirstLine);
 		} else
 			assert true;
@@ -597,9 +592,9 @@ public class DisplayManager
 			// JEditTextArea.scrollTo() needs this to simplify
 			// its code
 			if(skew < 0)
-				this.firstLine.scrollUp(-skew);
+				firstLine.scrollUp(-skew);
 			else if(skew > 0)
-				this.firstLine.scrollDown(skew);
+				firstLine.scrollDown(skew);
 			else
 			{
 				// nothing to do
@@ -608,7 +603,7 @@ public class DisplayManager
 		}
 		else if(amount > 0)
 			this.firstLine.physDown(amount,skew);
-		else if(amount < 0)
+		else // amount < 0;
 			this.firstLine.physUp(-amount,skew);
 
 		int firstLine = textArea.getFirstLine();
@@ -625,10 +620,8 @@ public class DisplayManager
 		{
 			textArea.chunkCache.scrollDown(firstLine - currentFirstLine);
 		}
-		else if(firstLine < currentFirstLine)
-		{
+		else // firstLine < currentFirstLine
 			textArea.chunkCache.scrollUp(currentFirstLine - firstLine);
-		}
 
 		// we have to be careful
 		notifyScreenLineChanges();
@@ -721,7 +714,7 @@ public class DisplayManager
 		DisplayManager copy)
 	{
 		this.buffer = buffer;
-		this.screenLineMgr = new ScreenLineManager(buffer);
+		screenLineMgr = new ScreenLineManager(buffer);
 		this.textArea = textArea;
 
 		scrollLineCount = new ScrollLineCount(this,textArea);
@@ -972,7 +965,7 @@ public class DisplayManager
 	} //}}}
 	
 	//{{{ MutableInteger class
-	private class MutableInteger
+	private static class MutableInteger
 	{
 		MutableInteger(int value)
 		{

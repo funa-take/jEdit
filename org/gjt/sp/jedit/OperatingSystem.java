@@ -37,7 +37,7 @@ import org.gjt.sp.util.Log;
 /**
  * Operating system detection routines.
  * @author Slava Pestov
- * @version $Id: OperatingSystem.java 24592 2017-01-20 02:34:44Z vampire0 $
+ * @version $Id: OperatingSystem.java 24918 2019-08-13 14:18:47Z vampire0 $
  * @since jEdit 4.0pre4
  */
 public class OperatingSystem
@@ -266,7 +266,7 @@ public class OperatingSystem
 	//{{{ hasJava17() method
 	/**
 	 * @deprecated - there is no point in checking for this
-	 *				 since we require Java 1.8.
+	 *				 since we require Java 11.
 	 * Returns if Java 2 version 1.7 is in use.
 	 * @since jEdit 5.0pre1
 	 */

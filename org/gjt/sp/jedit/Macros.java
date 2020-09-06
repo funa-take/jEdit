@@ -24,7 +24,6 @@
 package org.gjt.sp.jedit;
 
 //{{{ Imports
-
 import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.msg.BufferUpdate;
 import org.gjt.sp.jedit.msg.DynamicMenuChanged;
@@ -58,7 +57,7 @@ import java.util.regex.Pattern;
  * the methods in the {@link GUIUtilities} class instead.
  *
  * @author Slava Pestov
- * @version $Id: Macros.java 24477 2016-08-02 22:58:44Z daleanson $
+ * @version $Id: Macros.java 25328 2020-05-09 10:17:16Z kpouer $
  */
 public class Macros
 {
@@ -72,20 +71,17 @@ public class Macros
 	{
 		String[] paths = GUIUtilities.showVFSFileDialog(view,
 			null,JFileChooser.OPEN_DIALOG,true);
-		if(paths != null)
+		Buffer buffer = view.getBuffer();
+		try
 		{
-			Buffer buffer = view.getBuffer();
-			try
-			{
-				buffer.beginCompoundEdit();
+			buffer.beginCompoundEdit();
 
-				for (String path : paths)
-					runScript(view, path, false);
-			}
-			finally
-			{
-				buffer.endCompoundEdit();
-			}
+			for (String path : paths)
+				runScript(view, path, false);
+		}
+		finally
+		{
+			buffer.endCompoundEdit();
 		}
 	} //}}}
 
@@ -135,8 +131,9 @@ public class Macros
 			Log.log(Log.ERROR,Macros.class,path +
 				": Cannot find a suitable macro handler, "
 				+ "assuming BeanShell");
-			getHandler("beanshell").createMacro(
-				path,path).invoke(view);
+			Handler beanshell = getHandler("beanshell");
+			assert beanshell != null : "beanshell handler cannot be null";
+			beanshell.createMacro(path,path).invoke(view);
 		}
 	} //}}}
 
@@ -162,14 +159,7 @@ public class Macros
 		{
 			try
 			{
-				EventQueue.invokeAndWait(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						message(comp, message);
-					}
-				});
+				EventQueue.invokeAndWait(() -> message(comp, message));
 			}
 			catch (Exception e)		// NOPMD
 			{
@@ -202,14 +192,7 @@ public class Macros
 		{
 			try
 			{
-				EventQueue.invokeAndWait(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						message(comp, message);
-					}
-				});
+				EventQueue.invokeAndWait(() -> message(comp, message));
 			}
 			catch (Exception e)		// NOPMD
 			{
@@ -254,14 +237,7 @@ public class Macros
 		final String[] retValue = new String[1];
 		try
 		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					retValue[0] = input(comp, prompt, defaultValue);
-				}
-			});
+			EventQueue.invokeAndWait(() -> retValue[0] = input(comp, prompt, defaultValue));
 		}
 		catch (Exception e)
 		{
@@ -294,14 +270,7 @@ public class Macros
 		final int [] retValue = new int[1];
 		try
 		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					retValue[0] = confirm(comp, prompt, buttons);
-				}
-			});
+			EventQueue.invokeAndWait(() -> retValue[0] = confirm(comp, prompt, buttons));
 		}
 		catch (Exception e)
 		{
@@ -337,23 +306,13 @@ public class Macros
 		final int [] retValue = new int[1];
 		try
 		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					retValue[0] = confirm(comp, prompt, buttons, type);
-				}
-			});
+			EventQueue.invokeAndWait(() -> retValue[0] = confirm(comp, prompt, buttons, type));
 		}
 		catch (Exception e)
 		{
 			return JOptionPane.CANCEL_OPTION;
 		}
 		return retValue[0];
-		
-		
-		
 	} //}}}
 
 	//{{{ loadMacros() method
@@ -589,13 +548,19 @@ public class Macros
 		{
 			int index = macroName.lastIndexOf('/');
 			return macroName.substring(index + 1).replace('_', ' ');
-		}
-		//}}}
+		}//}}}
+
+		//{{{ getLabel() method
+		@Override
+		public String getLabel()
+		{
+			return label;
+		} //}}}
 
 		//{{{ Private members
-		private Handler handler;
-		private String path;
-		String label;
+		private final Handler handler;
+		private final String path;
+		private final String label;
 		//}}}
 	} //}}}
 
@@ -611,12 +576,12 @@ public class Macros
 
 		if(settings == null)
 		{
-			GUIUtilities.error(view,"no-settings",new String[0]);
+			GUIUtilities.error(view,"no-settings", StandardUtilities.EMPTY_STRING_ARRAY);
 			return;
 		}
 		if(view.getMacroRecorder() != null)
 		{
-			GUIUtilities.error(view,"already-recording",new String[0]);
+			GUIUtilities.error(view, "already-recording", StandardUtilities.EMPTY_STRING_ARRAY);
 			return;
 		}
 
@@ -644,13 +609,13 @@ public class Macros
 
 		if(settings == null)
 		{
-			GUIUtilities.error(view,"no-settings",new String[0]);
+			GUIUtilities.error(view,"no-settings", StandardUtilities.EMPTY_STRING_ARRAY);
 			return;
 		}
 
 		if(view.getMacroRecorder() != null)
 		{
-			GUIUtilities.error(view,"already-recording",new String[0]);
+			GUIUtilities.error(view,"already-recording", StandardUtilities.EMPTY_STRING_ARRAY);
 			return;
 		}
 
@@ -714,13 +679,14 @@ public class Macros
 			jEdit.getSettingsDirectory(),"macros",
 			"Temporary_Macro.bsh");
 
-		if(jEdit.getBuffer(path) == null)
+		if(jEdit.getBufferManager().getBuffer(path).isEmpty())
 		{
 			GUIUtilities.error(view,"no-temp-macro",null);
 			return;
 		}
 
 		Handler handler = getHandler("beanshell");
+		assert handler != null : "beanshell handler cannot be null";
 		Macro temp = handler.createMacro(path,path);
 
 		Buffer buffer = view.getBuffer();
@@ -745,11 +711,11 @@ public class Macros
 	private static String systemMacroPath;
 	private static String userMacroPath;
 
-	private static List<Handler> macroHandlers;
+	private static final List<Handler> macroHandlers;
 
-	private static ActionSet macroActionSet;
-	private static Vector macroHierarchy;
-	private static Map<String, Macro> macroHash;
+	private static final ActionSet macroActionSet;
+	private static final Vector macroHierarchy;
+	private static final Map<String, Macro> macroHash;
 
 	private static Macro lastMacro;
 	//}}}
@@ -762,12 +728,12 @@ public class Macros
 		macroActionSet = new ActionSet(jEdit.getProperty("action-set.macros"));
 		jEdit.addActionSet(macroActionSet);
 		macroHierarchy = new Vector();
-		macroHash = new Hashtable<String, Macro>();
+		macroHash = new Hashtable<>();
 	} //}}}
 
 	//{{{ loadMacros() method
-	@SuppressWarnings({"unchecked"})	// TODO: figure out what is in 'vector', might be a vector of vectors
-	private static void loadMacros(List vector, String path, File directory)
+	@SuppressWarnings({"unchecked"})	// TODO: figure out what is in 'list', might be a list of lists
+	private static void loadMacros(List list, String path, File directory)
 	{
 		lastMacro = null;
 
@@ -787,7 +753,7 @@ public class Macros
 				String submenuName = fileName.replace('_', ' ');
 				List submenu = null;
 				//{{{ try to merge with an existing menu first
-				for (Object obj : vector)
+				for (Object obj : list)
 				{
 					if (obj instanceof List)
 					{
@@ -801,22 +767,22 @@ public class Macros
 				} //}}}
 				if (submenu == null)
 				{
-					submenu = new Vector();
+					submenu = new ArrayList();
 					submenu.add(submenuName);
-					vector.add(submenu);
+					list.add(submenu);
 				}
 
 				loadMacros(submenu, path + fileName + '/', file);
 			} else
 			{
-				addMacro(file, path, vector);
+				addMacro(file, path, list);
 			}
 		}
 	} //}}}
 
 	//{{{ addMacro() method
 	@SuppressWarnings({"unchecked"})
-	private static void addMacro(File file, String path, List vector)
+	private static void addMacro(File file, String path, List list)
 	{
 		String fileName = file.getName();
 		Handler handler = getHandlerForPathName(file.getPath());
@@ -837,10 +803,8 @@ public class Macros
 			if(macroHash.get(newMacro.getName()) != null)
 				return;
 
-			vector.add(newMacro.getName());
-			jEdit.setTemporaryProperty(newMacro.getName()
-				+ ".label",
-				newMacro.label);
+			list.add(newMacro.getName());
+			jEdit.setTemporaryProperty(newMacro.getName() + ".label", newMacro.getLabel());
 			jEdit.setTemporaryProperty(newMacro.getName()
 				+ ".mouse-over",
 				handler.getLabel() + " - " + file.getPath());
@@ -930,15 +894,12 @@ public class Macros
 			// record \n and \t on lines specially so that auto indent
 			// can take place
 			if(ch == '\n')
-				record(repeat,"textArea.userInput(\'\\n\');");
+				record(repeat,"textArea.userInput('\\n');");
 			else if(ch == '\t')
-				record(repeat,"textArea.userInput(\'\\t\');");
+				record(repeat,"textArea.userInput('\\t');");
 			else
 			{
-				StringBuilder buf = new StringBuilder(repeat);
-				for(int i = 0; i < repeat; i++)
-					buf.append(ch);
-				recordInput(buf.toString(),overwrite);
+				recordInput(String.valueOf(ch).repeat(Math.max(0, repeat)),overwrite);
 			}
 		} //}}}
 
@@ -984,7 +945,7 @@ public class Macros
 		{
 			if(bmsg.getWhat() == BufferUpdate.CLOSED && bmsg.getBuffer() == buffer)
 			{
-					stopRecording(view);
+				stopRecording(view);
 			}
 		} //}}}
 
@@ -1114,9 +1075,9 @@ public class Macros
 		} //}}}
 
 		//{{{ Private members
-		private String name;
-		private String label;
-		private Pattern filter;
+		private final String name;
+		private final String label;
+		private final Pattern filter;
 		//}}}
 	} //}}}
 

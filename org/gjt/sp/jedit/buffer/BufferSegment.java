@@ -21,12 +21,14 @@
 
 package org.gjt.sp.jedit.buffer;
 
+import javax.annotation.Nonnull;
+
 /**
  * A read-only text segment from a buffer. Allows concatenation using a
  * "linked list" approach.
  *
  * @author Marcelo Vanzin
- * @version $Id: BufferSegment.java 21971 2012-08-02 20:32:37Z jarekczek $
+ * @version $Id: BufferSegment.java 25191 2020-04-11 17:00:39Z kpouer $
  * @since jEdit 4.3pre15
  */
 class BufferSegment implements CharSequence
@@ -50,6 +52,7 @@ class BufferSegment implements CharSequence
 		this.next = next;
 	}
 
+	@Override
 	public char charAt(int index)
 	{
 		if (index < len)
@@ -60,17 +63,20 @@ class BufferSegment implements CharSequence
 			throw new ArrayIndexOutOfBoundsException(index);
 	}
 
+	@Override
 	public int length()
 	{
 		return len + ((next != null) ? next.length() : 0);
 	}
 
+	@Override
 	public CharSequence subSequence(int start,
 					int end)
 	{
 		return subSegment(start, end);
 	}
 
+	@Nonnull
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();

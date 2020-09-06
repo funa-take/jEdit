@@ -22,13 +22,14 @@
 
 package org.gjt.sp.jedit.indent;
 
+import java.util.Collection;
 import java.util.List;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.TextUtilities;
 
 /**
  * @author Slava Pestov
- * @version $Id: OpenBracketIndentRule.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: OpenBracketIndentRule.java 25222 2020-04-12 16:07:38Z kpouer $
  */
 public class OpenBracketIndentRule extends BracketIndentRule
 {
@@ -41,6 +42,7 @@ public class OpenBracketIndentRule extends BracketIndentRule
 	} //}}}
 
 	//{{{ apply() method
+	@Override
 	public void apply(JEditBuffer buffer, int thisLineIndex,
 		int prevLineIndex, int prevPrevLineIndex,
 		List<IndentAction> indentActions)
@@ -71,8 +73,7 @@ public class OpenBracketIndentRule extends BracketIndentRule
 	} //}}}
 
 	//{{{ handleCollapse() method
-	private static void handleCollapse(List<IndentAction> indentActions,
-					   boolean delPrevPrevCollapse)
+	private static void handleCollapse(Collection<IndentAction> indentActions, boolean delPrevPrevCollapse)
 	{
 		if (indentActions.contains(IndentAction.PrevCollapse))
 		{
@@ -83,7 +84,6 @@ public class OpenBracketIndentRule extends BracketIndentRule
 		if (delPrevPrevCollapse && indentActions.contains(IndentAction.PrevPrevCollapse))
 		{
 			indentActions.clear();
-			return;
 		}
 	} //}}}
 

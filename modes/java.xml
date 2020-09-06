@@ -146,6 +146,8 @@
 			<KEYWORD3>interface</KEYWORD3>
 			<KEYWORD3>long</KEYWORD3>
 			<KEYWORD3>short</KEYWORD3>
+			<!-- added for Java 10. While 'var' is not technically a keyword, it is a type. -->
+			<KEYWORD3>var</KEYWORD3>
 			<!--}}}-->
 
 			<!--{{{ literals -->
@@ -227,7 +229,7 @@
 			<END>}</END>
 		</SPAN_REGEXP>
 
-		<!-- for the common usage of the cvs keyword $Id: java.xml 20772 2012-01-13 18:54:27Z kog13 $ -->
+		<!-- for the common usage of the cvs keyword $Id: java.xml 24893 2019-01-17 20:10:18Z daleanson $ -->
 		<SPAN_REGEXP TYPE="LABEL" HASH_CHAR="@version" NO_WORD_BREAK="FALSE" DELEGATE="JAVADOC_PARAM">
 			<BEGIN>@version\s+\$</BEGIN>
 			<END>$</END>
@@ -260,7 +262,7 @@
 			<LABEL>@serialData</LABEL>
 		<!--<LABEL>@serialField</LABEL>-->
 			<LABEL>@since</LABEL>
-		<!--<LABEL>@throws</LABEL>-->
+			<LABEL>@throws</LABEL>
 			<LABEL>{@value}</LABEL>
 			<LABEL>@version</LABEL>
 

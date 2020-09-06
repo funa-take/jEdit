@@ -1,129 +1,155 @@
-jEdit 5.5 version history
-       (changes since jEdit 5.4.0)
+jEdit 5.6 version history
+       (changes since jEdit 5.5.0)
 :encoding=UTF-8:
 
-{{{ Version 5.5.0
+{{{ Version 5.6.0
 
-Thanks to Björn "Vampire" Kautler, AdamS, Wim West, M. Cesar R. Lacruz,
-Egor Abramovich, Hrotkó Gábor, Alan Ezust, Dale Anson, Roman Tsourick,
-Rafal Kolanski, Uwe Stöhr, Matthieu Casanova, A. Vontobel and Jesse Pavel for
-contributing to this release.
+Thanks to Björn "Vampire" Kautler, Matthieu Casanova, Hrotkó Gábor,
+Alan Ezust, Makarius, and Dale Anson for contributing to this release.
 
 {{{ Bug Fixes
 
-- Fix and cleanup various localization properties (Björn "Vampire" Kautler)
+- Fix MiscUtilities.isBackup() method when there is no suffix and prefix set
+  (patch #4088 - Makarius)
 
-- Make the Display_Shortcuts.bsh macro work properly (Björn "Vampire" Kautler)
+- Do not loose the screen line count of lines that were not modified
+  when inserting multiple lines (minor optimization)
+  (#4091 - Matthieu Casanova)
 
-- Do not manipulate filename when opening a probably backup file but let the
-  user choose what to do as intended (Björn "Vampire" Kautler)
+- Fixed a NPE when trying to choose a non existing icon when adding a
+  toolbar item (#3770 - Matthieu Casanova)
 
-- Fix jEdit backup filename recognition (Björn "Vampire" Kautler)
+- When launching jEdit if a file named like the untitled buffer from
+  perspective exists, then load it (#4087 - Matthieu Casanova)
 
-- Do not use translated strings to match log lines within activity.log in
-  Make_Bug_Report.bsh (Björn "Vampire" Kautler)
+- Do not only highlight the first match in hypersearch results
+  (#4083 - Matthieu Casanova)
 
-- Support Java 9 and newer in the Windows EXE launcher
-  (Bug #4064 - Björn "Vampire" Kautler)
+- Re-add missing help viewer back and forward icons (Björn "Vampire" Kautler)
 
-- Fix splash screen progress call count not being equal in all code branches /
-  parameter combinations (Björn "Vampire" Kautler)
+- Fix wrong behavior of input method framework support that returned wrong
+  locations for offsets and wrong offsets for locations
+  (#4082 - Björn "Vampire" Kautler)
 
-- Fix splash screen progress count, so that the progress bar finally reaches
-  the right end (Björn "Vampire" Kautler)
+- Upgrade OS X launcher stub to be compatible with newer Java versions
+  (#4077 - Björn "Vampire" Kautler)
 
-- Fix a bug preventing jEdit from loading when a buffer has an invalid
-  selection and is loaded in two edit panes (Matthieu Casanova)
+- Fix Untitled Issue with -background command line option
+  (Patch #617 - Hrotkó Gábor)
 
-- RegisterViewer editable contentPane fixed (Patch #598, Jesse Pavel)
+- Handle case where user has not set either a backup prefix or suffix
+  (#4069 - Dale Anson)
 
-- Command line behavior for +line fixed (Patch #590 - Wim West)
+- Fix odd default colors for style editor (#4055 - Dale Anson)
 
-- Autosave Untitled Buffers is now persistent across sessions
-  (Feature Request #501, Patch #596, Patch #614, Fix Bug #4059 - Hrotkó Gábor)
+- Fix NullPointerException in Preview Javadoc macro (#2412 - Dale Anson)
 
-- Fixed a number of bugs in the new jEdit printing system (Dale Anson)
+- Fix dockable buttons not wrapping correctly (#2626 - Dale Anson)
 
-- Add missing local properties to Insert_Buffer_Properties macro
-  (Patch #599 - Jesse Pavel)
+- Fix electric scroll not working with page up/down (#2719 - Dale Anson)
 
-- Fixed an issue with the activity log viewer so that setting the number of
-  lines in the log actually works. (Dale Anson)
+- Correct location of context menu popup (#4073 - Dale Anson)
 
-- Fix for bug #3971, exception trying to set WM_CLASS. (Dale Anson)
-
-- Fix for bug #4047, illegal reflective access operation with Java 9.
-  (Dale Anson)
-
-- Fix Bug #4011, The Cut Lines macro gives exception if the cursor is beyond
-  text area (Patch #600, Roman Tsourick)
-
-- Fix for bug #541, let ESC key close the print dialog. (Dale Anson)
-
-}}}
-{{{ UI Improvements
-
-- Consistently use lowercase status bar indicators for disabled settings
-  (Björn "Vampire" Kautler)
-
-- Allow specification of fallback font sizes (Patch #569, Rafal Kolanski)
-
-- Show tooltips in ShortcutOptionPane table (FR# 538, Roman Tsourick)
-
-- FSB: Disable first column dragging (Patch# 603, Roman Tsourick)
-
-- FSB: Sorting icon not following header when moving
-  (Bug# 4049, Patch# 604, Roman Tsourick)
+- Fix file browser splitter buttons not working (#4081 - Dale Anson)
 
 }}}
 {{{ Miscellaneous
 
-- FR #506, FR #536: Autosaves are now saved to the Autosave directory, if
-  specified. (Alan Ezust, Hrotkó Gábor)
+- Important improvement to Font substitution for documents that contains
+  characters that are not supported by the default font (Matthieu Casanova)
 
-- FR #175: Saving and backup option, "Never Mark Untitled Buffers Dirty" changed
-  name and behavior to "Close Dirty Untitled buffers without confirmation"
-  (Alan Ezust)
+- Major performance improvement at displaying big files by changing the
+  call to Font.layoutGlyphVector()  (Matthieu Casanova)
 
-- Patch #612, fr #518: buffer lock (Roman Tsourick)
+- Made a larger plugin download dialog, patch submitted in bug #4050
+  (Kalle Helminen)
 
-- Enhancements of russian localization (Roman Tsourick)
+- Store rules in an array instead of a Map avoiding computations
+  (Matthieu Casanova)
+
+- Store the glyph width in the GlyphCache to make token marking faster
+  (Matthieu Casanova)
+
+- New EditPaneManager, with convenient methods to get and iterate over
+  EditPanes, get it by calling jEdit.getEditPaneManager() (Matthieu Casanova)
+
+- New BufferManager, all you need to get loaded buffers from jEdit
+  get it by calling jEdit.getBufferManager() (Matthieu Casanova)
+
+- New ViewManager, all you need to get loaded existing views
+  get it by calling jEdit.getViewManager() (Matthieu Casanova)
+
+- Added new method JEditBuffer.hasProperty() (Matthieu Casanova)
+
+- Apply UI language changes immediately without the need to restart.
+  (Björn "Vampire" Kautler)
+
+- The tray icon on Linux systems now by default tries to detect the proper
+  background color and also lets the user either select a fixed color for
+  the background or select some arbitrary rectangle as background for the
+  tray icon, making the icon much less ugly on dark themes.
+  (Björn "Vampire" Kautler)
+
+- The Windows EXE launcher now considers JAVA_HOME environment variable if no
+  matching Java is found in the registry (Björn "Vampire" Kautler)
+
+- The Windows installer now uses modern and resizable style and allows
+  installation without administrator privileges (Björn "Vampire" Kautler)
+
+- Chinese Taiwan localization from David Day (Patch #620 - Dale Anson)
+
+- Fix all deprecation warnings produced when compiling with Java 9 (Dale Anson)
+
+- Adjust Appearance option pane to allow setting "primary" and "secondary" fonts
+  for all look and feels (Dale Anson)
+
+- Improve Regular Expressions documentation (Björn "Vampire" Kautler)
+
+}}}
+{{{ API Changes
+
+- StringList.join() method is now deprecated as String.join()
+  is now provided since Java 8 (Matthieu Casanova)
+
+- TextUtilities.join() method is now deprecated as String.join()
+  is now provided since Java 8 (Matthieu Casanova)
+
+- Change BoyerMooreSearchMatcher to make it thread safe (Matthieu Casanova)
+
+- New methods IOUtilities.toString(InputStream) (Matthieu Casanova)
+
+- New method IOUtilities.toByteArray(InputStream) (Matthieu Casanova)
+
+- New UniqueActionDocumentListener class, a DocumentListener that does the same
+  action for every event (Matthieu Casanova)
+
+- New AbstractWidget class (Matthieu Casanova)
+
+- GUIUtilities.showVFSFileDialog() methods now never returns null
+  (Matthieu Casanova)
+
+- New Method VFSManager.canReadFile(path) (Matthieu Casanova)
+
+- New method IntegerArray.isEmpty() (Matthieu Casanova)
 
 }}}
 {{{ Editing
 
-- Shipped JavaDocs are now working properly if viewed with a browser as
-  JavaScript parts are no longer stripped off, just the noscript tags that
-  inform about disabled JavaScript are removed. ((Björn "Vampire" Kautler)
+- Add SIPp edit mode (Matthieu Casanova)
 
-- Patch #607: C and C++ mode updates (Roman Tsourick)
+- Add Well Known Text (WKT) edit mode (Matthieu Casanova)
 
-- Patch #613: javascript mode update (up to ES 2017) (Roman Tsourick)
+- Update RPM Spec mode (bug #3880 Matthieu Casanova)
 
-- Patch #608, bug #2106: PHP mode "//" comment syntax highlighting is incorrect
-  (Roman Tsourick)
+- Added openSIPS mode (Matthieu Casanova)
 
-- Patch #609, bug #2194: ASP Syntax highlight bug w/comment (Roman Tsourick)
+- Update Java mode to support Java 10 "var" type. (Dale Anson)
 
-- Patch #610, bug #4054: hash comment highlighting in mysql mode
-  (Roman Tsourick)
+- Add PlantUML mode (Andreas Studer / Dale Anson)
 
-- Patch #611, bug #3249: assembler-x86 comment directive (Roman Tsourick)
+- Add HL7 mode (Thiemo Kellner / Dale Anson)
 
-- nsis2 mode updates (Uwe Stöhr - Patch #606)
-
-- Draw2d mode updates (A.Vontobel - Patch #605)
-
-- Add Gherkin mode (english) to support Cucumber feature files
-  (Matthieu Casanova)
-
-- Patch #593 - Various small patches to modes (AdamS)
-
-- Patch #592 - for groovy mode (Egor Abramovich)
-
-- Patch #595 - New Assembly-arm32 edit mode (M. Cesar R. Lacruz)
-
-- Updated java-module-info mode (Dale Anson)
+- Update drawj2d mode (patch #622 A. Vontobel / Matthieu Casanova)
 
 }}}
 

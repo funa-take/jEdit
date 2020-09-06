@@ -42,7 +42,6 @@ import org.gjt.sp.util.StandardUtilities;
 import javax.annotation.Nonnull;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -68,7 +67,7 @@ import java.util.regex.Pattern;
  * </ul>
  *
  * @author Slava Pestov
- * @version $Id: JEditBuffer.java 24832 2018-02-22 01:27:36Z vampire0 $
+ * @version $Id: JEditBuffer.java 25279 2020-04-20 22:08:37Z kpouer $
  *
  * @since jEdit 4.3pre3
  */
@@ -88,7 +87,7 @@ public class JEditBuffer
 	//{{{ JEditBuffer constructors
 
 	{
-		bufferListeners = new Vector<Listener>();
+		bufferListeners = new Vector<>();
 		lock = new ReentrantReadWriteLock();
 		contentMgr = new ContentManager();
 		lineMgr = new LineManager();
@@ -96,7 +95,7 @@ public class JEditBuffer
 		undoMgr = new UndoManager(this);
 		integerArray = new IntegerArray();
 		propertyLock = new Object();
-		properties = new HashMap<Object, PropValue>();
+		properties = new HashMap<>();
 	}
 
 	@SuppressWarnings({"unchecked"})
@@ -111,9 +110,9 @@ public class JEditBuffer
 
 		// fill in defaults for these from system properties if the
 		// corresponding buffer.XXX properties not set
-		if(getProperty(ENCODING) == null)
+		if(!hasProperty(ENCODING))
 			properties.put(ENCODING,new PropValue(System.getProperty("file.encoding"),false));
-		if(getProperty(LINESEP) == null)
+		if(!hasProperty(LINESEP))
 			properties.put(LINESEP,new PropValue(System.getProperty("line.separator"),false));
 
 		setFoldHandler(new DummyFoldHandler());
@@ -133,9 +132,9 @@ public class JEditBuffer
 
 		loadText(null,null);
 		// corresponding buffer.XXX properties not set
-		if(getProperty(ENCODING) == null)
+		if(!hasProperty(ENCODING))
 			properties.put(ENCODING,new PropValue(System.getProperty("file.encoding"),false));
-		if(getProperty(LINESEP) == null)
+		if(!hasProperty(LINESEP))
 			properties.put(LINESEP,new PropValue(System.getProperty("line.separator"),false));
 
 		setFoldHandler(new DummyFoldHandler());
@@ -1148,7 +1147,7 @@ loop:		for(int i = 0; i < seg.count; i++)
 		int newIndent = oldIndent;
 
 		List<IndentRule> indentRules = getIndentRules(lineIndex);
-		List<IndentAction> actions = new LinkedList<IndentAction>();
+		List<IndentAction> actions = new LinkedList<>();
 		for (IndentRule rule : indentRules)
 			rule.apply(this, lineIndex, prevLineIndex, prevPrevLineIndex, actions);
 
@@ -1548,6 +1547,21 @@ loop:		for(int i = 0; i < seg.count; i++)
 		}
 	} //}}}
 
+	//{{{ hasProperty() method
+	/**
+	 * @return true if the buffer local property exists.
+	 *
+	 * This method is thread-safe.
+	 *
+	 * @param name The property name. For backwards compatibility, this
+	 * is an {@code Object}, not a {@code String}.
+	 * @since jEdit 5.6pre1
+	 */
+	public boolean hasProperty(Object name)
+	{
+		return null != getProperty(name);
+	} //}}}
+
 	//{{{ getDefaultProperty() method
 	public Object getDefaultProperty(String key)
 	{
@@ -1600,13 +1614,7 @@ loop:		for(int i = 0; i < seg.count; i++)
 	{
 		// Need to reset properties that were cached defaults,
 		// since the defaults might have changed.
-		Iterator<PropValue> iter = properties.values().iterator();
-		while(iter.hasNext())
-		{
-			PropValue value = iter.next();
-			if(value.defaultValue)
-				iter.remove();
-		}
+		properties.values().removeIf(value -> value.defaultValue);
 	} //}}}
 
 	//{{{ getStringProperty() method
@@ -1856,7 +1864,7 @@ loop:		for(int i = 0; i < seg.count; i++)
 	 * to the name of the mode. A bit inelegant, I know...
 	 * @param mode The mode
 	 */
-	public void setMode(Mode mode)
+	public void setMode(@Nonnull Mode mode)
 	{
 		setMode(mode, false);
 	}
@@ -1871,12 +1879,11 @@ loop:		for(int i = 0; i < seg.count; i++)
 	 * value is false
 	 * @since jEdit 4.5pre1
 	 */
-	public void setMode(Mode mode, boolean forceContextInsensitive)
+	public void setMode(@Nonnull Mode mode, boolean forceContextInsensitive)
 	{
 		/* This protects against stupid people (like me)
 		 * doing stuff like buffer.setMode(jEdit.getMode(...)); */
-		if(mode == null)
-			throw new NullPointerException("Mode must be non-null");
+		Objects.requireNonNull(mode);
 
 		this.mode = mode;
 
@@ -1978,7 +1985,7 @@ loop:		for(int i = 0; i < seg.count; i++)
 							for (Integer foldLevel: precedingFoldLevels)
 							{
 								j--;
-								lineMgr.setFoldLevel(j,foldLevel.intValue());
+								lineMgr.setFoldLevel(j, foldLevel);
 							}
 							if (j < firstUpdatedFoldLevel)
 								firstUpdatedFoldLevel = j;
@@ -2727,10 +2734,9 @@ loop:		for(int i = 0; i < seg.count; i++)
 	//{{{ Used to store property values
 	protected static class PropValue
 	{
-		PropValue(Object value, boolean defaultValue)
+		PropValue(@Nonnull Object value, boolean defaultValue)
 		{
-			if(value == null)
-				throw new NullPointerException();
+			Objects.requireNonNull(value);
 			this.value = value;
 			this.defaultValue = defaultValue;
 		}
@@ -2777,7 +2783,7 @@ loop:		for(int i = 0; i < seg.count; i++)
 	/** This field should be read instead of "elasticTabstops" property
 	  * when efficiency matters. */
 	// synchronization done in TextArea.propertiesChanged()
-	public boolean elasticTabstopsOn = false;
+	public boolean elasticTabstopsOn;
 	private ColumnBlock columnBlock;
 
 	//{{{ getListener() method
@@ -2922,7 +2928,7 @@ loop:		for(int i = 0; i < seg.count; i++)
 		{
 			int currentLine = startLine;
 			int colBlockWidth=0;
-			Vector<ColumnBlockLine> columnBlockLines = new Vector<ColumnBlockLine>();
+			Vector<ColumnBlockLine> columnBlockLines = new Vector<>();
 			//while(currentLine<=endLine)
 			ColumnBlock parentColumnBlock = (ColumnBlock) parent;
 			for(int ik=startLine- parentColumnBlock.getStartLine();currentLine<=endLine;ik++)

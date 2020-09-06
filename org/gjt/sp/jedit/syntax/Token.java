@@ -27,7 +27,7 @@ import java.lang.reflect.Field;
  * A linked list of syntax tokens.
  *
  * @author Slava Pestov
- * @version $Id: Token.java 24461 2016-07-17 18:57:20Z makarius $
+ * @version $Id: Token.java 25244 2020-04-15 15:14:49Z kpouer $
  */
 public class Token
 {
@@ -61,7 +61,7 @@ public class Token
 	} //}}}
 
 	//{{{ Token types
-	public static final String[] TOKEN_TYPES = new String[] {
+	public static final String[] TOKEN_TYPES = {
 		"NULL",
 		"COMMENT1",
 		"COMMENT2",

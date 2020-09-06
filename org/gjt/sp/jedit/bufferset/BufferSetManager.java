@@ -39,6 +39,7 @@ import java.util.*;
  *
  * @author Matthieu Casanova
  * @since jEdit 4.3pre15
+ * @version $Id: jEdit.java 25120 2020-04-03 14:58:39Z kpouer $
  */
 public class BufferSetManager
 {
@@ -79,14 +80,8 @@ public class BufferSetManager
 	{
 		// pass on PropertiesChanged message to BufferSets so
 		// they can resort themselves as needed.
-		jEdit.visit(new JEditVisitorAdapter()
-		{
-			@Override
-			public void visit(EditPane editPane)
-			{
-				editPane.getBufferSet().propertiesChanged();
-			}
-		});
+		// todo : if it is global or per view, it is probably too many calls
+		jEdit.getEditPaneManager().forEach(editPane -> editPane.getBufferSet().propertiesChanged());
 	} //}}}
 
 	//{{{ countBufferSets() method
@@ -106,29 +101,26 @@ public class BufferSetManager
 	{
 		if (scope == this.scope)
 			return;
-        jEdit.setProperty("bufferset.scope", scope.name());
+		jEdit.setProperty("bufferset.scope", scope.name());
 		if (scope.compareTo(this.scope) > 0)
 		{
 			// The new scope is wider
 			if (scope == BufferSet.Scope.global)
 			{
-				final Buffer[] buffers = jEdit.getBuffers();
+				final List<Buffer> buffers = jEdit.getBufferManager().getBuffers();
 				jEdit.visit(new JEditVisitorAdapter()
 				{
 					@Override
 					public void visit(EditPane editPane)
 					{
 						BufferSet bufferSet = editPane.getBufferSet();
-						for (Buffer buffer : buffers)
-						{
-							bufferSet.addBuffer(buffer);
-						}
+						buffers.forEach(bufferSet::addBuffer);
 					}
 				});
 			}
 			else
 			{
-				final Map<View,Set<Buffer>> buffersMap = new HashMap<View, Set<Buffer>>();
+				final Map<View,Set<Buffer>> buffersMap = new HashMap<>();
 				jEdit.visit(new JEditVisitorAdapter()
 				{
 					@Override
@@ -136,12 +128,7 @@ public class BufferSetManager
 					{
 						BufferSet bufferSet = editPane.getBufferSet();
 						Buffer[] buffers = bufferSet.getAllBuffers();
-						Set<Buffer> set = buffersMap.get(editPane.getView());
-						if (set == null)
-						{
-							set = new HashSet<Buffer>();
-							buffersMap.put(editPane.getView(), set);
-						}
+						Set<Buffer> set = buffersMap.computeIfAbsent(editPane.getView(), k -> new HashSet<>());
 						set.addAll(Arrays.asList(buffers));
 					}
 				});
@@ -204,25 +191,11 @@ public class BufferSetManager
 				bufferSet.addBuffer(buffer);
 				break;
 			case view:
-				EditPane[] editPanes = editPane.getView().getEditPanes();
-				for (EditPane pane:editPanes)
-				{
-					if (pane == null)
-						continue;
-					BufferSet bfs = pane.getBufferSet();
-					bfs.addBuffer(buffer);
-				}
+				editPane.getView().forEachEditPane(pane -> pane.getBufferSet().addBuffer(buffer));
 				break;
 			case global:
-				jEdit.visit(new JEditVisitorAdapter()
-				{
-					@Override
-					public void visit(EditPane editPane)
-					{
-						BufferSet bfs = editPane.getBufferSet();
-						bfs.addBuffer(buffer);
-					}
-				});
+				jEdit.getEditPaneManager().forEach(pane -> pane.getBufferSet().addBuffer(buffer));
+				break;
 		}
 	} //}}}
 
@@ -253,11 +226,7 @@ public class BufferSetManager
 				removeBuffer(bufferSet, buffer);
 				break;
 			case view:
-				EditPane[] editPanes = editPane.getView().getEditPanes();
-				for (EditPane pane : editPanes)
-				{
-					removeBuffer(pane.getBufferSet(), buffer);
-				}
+				editPane.getView().forEachEditPane(pane -> removeBuffer(pane.getBufferSet(), buffer));
 				break;
 			case global:
 				jEdit._closeBuffer(null, buffer);
@@ -375,25 +344,11 @@ public class BufferSetManager
 	 */
 	public Set<BufferSet> getOwners(Buffer buffer)
 	{
-		final Set<BufferSet> candidates = new HashSet<BufferSet>();
+		final Set<BufferSet> candidates = new HashSet<>();
 		// Collect all BufferSets.
-		jEdit.visit(new JEditVisitorAdapter()
-		{
-			@Override
-			public void visit(EditPane editPane)
-			{
-				candidates.add(editPane.getBufferSet());
-			}
-		});
+		jEdit.getEditPaneManager().forEach(editPane -> candidates.add(editPane.getBufferSet()));
 		// Remove all that doesn't contain the buffer.
-		Iterator<BufferSet> i = candidates.iterator();
-		while (i.hasNext())
-		{
-			if (i.next().indexOf(buffer) == -1)
-			{
-				i.remove();
-			}
-		}
+		candidates.removeIf(bufferSet -> bufferSet.indexOf(buffer) == -1);
 		// Remaining are the result.
 		return candidates;
 	} //}}}
@@ -406,7 +361,7 @@ public class BufferSetManager
 	 */
 	private static EditPane getOwner(BufferSet bufferSet)
 	{
-		View[] views = jEdit.getViews();
+		List<View> views = jEdit.getViewManager().getViews();
 		for (View view : views)
 		{
 			EditPane[] editPanes = view.getEditPanes();

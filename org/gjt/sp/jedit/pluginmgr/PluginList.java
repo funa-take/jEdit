@@ -27,12 +27,16 @@ import java.io.*;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
 
 import org.gjt.sp.util.*;
+import org.jedit.io.HttpException;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.InputSource;
-import org.xml.sax.helpers.XMLReaderFactory;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.gjt.sp.jedit.*;
 //}}}
 
@@ -40,196 +44,108 @@ import org.gjt.sp.jedit.*;
 /**
  * Plugin list downloaded from server.
  * @since jEdit 3.2pre2
- * @version $Id: PluginList.java 24766 2017-10-19 00:12:44Z daleanson $
+ * @version $Id: PluginList.java 25274 2020-04-19 16:30:10Z kpouer $
  */
-class PluginList
+class PluginList extends Task
 {
-	/**
-	 * Magic numbers used for auto-detecting GZIP files.
-	 */
-	public static final int GZIP_MAGIC_1 = 0x1f;
-	public static final int GZIP_MAGIC_2 = 0x8b;
-	public static final long MILLISECONDS_PER_MINUTE = 60L * 1000L;
-
 	final List<Plugin> plugins = new ArrayList<>();
 	final Map<String, Plugin> pluginHash = new HashMap<>();
 	final List<PluginSet> pluginSets = new ArrayList<>();
 
 	/**
 	 * The mirror id.
-	 * @since jEdit 4.3pre3
 	 */
-	private final String id;
-	private String cachedURL;
-	private final Task task;
-	String gzipURL;
+	private String id;
+	private final Runnable dispatchThreadTask;
 
-	PluginList(Task task)
+	//{{{ PluginList constructor
+	/**
+	 * Instantiate the PluginList.
+	 *
+	 * @param dispatchThreadTask the task to execute in dispatch thread after the list was loaded
+	 */
+	PluginList(Runnable dispatchThreadTask)
+	{
+		this.dispatchThreadTask = dispatchThreadTask;
+	} //}}}
+
+	//{{{ _run() method
+	@Override
+	public void _run()
 	{
 		id = jEdit.getProperty("plugin-manager.mirror.id");
-		this.task = task;
-		readPluginList(true);
-	}
+		CachePluginList cachePluginList = new CachePluginList(id);
+		RemotePluginList remotePluginList = new RemotePluginList(this, id);
 
-	void readPluginList(boolean allowRetry)
-	{
-		String mirror = buildMirror(id);
-		if (mirror == null)
-			return;
-		gzipURL = jEdit.getProperty("plugin-manager.export-url");
-		gzipURL += "?mirror=" + mirror;
-		gzipURL += "&new_url_scheme";
-		String path = null;
-		if (jEdit.getSettingsDirectory() == null)
-		{
-			cachedURL = gzipURL;
-		}
-		else
-		{
-			path = jEdit.getSettingsDirectory() + File.separator + "pluginMgr-Cached.xml.gz";
-			cachedURL = "file:///" + path;
-		}
-		boolean downloadIt = !id.equals(jEdit.getProperty("plugin-manager.mirror.cached-id"));
-		if (path != null)
-		{
-			try
-			{
-
-				File f = new File(path);
-				if (!f.canRead()) downloadIt = true;
-				long currentTime = System.currentTimeMillis();
-				long age = currentTime - f.lastModified();
-				/* By default only download plugin lists every 5 minutes */
-				long interval = jEdit.getIntegerProperty("plugin-manager.list-cache.minutes", 5) * MILLISECONDS_PER_MINUTE;
-				if (age > interval)
-				{
-					Log.log(Log.MESSAGE, this, "PluginList cached copy too old. Downloading from mirror. ");
-					downloadIt = true;
-				}
-			}
-			catch (Exception e)
-			{
-				Log.log(Log.MESSAGE, this, "No cached copy. Downloading from mirror. ");
-				downloadIt = true;
-			}
-		}
-		if (downloadIt && cachedURL != gzipURL)
-		{
-			downloadPluginList();
-		}
-		InputStream in = null, inputStream = null;
+		setStatus(jEdit.getProperty("plugin-manager.list-download-connect"));
 		try
 		{
-			if (cachedURL != gzipURL)
-				Log.log(Log.MESSAGE, this, "Using cached pluginlist");
-			inputStream = new URL(cachedURL).openStream();
-			XMLReader parser = XMLReaderFactory.createXMLReader();
-			PluginListHandler handler = new PluginListHandler(this, cachedURL);
-			in = new BufferedInputStream(inputStream);
-			if(in.markSupported())
+			String pluginListXml = cachePluginList.getPluginList();
+			if (pluginListXml != null)
 			{
-				in.mark(2);
-				int b1 = in.read();
-				int b2 = in.read();
-				in.reset();
-
-				if(b1 == GZIP_MAGIC_1 && b2 == GZIP_MAGIC_2)
-					in = new GZIPInputStream(in);
-			}
-			InputSource isrc = new InputSource(new InputStreamReader(in,"UTF8"));
-			isrc.setSystemId("jedit.jar");
-			parser.setContentHandler(handler);
-			parser.setDTDHandler(handler);
-			parser.setEntityResolver(handler);
-			parser.setErrorHandler(handler);
-			parser.parse(isrc);
-
-		}
-		catch (Exception e)
-		{
-			Log.log(Log.ERROR, this, "readpluginlist: error", e);
-			if (cachedURL.startsWith("file:///"))
-			{
-				Log.log(Log.DEBUG, this, "Unable to read plugin list, deleting cached file and try again");
-				new File(cachedURL.substring(8)).delete();
-				if (allowRetry)
+				try
 				{
-					plugins.clear();
-					pluginHash.clear();
-					pluginSets.clear();
-					readPluginList(false);
+					loadPluginList(pluginListXml);
 				}
-			}
-		}
-		finally
-		{
-			IOUtilities.closeQuietly((Closeable)in);
-			IOUtilities.closeQuietly((Closeable)inputStream);
-		}
-
-	}
-
-	/** Caches it locally */
-	void downloadPluginList()
-	{
-		BufferedInputStream is = null;
-		BufferedOutputStream out = null;
-		/* download the plugin list, while trying to show informative error messages.
-		 * Currently when :
-		 * - the proxy requires authentication
-		 * - another HTTP error happens (may be good to know that the site is broken)
-		 * - the host can't be reached (reported as internet access error)
-		 * Otherwise, only an error message is logged in the activity log.
-		 **/
-		try
-		{
-
-			task.setStatus(jEdit.getProperty("plugin-manager.list-download"));
-			URL downloadURL = new URL(gzipURL);
-			HttpURLConnection c = (HttpURLConnection)downloadURL.openConnection();
-			if(c.getResponseCode() == HttpURLConnection.HTTP_PROXY_AUTH)
-			{
-				GUIUtilities.error(jEdit.getActiveView()
-					, "plugin-manager.list-download.need-password"
-					, new Object[]{});
-				Log.log (Log.ERROR, this, "CacheRemotePluginList: proxy requires authentication");
-			}
-			else if(c.getResponseCode() == HttpURLConnection.HTTP_OK)
-			{
-				InputStream inputStream = c.getInputStream();
-				String fileName = cachedURL.replaceFirst("file:///", "");
-				out = new BufferedOutputStream(new FileOutputStream(fileName));
-				long start = System.currentTimeMillis();
-				is = new BufferedInputStream(inputStream);
-				IOUtilities.copyStream(4096, null, is, out, false);
-				jEdit.setProperty("plugin-manager.mirror.cached-id", id);
-				Log.log(Log.MESSAGE, this, "Updated cached pluginlist " + (System.currentTimeMillis() - start));
+				catch (SAXException | ParserConfigurationException | IOException e)
+				{
+					cachePluginList.deleteCache();
+					String newPluginList = remotePluginList.getPluginList();
+					loadPluginList(newPluginList);
+					cachePluginList.saveCache(newPluginList);
+				}
 			}
 			else
 			{
-				GUIUtilities.error(jEdit.getActiveView()
-					, "plugin-manager.list-download.generic-error"
-					, new Object[]{c.getResponseCode(), c.getResponseMessage()});
-				Log.log (Log.ERROR, this, "CacheRemotePluginList: HTTP error: "+c.getResponseCode()+ c.getResponseMessage());
+				String newPluginList = remotePluginList.getPluginList();
+				loadPluginList(newPluginList);
+				cachePluginList.saveCache(newPluginList);
 			}
 		}
-		catch(java.net.UnknownHostException e)
+		catch (HttpException e)
 		{
-				GUIUtilities.error(jEdit.getActiveView()
-					, "plugin-manager.list-download.disconnected"
-					, new Object[]{e.getMessage()});
-			Log.log (Log.ERROR, this, "CacheRemotePluginList: error", e);
+			int responseCode = e.getResponseCode();
+			if (responseCode == HttpURLConnection.HTTP_PROXY_AUTH)
+			{
+				Log.log(Log.ERROR, this, "CacheRemotePluginList: proxy requires authentication");
+				ThreadUtilities.runInDispatchThread(() -> GUIUtilities.error(jEdit.getActiveView(),
+					"plugin-manager.list-download.need-password",
+					new Object[]{}));
+			}
+			else
+			{
+				String responseMessage = e.getMessage();
+				Log.log(Log.ERROR, this, "CacheRemotePluginList: HTTP error: " + responseCode + ' ' + responseMessage);
+				ThreadUtilities.runInDispatchThread(() ->
+					GUIUtilities.error(jEdit.getActiveView(),
+						"plugin-manager.list-download.generic-error",
+						new Object[]{responseCode, responseMessage}));
+			}
 		}
 		catch (Exception e)
 		{
 			Log.log (Log.ERROR, this, "CacheRemotePluginList: error", e);
+			ThreadUtilities.runInDispatchThread(() -> GUIUtilities.error(jEdit.getActiveView(),
+				"plugin-manager.list-download.disconnected",
+				new Object[]{e.getMessage()}));
 		}
-		finally
-		{
-			IOUtilities.closeQuietly((Closeable)out);
-			IOUtilities.closeQuietly((Closeable)is);
-		}
-	}
+		// even if there was an error we want to update the panels
+		ThreadUtilities.runInDispatchThread(dispatchThreadTask);
+	} //}}}
+
+	//{{{ loadPluginList() method
+	private void loadPluginList(String pluginListXml) throws IOException, SAXException, ParserConfigurationException
+	{
+		PluginListHandler handler = new PluginListHandler(this);
+		XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
+		InputSource isrc = new InputSource(new StringReader(pluginListXml));
+		isrc.setSystemId("jedit.jar");
+		parser.setContentHandler(handler);
+		parser.setDTDHandler(handler);
+		parser.setEntityResolver(handler);
+		parser.setErrorHandler(handler);
+		parser.parse(isrc);
+	} //}}}
 
 	//{{{ addPlugin() method
 	void addPlugin(Plugin plugin)
@@ -468,8 +384,7 @@ class PluginList
 		void satisfyDependencies(Roster roster, String installDirectory,
 			boolean downloadSource)
 		{
-			for (Dependency dep : deps)
-				dep.satisfy(roster, installDirectory, downloadSource);
+			deps.forEach(dep -> dep.satisfy(roster, installDirectory, downloadSource));
 		}
 
 		public String depsToString()
@@ -512,57 +427,58 @@ class PluginList
 
 		boolean isSatisfied()
 		{
-			if(what.equals("plugin"))
+			switch (what)
 			{
-				for(int i = 0; i < plugin.branches.size(); i++)
+				case "plugin":
+					return isSatisfiedByPlugin();
+				case "jdk":
+					return isSatisfiedByJdk();
+				case "jedit":
+					return isSatisfiedByJEdit();
+				default:
+					Log.log(Log.ERROR, this, "Invalid dependency: " + what);
+					return false;
+			}
+		}
+
+		private boolean isSatisfiedByJEdit()
+		{
+			String build = jEdit.getBuild();
+
+			return (from == null ||
+				StandardUtilities.compareStrings(build, from, false) >= 0) &&
+				(to == null ||
+					StandardUtilities.compareStrings(build, to, false) <= 0);
+		}
+
+		private boolean isSatisfiedByJdk()
+		{
+			String javaVersion = System.getProperty("java.version");
+			// openjdk 9 returns just "9", not 1.X.X like previous versions
+			javaVersion = javaVersion.length() >= 3 ? javaVersion.substring(0, 3) : javaVersion;
+
+			return (from == null ||
+				StandardUtilities.compareStrings(javaVersion, from, false) >= 0) &&
+				(to == null ||
+					StandardUtilities.compareStrings(javaVersion, to, false) <= 0);
+		}
+
+		private boolean isSatisfiedByPlugin()
+		{
+			for(int i = 0; i < plugin.branches.size(); i++)
+			{
+				String installedVersion = plugin.getInstalledVersion();
+				if(installedVersion != null &&
+					(from == null ||
+						StandardUtilities.compareStrings(installedVersion,from,false) >= 0) &&
+					(to == null ||
+						StandardUtilities.compareStrings(installedVersion,to,false) <= 0))
 				{
-					String installedVersion = plugin.getInstalledVersion();
-					if(installedVersion != null
-						&&
-					(from == null || StandardUtilities.compareStrings(
-						installedVersion,from,false) >= 0)
-						&&
-						(to == null || StandardUtilities.compareStrings(
-						      installedVersion,to,false) <= 0))
-					{
-						return true;
-					}
+					return true;
 				}
+			}
 
-				return false;
-			}
-			else if(what.equals("jdk"))
-			{
-				String javaVersion = System.getProperty("java.version");
-				// openjdk 9 returns just "9", not 1.X.X like previous versions
-				javaVersion = javaVersion.length() >= 3 ? javaVersion.substring(0, 3) : javaVersion;
-				if((from == null || StandardUtilities.compareStrings(
-					javaVersion,from,false) >= 0)
-					&&
-					(to == null || StandardUtilities.compareStrings(
-						     javaVersion,to,false) <= 0))
-					return true;
-				else
-					return false;
-			}
-			else if(what.equals("jedit"))
-			{
-				String build = jEdit.getBuild();
-
-				if((from == null || StandardUtilities.compareStrings(
-					build,from,false) >= 0)
-					&&
-					(to == null || StandardUtilities.compareStrings(
-						     build,to,false) <= 0))
-					return true;
-				else
-					return false;
-			}
-			else
-			{
-				Log.log(Log.ERROR,this,"Invalid dependency: " + what);
-				return false;
-			}
+			return false;
 		}
 
 		boolean canSatisfy()
@@ -574,25 +490,20 @@ class PluginList
 			return false;
 		}
 
-		void satisfy(Roster roster, String installDirectory,
-			boolean downloadSource)
+		void satisfy(Roster roster, String installDirectory, boolean downloadSource)
 		{
-			if(what.equals("plugin"))
+			if ("plugin".equals(what))
 			{
 				String installedVersion = plugin.getInstalledVersion();
-				for(int i = 0; i < plugin.branches.size(); i++)
+				for (int i = 0; i < plugin.branches.size(); i++)
 				{
 					Branch branch = plugin.branches.get(i);
-					if((installedVersion == null
-						||
-					StandardUtilities.compareStrings(
-						installedVersion,branch.version,false) < 0)
-						&&
-					(from == null || StandardUtilities.compareStrings(
-						branch.version,from,false) >= 0)
-						&&
-						(to == null || StandardUtilities.compareStrings(
-						      branch.version,to,false) <= 0))
+					if ((installedVersion == null ||
+						StandardUtilities.compareStrings(installedVersion,branch.version,false) < 0) &&
+						(from == null ||
+							StandardUtilities.compareStrings(branch.version,from,false) >= 0) &&
+						(to == null ||
+							StandardUtilities.compareStrings(branch.version,to,false) <= 0))
 					{
 						plugin.install(roster,installDirectory,
 							downloadSource, false);
@@ -604,17 +515,11 @@ class PluginList
 
 		public String toString()
 		{
-			return "[what=" + what + ",from=" + from
-				+ ",to=" + to + ",plugin=" + plugin + ']';
+			return "[what=" + what + ",from=" + from + ",to=" + to + ",plugin=" + plugin + ']';
 		}
 	} //}}}
 
 	//{{{ Private members
-
-	private static String buildMirror(String id)
-	{
-		return ((id != null) && !id.equals(MirrorList.Mirror.NONE)) ? id : "default";
-	}
 
 	// TODO: this isn't used, should it be?
 	private static String getAutoSelectedMirror()
@@ -645,6 +550,5 @@ class PluginList
 			redirected.substring(start, end) :
 			redirected.substring(start);
 	}
-
 	//}}}
 }

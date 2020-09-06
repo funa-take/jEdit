@@ -55,7 +55,7 @@ import java.awt.*;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: AbstractOptionPane.java 24561 2016-10-04 20:18:52Z ezust $
+ * @version $Id: AbstractOptionPane.java 24946 2019-08-23 07:46:38Z vampire0 $
  */
 // even though this class is called AbstractOptionPane, it is not really
 // abstract, since BufferOptions uses an instance of it to lay out its
@@ -134,6 +134,7 @@ public class AbstractOptionPane extends JPanel implements OptionPane
 	public JLabel newLabel(String label, Component comp)
 	{
 		JLabel retval = new JLabel(label);
+		retval.setLabelFor(comp);
 		try /* to get the tooltip of the component */
 		{
 			JComponent jc = (JComponent) comp;

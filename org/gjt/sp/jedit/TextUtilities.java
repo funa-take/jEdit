@@ -42,7 +42,7 @@ import org.gjt.sp.util.StandardUtilities;
  * </ul>
  *
  * @author Slava Pestov
- * @version $Id: TextUtilities.java 24445 2016-07-10 19:48:34Z ezust $
+ * @version $Id: TextUtilities.java 25308 2020-05-03 22:08:41Z kpouer $
  */
 public class TextUtilities
 {
@@ -113,6 +113,8 @@ public class TextUtilities
 		case '⟧': if (direction != null) direction[0] = false; return '⟦';
 		case '⦃': if (direction != null) direction[0] = true;  return '⦄';
 		case '⦄': if (direction != null) direction[0] = false; return '⦃';
+		case '⟪': if (direction != null) direction[0] = true;  return '⟫';
+		case '⟫': if (direction != null) direction[0] = false; return '⟪';
 		default:  return '\0';
 		}
 	} //}}}
@@ -275,7 +277,11 @@ public class TextUtilities
 	 * @return a joined toString() representation of the collection
 	 *
 	 * @since jedit 4.3pre3
+	 * @deprecated use {@link String#join(CharSequence, CharSequence...)} or
+	 * {@link String#join(CharSequence, Iterable)}, thos methods are available
+	 * since Java 8 and are faster in all situations
 	 */
+	@Deprecated
 	public static String join(Collection<?> c, String delim)
 	{
 		StringBuilder retval = new StringBuilder();

@@ -23,15 +23,13 @@
 package org.gjt.sp.jedit.gui;
 
 //{{{ Imports
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import org.gjt.sp.jedit.*;
 //}}}
 
 /** A dialog box showing a stack trace. Perhaps badly named, since any error, not just a BeanShell error can be shown.
  * @author Slava Pestov
- * @version $Id: BeanShellErrorDialog.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: BeanShellErrorDialog.java 25313 2020-05-04 22:18:59Z kpouer $
  */
 public class BeanShellErrorDialog extends TextAreaDialog
 {

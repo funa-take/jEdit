@@ -30,7 +30,7 @@ import org.gjt.sp.jedit.syntax.TokenMarker;
 
 /**
  * @author Slava Pestov
- * @version $Id: BracketIndentRule.java 24413 2016-06-19 11:07:31Z kerik-sf $
+ * @version $Id: BracketIndentRule.java 25222 2020-04-12 16:07:38Z kpouer $
  */
 public abstract class BracketIndentRule implements IndentRule
 {
@@ -130,6 +130,7 @@ public abstract class BracketIndentRule implements IndentRule
 			}
 		}
 
+		@Override
 		public void handleToken(Segment seg
 			, byte id, int offset, int length
 			, TokenMarker.LineContext context)
@@ -143,6 +144,7 @@ public abstract class BracketIndentRule implements IndentRule
 			scannedIndex += length;
 		}
 
+		@Override
 		public void setLineContext(TokenMarker.LineContext lineContext)
 		{
 		}

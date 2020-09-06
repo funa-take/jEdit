@@ -25,17 +25,11 @@ package org.gjt.sp.jedit.pluginmgr;
 //{{{ Imports
 import java.awt.*;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 import java.net.URL;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 
@@ -120,7 +114,7 @@ public class ManagePanel extends JPanel
 		ActionMap tableActionMap = table.getActionMap();
 		tableInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,0),"tabOutForward");
 		tableActionMap.put("tabOutForward",new KeyboardAction(KeyboardCommand.TAB_OUT_FORWARD));
-		tableInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,InputEvent.SHIFT_MASK),"tabOutBack");
+		tableInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,InputEvent.SHIFT_DOWN_MASK),"tabOutBack");
 		tableActionMap.put("tabOutBack",new KeyboardAction(KeyboardCommand.TAB_OUT_BACK));
 		tableInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,0),"editPlugin");
 		tableActionMap.put("editPlugin",new KeyboardAction(KeyboardCommand.EDIT_PLUGIN));
@@ -145,7 +139,7 @@ public class ManagePanel extends JPanel
 		header.setReorderingAllowed(false);
 		header.setDefaultRenderer(new HeaderRenderer(
 				(DefaultTableCellRenderer)header.getDefaultRenderer()));
-		HeaderMouseHandler mouseHandler = new HeaderMouseHandler();
+		MouseListener mouseHandler = new HeaderMouseHandler();
 		header.addMouseListener(mouseHandler);
 		table.addMouseListener(mouseHandler);
 		scrollpane = new JScrollPane(table);
@@ -187,11 +181,9 @@ public class ManagePanel extends JPanel
 	{
 		ManagePanelRestoreHandler()
 		{
-			selectedPlugins = new HashSet<String>();
-			jarNames = new HashSet<String>();
+			selectedPlugins = new HashSet<>();
+			jarNames = new HashSet<>();
 		}
-
-
 
 		@Override
 		public void startElement(String uri, String localName,
@@ -263,7 +255,7 @@ public class ManagePanel extends JPanel
 	 */
 	private static Collection<String> getDeclaredJars(String jarPath) throws IOException
 	{
-		Collection<String> jarList = new ArrayList<String>();
+		Collection<String> jarList = new ArrayList<>();
 		PluginJAR pluginJAR = new PluginJAR(new File(jarPath));
 		PluginJAR.PluginCacheEntry pluginCacheEntry = PluginJAR.getPluginCacheEntry(jarPath);
 		if(pluginCacheEntry != null)
@@ -326,7 +318,7 @@ public class ManagePanel extends JPanel
 		 */
 		Entry(String jar)
 		{
-			jars = new LinkedList<String>();
+			jars = new LinkedList<>();
 			this.jar = jar;
 			jars.add(this.jar);
 			if (jEdit.getBooleanProperty("plugin." + MiscUtilities.getFileName(jar) + ".disabled"))
@@ -393,12 +385,11 @@ public class ManagePanel extends JPanel
 			if (plugin == null)
 				return null;
 			Set<String> depends = null;
-			PluginJAR jar = plugin.getPluginJAR();
 			String cn = plugin.getClassName();
-			Set<String> requiredJars = jar.getDependencies(cn);
-			if (requiredJars != null && !requiredJars.isEmpty())
+			Set<String> requiredJars = PluginJAR.getDependencies(cn);
+			if (!requiredJars.isEmpty())
 			{
-				depends = new HashSet<String>();
+				depends = new HashSet<>();
 				for (String dep : requiredJars)
 				{
 					Entry e = pluginModel.getEntry(dep);
@@ -415,14 +406,13 @@ public class ManagePanel extends JPanel
 	{
 		private final List<Entry> entries;
 		private int sortType = EntryCompare.NAME;
-		private ConcurrentHashMap<String, Object> unloaded;
-		// private HashSet<String> unloaded;
+		private Map<String, Object> unloaded;
 		private int sortDirection = 1;
 
 		//{{{ Constructor
 		PluginTableModel()
 		{
-			entries = new ArrayList<Entry>();
+			entries = new ArrayList<>();
 		} //}}}
 
 		//{{{ getColumnCount() method
@@ -498,8 +488,8 @@ public class ManagePanel extends JPanel
 			switch (columnIndex)
 			{
 				case 0:
-					return Boolean.valueOf(!entry.status.equals(Entry.NOT_LOADED) &&
-							!entry.status.equals(Entry.DISABLED));
+					return !entry.status.equals(Entry.NOT_LOADED) &&
+						!entry.status.equals(Entry.DISABLED);
 				case 1:
 					if(entry.name == null)
 					{
@@ -593,7 +583,7 @@ public class ManagePanel extends JPanel
 		//{{{ sort() method
 		public void sort(int type)
 		{
-			List<String> savedSelection = new ArrayList<String>();
+			List<String> savedSelection = new ArrayList<>();
 			saveSelection(savedSelection);
 
 			if (sortType != type)
@@ -602,7 +592,7 @@ public class ManagePanel extends JPanel
 			}
 			sortType = type;
 
-			Collections.sort(entries, new EntryCompare(type, sortDirection));
+			entries.sort(new EntryCompare(type, sortDirection));
 			fireTableChanged(new TableModelEvent(this));
 			restoreSelection(savedSelection);
 			table.getTableHeader().repaint();
@@ -612,7 +602,7 @@ public class ManagePanel extends JPanel
 		//{{{ update() method
 		public void update()
 		{
-			List<String> savedSelection = new ArrayList<String>();
+			List<String> savedSelection = new ArrayList<>();
 			saveSelection(savedSelection);
 			entries.clear();
 
@@ -661,7 +651,7 @@ public class ManagePanel extends JPanel
 		private void unloadPluginJARWithDialog(PluginJAR jar)
 		{
 			// unloaded = new HashSet<String>();
-			unloaded = new ConcurrentHashMap<String, Object>();
+			unloaded = new ConcurrentHashMap<>();
 			String[] dependents = jar.getAllDependentPlugins();
 			if(dependents.length == 0)
 			{
@@ -669,15 +659,15 @@ public class ManagePanel extends JPanel
 			}
 			else
 			{
-				List<String> closureSet = new LinkedList<String>();
+				List<String> closureSet = new LinkedList<>();
 				dependents = jar.getDependentPlugins();
 				PluginJAR.transitiveClosure(dependents, closureSet);
-				List<String> listModel = new ArrayList<String>(new HashSet<String>(closureSet));	// remove dupes
+				List<String> listModel = new ArrayList<>(new HashSet<>(closureSet));	// remove dupes
 				boolean confirm = true;
 				if (!listModel.isEmpty())
 				{
 					// show confirmation dialog listing dependencies to be unloaded
-					Collections.sort(listModel, new StandardUtilities.StringCompare<String>(true));
+					listModel.sort(new StandardUtilities.StringCompare<>(true));
 					int button = GUIUtilities.listConfirm(window,"plugin-manager.dependency",
 						new String[] { jar.getFile().getName() }, listModel.toArray());
 					confirm = button == JOptionPane.YES_OPTION;
@@ -799,23 +789,18 @@ public class ManagePanel extends JPanel
 	} //}}}
 
 	//{{{ HideLibrariesButton class
-	private class HideLibrariesButton extends JCheckBox implements ActionListener
+	private class HideLibrariesButton extends JCheckBox
 	{
 		HideLibrariesButton()
 		{
 			super(jEdit.getProperty("plugin-manager.hide-libraries"));
 			setSelected(jEdit.getBooleanProperty(
 				"plugin-manager.hide-libraries.toggle"));
-			addActionListener(this);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent evt)
-		{
-			jEdit.setBooleanProperty(
-				"plugin-manager.hide-libraries.toggle",
-				isSelected());
-			ManagePanel.this.update();
+			addActionListener(e ->
+			{
+				jEdit.setBooleanProperty("plugin-manager.hide-libraries.toggle", isSelected());
+				ManagePanel.this.update();
+			});
 		}
 	} //}}}
 
@@ -845,9 +830,10 @@ public class ManagePanel extends JPanel
 		{
 			String path = jEdit.getProperty(PluginManager.PROPERTY_PLUGINSET,
 				jEdit.getSettingsDirectory() + File.separator);
-			String[] selectedFiles = GUIUtilities.showVFSFileDialog(ManagePanel.this.window,
+			String[] selectedFiles = GUIUtilities.showVFSFileDialog(window,
 				jEdit.getActiveView(), path, VFSBrowser.OPEN_DIALOG, false);
-			if (selectedFiles == null || selectedFiles.length != 1) return;
+			if (selectedFiles.length != 1)
+				return;
 			path = selectedFiles[0];
 			boolean success = loadPluginSet(path);
 			if (success)
@@ -891,34 +877,27 @@ public class ManagePanel extends JPanel
 
 			VFS vfs = VFSManager.getVFSForPath(vfsURL);
 			Object session = vfs.createVFSSession(vfsURL, ManagePanel.this);
-			Writer writer = null;
-			try
+			try (OutputStream os = vfs._createOutputStream(session, vfsURL, ManagePanel.this);
+			     Writer writer = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)))
 			{
-				OutputStream os = vfs._createOutputStream(session, vfsURL, ManagePanel.this);
-				writer = new BufferedWriter(new OutputStreamWriter(os, "utf-8"));
 				writer.write(sb.toString());
 			}
 			catch (Exception e)
 			{
 				Log.log(Log.ERROR, this, "Saving State Error", e);
 			}
-			finally
-			{
-				IOUtilities.closeQuietly((Closeable)writer);
-			}
-
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e)
 		{
 			String path = jEdit.getProperty("plugin-manager.pluginset.path", jEdit.getSettingsDirectory() + File.separator);
-			VFSFileChooserDialog fileChooser = new VFSFileChooserDialog(
-				ManagePanel.this.window, jEdit.getActiveView(),
+			VFSFileChooserDialog fileChooser = new VFSFileChooserDialog(window, jEdit.getActiveView(),
 				path, VFSBrowser.SAVE_DIALOG, false , true);
 			String[] fileselections = fileChooser.getSelectedFiles();
-			List<Entry> pluginSelections = new ArrayList<Entry>();
-			if (fileselections == null || fileselections.length != 1) return;
+			List<Entry> pluginSelections = new ArrayList<>();
+			if (fileselections.length != 1)
+				return;
 
 			PluginJAR[] jars = jEdit.getPluginJARs();
 			for (PluginJAR jar : jars)
@@ -955,13 +934,13 @@ public class ManagePanel extends JPanel
 		{
 			int[] selected = table.getSelectedRows();
 
-			List<String> listModel = new LinkedList<String>();
+			Collection<String> listModel = new LinkedList<>();
 			Roster roster = new Roster();
-			Set<String> jarsToRemove = new HashSet<String>();
+			Collection<String> jarsToRemove = new HashSet<>();
 			// this one will contains the loaded jars to remove. They
 			// are the only one we need to check to unload plugins
 			// that depends on them
-			Set<String> loadedJarsToRemove = new HashSet<String>();
+			Set<String> loadedJarsToRemove = new HashSet<>();
 			for(int i = 0; i < selected.length; i++)
 			{
 				Entry entry = pluginModel.getEntry(selected[i]);
@@ -1006,8 +985,8 @@ public class ManagePanel extends JPanel
 			if(button == JOptionPane.YES_OPTION)
 			{
 
-				List<String> closureSet = new ArrayList<String>();
-				PluginJAR.transitiveClosure(loadedJarsToRemove.toArray(new String[loadedJarsToRemove.size()]), closureSet);
+				List<String> closureSet = new ArrayList<>();
+				PluginJAR.transitiveClosure(loadedJarsToRemove.toArray(StandardUtilities.EMPTY_STRING_ARRAY), closureSet);
 				closureSet.removeAll(listModel);
 				if (closureSet.isEmpty())
 				{
@@ -1017,7 +996,7 @@ public class ManagePanel extends JPanel
 				{
 					button = GUIUtilities.listConfirm(window,"plugin-manager.remove-dependencies",
 						null, closureSet.toArray());
-					Collections.sort(closureSet, new StandardUtilities.StringCompare<String>(true));
+					closureSet.sort(new StandardUtilities.StringCompare<>(true));
 				}
 				if(button == JOptionPane.YES_OPTION)
 				{
@@ -1063,9 +1042,9 @@ public class ManagePanel extends JPanel
 		public void actionPerformed(ActionEvent e)
 		{
 			PluginJAR[] pluginJARs = jEdit.getPluginJARs();
-			Set<String> neededJars = new HashSet<String>();
+			Collection<String> neededJars = new HashSet<>();
 
-			Map<String, String> jarlibs = new HashMap<String, String>();
+			Map<String, String> jarlibs = new HashMap<>();
 			for (PluginJAR pluginJAR : pluginJARs)
 			{
 				EditPlugin plugin = pluginJAR.getPlugin();
@@ -1126,7 +1105,7 @@ public class ManagePanel extends JPanel
 				}
 			}
 
-			List<String> removingJars = new ArrayList<String>();
+			List<String> removingJars = new ArrayList<>();
 			Set<String> jarlibsKeys = jarlibs.keySet();
 			for (String jar : jarlibsKeys)
 			{
@@ -1142,8 +1121,8 @@ public class ManagePanel extends JPanel
 				return;
 			}
 
-			String[] strings = removingJars.toArray(new String[removingJars.size()]);
-			List<String> mustRemove = new ArrayList<String>();
+			String[] strings = removingJars.toArray(StandardUtilities.EMPTY_STRING_ARRAY);
+			List<String> mustRemove = new ArrayList<>();
 			int ret = GUIUtilities.listConfirm(ManagePanel.this,
 							   "plugin-manager.findOrphan",
 							   null,
@@ -1170,7 +1149,7 @@ public class ManagePanel extends JPanel
 	} //}}}
 
 	//{{{ HelpButton class
-	private class HelpButton extends JButton implements ListSelectionListener, ActionListener
+	private class HelpButton extends JButton implements ListSelectionListener
 	{
 		private URL docURL;
 
@@ -1178,14 +1157,8 @@ public class ManagePanel extends JPanel
 		{
 			super(jEdit.getProperty("manage-plugins.help"));
 			table.getSelectionModel().addListSelectionListener(this);
-			addActionListener(this);
+			addActionListener(e -> new HelpViewer(docURL));
 			setEnabled(false);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent evt)
-		{
-			new HelpViewer(docURL);
 		}
 
 		@Override
@@ -1325,8 +1298,8 @@ public class ManagePanel extends JPanel
 			{
 
 				int[] ints = table.getSelectedRows();
-				List<String> list = new ArrayList<String>(ints.length);
-				List<Entry> entries = new ArrayList<Entry>(ints.length);
+				List<String> list = new ArrayList<>(ints.length);
+				List<Entry> entries = new ArrayList<>(ints.length);
 				for (int i = 0; i < ints.length; i++)
 				{
 					Entry entry = pluginModel.getEntry(ints[i]);
@@ -1337,7 +1310,7 @@ public class ManagePanel extends JPanel
 					}
 				}
 
-				String[] strings = list.toArray(new String[list.size()]);
+				String[] strings = list.toArray(StandardUtilities.EMPTY_STRING_ARRAY);
 				int ret = GUIUtilities.listConfirm(ManagePanel.this,
 								   "plugin-manager.cleanup",
 								   null,
@@ -1361,7 +1334,7 @@ public class ManagePanel extends JPanel
 	//{{{ KeyboardAction class
 	private class KeyboardAction extends AbstractAction
 	{
-		private KeyboardCommand command = KeyboardCommand.NONE;
+		private final KeyboardCommand command;
 
 		KeyboardAction(KeyboardCommand command)
 		{

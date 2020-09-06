@@ -135,8 +135,7 @@ class JEditKillRing extends KillRing
 			for(int i = size - 1; i >=0; i--)
 			{
 				out.write("<ENTRY>");
-				out.write(XMLUtilities.charsToEntities(
-					getElementAt(i).toString(),true));
+				out.write(XMLUtilities.charsToEntities(getElementAt(i),true));
 				out.write("</ENTRY>");
 				out.write(lineSep);
 			}
@@ -162,7 +161,7 @@ class JEditKillRing extends KillRing
 	//{{{ KillRingHandler class
 	private static class KillRingHandler extends DefaultHandler
 	{
-		public List<String> list = new LinkedList<String>();
+		public List<String> list = new LinkedList<>();
 
 		@Override
 		public InputSource resolveEntity(String publicId, String systemId)

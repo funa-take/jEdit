@@ -29,7 +29,7 @@ import javax.swing.text.Segment;
  * embedded in the text.
  *
  * @author Slava Pestov
- * @version $Id: ExplicitFoldHandler.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: ExplicitFoldHandler.java 25193 2020-04-11 17:02:18Z kpouer $
  * @since jEdit 4.0pre1
  */
 public class ExplicitFoldHandler extends FoldHandler
@@ -50,6 +50,7 @@ public class ExplicitFoldHandler extends FoldHandler
 	 * @return The fold level of the specified line
 	 * @since jEdit 4.0pre1
 	 */
+	@Override
 	public int getFoldLevel(JEditBuffer buffer, int lineIndex, Segment seg)
 	{
 		if(lineIndex == 0)

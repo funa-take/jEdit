@@ -28,7 +28,8 @@ import org.gjt.sp.util.Log;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -40,7 +41,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.regex.*;
-import javax.swing.JOptionPane;
 //}}}
 
 /**
@@ -54,7 +54,7 @@ public class ModeProvider
 {
 	public static ModeProvider instance = new ModeProvider();
 
-	private final LinkedHashMap<String, Mode> modes = new LinkedHashMap<String, Mode>(220);
+	private final LinkedHashMap<String, Mode> modes = new LinkedHashMap<>(250);
 
 	//{{{ removeAll() method
 	public void removeAll()
@@ -184,7 +184,7 @@ public class ModeProvider
 		if (filename != null && filename.endsWith(".gz"))
 			filename = filename.substring(0, filename.length() - 3);
 
-		List<Mode> acceptable = new ArrayList<Mode>(1);
+		List<Mode> acceptable = new ArrayList<>(1);
 		for(Mode mode : modes.values())
 		{
 			if(mode.accept(filepath, filename, firstLine))
@@ -266,7 +266,7 @@ public class ModeProvider
 	 */
 	public Mode[] getModes()
 	{
-		return modes.values().toArray(new Mode[modes.size()]);
+		return modes.values().toArray(new Mode[0]);
 	} //}}}
 
 	//{{{ addMode() method
@@ -332,11 +332,10 @@ public class ModeProvider
 				// insert the catalog entry for this mode
 				p = Pattern.compile("(?m)(</MODES>)");
 				m = p.matcher(contents);
-				StringBuilder modeLine = new StringBuilder("\t<MODE NAME=\"");
-				modeLine.append(name).append("\" FILE=\"").append(target.toFile().getName()).append("\"");
-				modeLine.append(filenameGlob == null || filenameGlob.isEmpty() ? "" : " FILE_NAME_GLOB=\"" + filenameGlob + "\"");
-				modeLine.append(firstLineGlob == null || firstLineGlob.isEmpty() ? "" : " FIRST_LINE_GLOB=\"" + firstLineGlob + "\"");
-				modeLine.append("/>");
+				String modeLine = "\t<MODE NAME=\"" + name + "\" FILE=\"" + target.toFile().getName() + "\"" +
+					(filenameGlob == null || filenameGlob.isEmpty() ? "" : " FILE_NAME_GLOB=\"" + filenameGlob + "\"") +
+					(firstLineGlob == null || firstLineGlob.isEmpty() ? "" : " FIRST_LINE_GLOB=\"" + firstLineGlob + "\"") +
+					"/>";
 				newContents = m.replaceFirst(modeLine + "\n$1" );
 
 				// rewrite the catalog file
@@ -345,12 +344,11 @@ public class ModeProvider
 				bw.flush();
 				bw.close();
 			}
-			catch(Exception e)
+			catch(Exception e)	// NOPMD
 			{
 				// ignored
 			}
 		}
-
 
 		addMode(mode);
 		loadMode(mode);
@@ -366,8 +364,9 @@ public class ModeProvider
 		XMLReader parser;
 		try
 		{
-			parser = XMLReaderFactory.createXMLReader();
-		} catch (SAXException saxe)
+			parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
+		}
+		catch (SAXException | ParserConfigurationException saxe)
 		{
 			Log.log(Log.ERROR, this, saxe);
 			return;
@@ -401,7 +400,7 @@ public class ModeProvider
 
 			mode.setProperties(xmh.getModeProperties());
 		}
-		catch (Throwable e)
+		catch (Throwable e)	// NOPMD
 		{
 			error(fileName, e);
 		}

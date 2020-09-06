@@ -53,9 +53,10 @@ import org.gjt.sp.jedit.textarea.TextAreaMouseHandler;
 *
 * @author Slava Pestov
 * @author Eric Le Lay
-* @version $Id: GenericGUIUtilities.java 971 2017-03-20 07:33:52Z take $
+* @version $Id: GenericGUIUtilities.java 25107 2020-03-31 22:37:06Z kpouer $
 */
-public class GenericGUIUtilities {
+public class GenericGUIUtilities
+{
 	//{{{ prettifyMenuLabel() method
 	/**
 	 * `Prettifies' a menu item label by removing the `$' sign. This
@@ -156,14 +157,7 @@ public class GenericGUIUtilities {
 			@Override
 			public void windowGainedFocus(WindowEvent evt)
 			{
-				EventQueue.invokeLater(new Runnable()
-				{
-						@Override
-						public void run()
-						{
-							comp.requestFocusInWindow();
-						}
-				});
+				EventQueue.invokeLater(comp::requestFocusInWindow);
 				win.removeWindowFocusListener(this);
 			}
 		});
@@ -179,27 +173,59 @@ public class GenericGUIUtilities {
 	 */
 	public static boolean isPopupTrigger(MouseEvent evt)
 	{
-		return TextAreaMouseHandler.isRightButton(evt.getModifiers());
+		return TextAreaMouseHandler.isRightButton(evt);
+	} //}}}
+
+	//{{{ isLeftButton() method
+	/**
+	 * @param evt A mouse event
+	 * @since jEdit 5.6
+	 */
+	public static boolean isLeftButton(MouseEvent evt)
+	{
+		return TextAreaMouseHandler.isLeftButton(evt);
 	} //}}}
 
 	//{{{ isMiddleButton() method
 	/**
 	 * @param modifiers The modifiers flag from a mouse event
 	 * @since jEdit 5.3.1
+	 * @deprecated use {@link #isMiddleButton(MouseEvent)}
 	 */
+	@Deprecated
 	public static boolean isMiddleButton(int modifiers)
 	{
 		return TextAreaMouseHandler.isMiddleButton(modifiers);
+	}
+
+	/**
+	 * @param evt A mouse event
+	 * @since jEdit 5.6
+	 */
+	public static boolean isMiddleButton(MouseEvent evt)
+	{
+		return TextAreaMouseHandler.isMiddleButton(evt);
 	} //}}}
 
 	//{{{ isRightButton() method
 	/**
 	 * @param modifiers The modifiers flag from a mouse event
 	 * @since jEdit 5.3.1
+	 * @deprecated use {@link #isRightButton(MouseEvent)}
 	 */
+	@Deprecated
 	public static boolean isRightButton(int modifiers)
 	{
 		return TextAreaMouseHandler.isRightButton(modifiers);
+	}
+
+	/**
+	 * @param evt A mouse event
+	 * @since jEdit 5.6
+	 */
+	public static boolean isRightButton(MouseEvent evt)
+	{
+		return TextAreaMouseHandler.isRightButton(evt);
 	} //}}}
 
 	//{{{ getScreenBounds() method
@@ -302,9 +328,9 @@ public class GenericGUIUtilities {
 				&& y + offsetY + win.getY() >= size.height)
 			{
 				if(point)
-					y = win.getHeight() - size.height - offsetY + extraOffset;
+					y -= size.height + extraOffset;
 				else
-					y = -size.height - 1;
+					y = win.getHeight() - size.height - offsetY + extraOffset;
 			}
 			else
 			{
@@ -385,7 +411,7 @@ public class GenericGUIUtilities {
 		defaults.put("ToggleButton.contentMargins", margin);
 		button.putClientProperty("Nimbus.Overrides", defaults);
 	} //}}}
-	
+
 	//{{{
 	/**
  	 * Makes components the same size by finding the largest width and height of the
@@ -394,13 +420,13 @@ public class GenericGUIUtilities {
  	 * @param components The components to make the same size.
 	 * @since jEdit 5.3.1
  	 */
-	public static void makeSameSize(Component... components) 
+	public static void makeSameSize(Component... components)
 	{
 		if (components == null)
 			return;
 		int width = 0;
 		int height = 0;
-		for (Component component : components) 
+		for (Component component : components)
 		{
 			if (component == null)
 				continue;
@@ -408,11 +434,11 @@ public class GenericGUIUtilities {
 			height = Math.max(height, component.getPreferredSize().height);
 		}
 		Dimension d = new Dimension(width, height);
-		for (Component component : components) 
+		for (Component component : components)
 		{
 			if (component == null)
 				continue;
-			component.setPreferredSize(d);	
+			component.setPreferredSize(d);
 		}
 	} //}}}
 

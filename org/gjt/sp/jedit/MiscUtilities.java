@@ -41,7 +41,11 @@ import org.gjt.sp.util.Log;
 import org.gjt.sp.util.IOUtilities;
 
 import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.util.StandardUtilities;
 import org.gjt.sp.util.StringList;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 //}}}
 
 /**
@@ -56,7 +60,7 @@ import org.gjt.sp.util.StringList;
  * <li>{@link #constructPath(String,String)}</li>
  * </ul>
  *
- * @version $Id: MiscUtilities.java 24840 2018-03-04 20:08:53Z ezust $
+ * @version $Id: MiscUtilities.java 25348 2020-06-09 19:56:24Z kpouer $
  */
 public class MiscUtilities
 {
@@ -70,9 +74,10 @@ public class MiscUtilities
 	 * @param path The path name
 	 * @since jEdit 4.0pre2
 	 */
-	public static String canonPath(String path)
+	@Nonnull
+	public static String canonPath(@Nonnull String path)
 	{
-		if(path.length() == 0)
+		if(path.isEmpty())
 			return path;
 
 		if(path.startsWith("file://"))
@@ -84,19 +89,19 @@ public class MiscUtilities
 
 		if(File.separatorChar == '\\')
 		{
-				// get rid of mixed paths on Windows
-				path = path.replace('/','\\');
-				// also get rid of trailing spaces on Windows
-				int trim = path.length();
-				while(path.charAt(trim - 1) == ' ')
-					trim--;
+			// get rid of mixed paths on Windows
+			path = path.replace('/','\\');
+			// also get rid of trailing spaces on Windows
+			int trim = path.length();
+			while(path.charAt(trim - 1) == ' ')
+				trim--;
 
-				if (path.charAt(trim - 1) == '\\')
-					while (trim > 1 && path.charAt(trim - 2) == '\\')
-					{
-						trim--;
-					}
-				path = path.substring(0,trim);
+			if (path.charAt(trim - 1) == '\\')
+				while (trim > 1 && path.charAt(trim - 2) == '\\')
+				{
+					trim--;
+				}
+			path = path.substring(0,trim);
 		}
 
 		if(path.startsWith('~' + File.separator))
@@ -227,7 +232,7 @@ public class MiscUtilities
 	 * names only.</b>
 	 * @since jEdit 4.2pre1
 	 */
-	public static String resolveSymlinks(String path)
+	public static String resolveSymlinks(@Nonnull String path)
 	{
 		if(isURL(path))
 			return path;
@@ -260,7 +265,7 @@ public class MiscUtilities
 	 * Returns if the specified path name is an absolute path or URL.
 	 * @since jEdit 4.1pre11
 	 */
-	public static boolean isAbsolutePath(String path)
+	public static boolean isAbsolutePath(@Nonnull String path)
 	{
 		if(isURL(path))
 			return true;
@@ -271,11 +276,15 @@ public class MiscUtilities
 		else if(OperatingSystem.isWindows())
 		{
 			if(path.length() == 2 && path.charAt(1) == ':')
+			{
+				//  c:
 				return true;
-			if(path.length() > 2 && path.charAt(1) == ':'
-				&& (path.charAt(2) == '\\'
-					|| path.charAt(2) == '/'))
+			}
+			if(path.length() > 2 &&
+				path.charAt(1) == ':' &&
+				(path.charAt(2) == '\\' || path.charAt(2) == '/'))
 				return true;
+
 			if(path.startsWith("\\\\")
 				|| path.startsWith("//"))
 				return true;
@@ -285,7 +294,7 @@ public class MiscUtilities
 				|| OperatingSystem.isVMS())
 		{
 			// nice and simple
-			if(path.length() > 0 && path.charAt(0) == '/')
+			if(!path.isEmpty() && path.charAt(0) == '/')
 				return true;
 		}
 
@@ -299,7 +308,7 @@ public class MiscUtilities
 	 * @param parent The directory
 	 * @param path The path name
 	 */
-	public static String constructPath(String parent, String path)
+	public static String constructPath(@Nullable String parent, @Nonnull String path)
 	{
 		if(isAbsolutePath(path))
 			return canonPath(path);
@@ -307,7 +316,7 @@ public class MiscUtilities
 		if (parent == null)
 			parent = System.getProperty("user.dir");
 
-		if (path == null || path.length() == 0)
+		if (path.isEmpty())
 			return parent;
 
 		// have to handle this case specially on windows.
@@ -315,10 +324,13 @@ public class MiscUtilities
 		if(OperatingSystem.isWindows())
 		{
 			if(path.length() == 2 && path.charAt(1) == ':')
-				return path;
-			else if(path.length() > 2 && path.charAt(1) == ':'
-					&& path.charAt(2) != '\\')
 			{
+				// c: -> c:
+				return path;
+			}
+			if  (path.length() > 2 && path.charAt(1) == ':' && path.charAt(2) != '\\')
+			{
+				// c:blabla.txt -> c:\blabla.txt
 				path = path.substring(0,2) + '\\'
 					+ path.substring(2);
 				return canonPath(path);
@@ -344,12 +356,10 @@ public class MiscUtilities
 			else
 				break;
 		}
-		if(path.length() == 0)
+		if(path.isEmpty())
 			return parent;
 
-		if(OperatingSystem.isWindows()
-			&& !isURL(parent)
-		&& path.charAt(0) == '\\')
+		if(OperatingSystem.isWindows() && !isURL(parent) && path.charAt(0) == '\\')
 			parent = parent.substring(0,2);
 
 		VFS vfs = VFSManager.getVFSForPath(parent);
@@ -379,7 +389,7 @@ public class MiscUtilities
 	 * @param parent the parent path
 	 * @param path the path to append to the parent
 	 */
-	public static String concatPath(String parent, String path)
+	public static String concatPath(@Nonnull String parent, @Nonnull String path)
 	{
 		parent = canonPath(parent);
 		path = canonPath(path);
@@ -389,9 +399,6 @@ public class MiscUtilities
 			path = path.substring(1);
 		else if (path.length() >= 3 && path.charAt(1) == ':')
 			path = path.replace(':', File.separatorChar);
-
-		if (parent == null)
-			parent = System.getProperty("user.dir");
 
 		if (parent.endsWith(File.separator))
 			return parent + path;
@@ -404,6 +411,7 @@ public class MiscUtilities
 	 * Return the first index of either / or the OS-specific file
 	 * separator.
 	 * @param path The path
+	 * @return the index of the first separator or -1 if not found
 	 * @since jEdit 4.3pre3
 	 */
 	public static int getFirstSeparatorIndex(String path)
@@ -422,7 +430,7 @@ public class MiscUtilities
 	 * @param path The path
 	 * @since jEdit 4.3pre3
 	 */
-	public static int getLastSeparatorIndex(String path)
+	public static int getLastSeparatorIndex(@Nonnull String path)
 	{
 		int start = getPathStart(path);
 		if(start != 0)
@@ -448,6 +456,7 @@ public class MiscUtilities
 	 *    .gz
 	 * @see #getCompleteBaseName(String)
 	 */
+	@Nonnull
 	public static String getFileExtension(String path)
 	{
 		int fsIndex = getLastSeparatorIndex(path);
@@ -550,7 +559,7 @@ public class MiscUtilities
 	 * @param str The string to check
 	 * @return True if the string is a URL, false otherwise
 	 */
-	public static boolean isURL(String str)
+	public static boolean isURL(@Nonnull String str)
 	{
 		int fsIndex = getLastSeparatorIndex(str);
 		if(fsIndex == 0) // /etc/passwd
@@ -564,7 +573,7 @@ public class MiscUtilities
 
 		String protocol = str.substring(0,cIndex);
 		VFS vfs = VFSManager.getVFSForProtocol(protocol);
-		if(vfs != null && !(vfs instanceof UrlVFS))
+		if(!(vfs instanceof UrlVFS))
 			return true;
 
 		try
@@ -729,7 +738,7 @@ public class MiscUtilities
 	public static String getBackupDirectory()
 	{
 		String backupDirectory = jEdit.getProperty("backup.directory");
-		if(backupDirectory == null || backupDirectory.length() == 0)
+		if(backupDirectory == null || backupDirectory.isEmpty())
 		{
 			return null;
 		} else {
@@ -1026,8 +1035,22 @@ public class MiscUtilities
 		{
 			return false;
 		}
+		
+		if (jEdit.getIntegerProperty("backups") <= 0)
+		{
+				return false;
+		}
 
-		// check for #Untitled=X# and #filename#save#
+		// drop the path for the remaining checks
+		filename = getFileName(filename);
+		
+		// check for Untitled-XX
+		if (filename.matches("Untitled-\\d+"))
+		{
+			return false;
+		}
+
+		// check for #Untitled-X# and #filename#save#
 		if (filename.matches("[#]Untitled-\\d+[#]") || filename.matches("[#].*?[#]save[#]"))
 		{
 			return true;
@@ -1036,21 +1059,38 @@ public class MiscUtilities
 		// check for user supplied prefix and suffix
 		String backupPrefix = jEdit.getProperty("backup.prefix");
 		String backupSuffix = jEdit.getProperty("backup.suffix");
-		if (backupPrefix != null && backupSuffix != null)
+		if (backupPrefix != null && !backupPrefix.isEmpty() && backupSuffix != null && !backupSuffix.isEmpty())
 		{
 			return filename.startsWith(backupPrefix) && filename.endsWith(backupSuffix);
 		}
 
-		if (backupPrefix != null && filename.startsWith(backupPrefix))
+		if (backupPrefix != null && !backupPrefix.isEmpty() && filename.startsWith(backupPrefix))
 		{
 			return true;
 		}
 
-		if (backupSuffix != null && filename.startsWith(backupSuffix))
+		if (backupSuffix != null && !backupSuffix.isEmpty() && filename.endsWith(backupSuffix))
 		{
 			return true;
 		}
-
+		
+		// if the user sets an empty prefix and suffix, then check if the filename 
+		// ends with a number, but isn't a known mode suffix
+		if ((backupPrefix == null || backupPrefix.isEmpty()) && (backupSuffix == null || backupSuffix.isEmpty()))
+		{
+			if (filename.matches(".*?\\d+")) 
+			{
+				Mode[] modes = org.gjt.sp.jedit.syntax.ModeProvider.instance.getModes();
+				for (Mode mode : modes) 
+				{
+					if (mode.acceptFile(null, filename)) 
+					{
+						return false;	
+					}
+				}
+				return true;
+			}
+		}
 		return false;
 	} //}}}
 
@@ -1344,7 +1384,7 @@ loop:		for(;;)
 	{
 		Log.log(Log.DEBUG, MiscUtilities.class,"Searching for tools.jar...");
 
-		Collection<String> paths = new LinkedList<String>();
+		Collection<String> paths = new LinkedList<>();
 
 		//{{{ 1. Check whether tools.jar is in the system classpath:
 		paths.add("System classpath: "
@@ -1499,7 +1539,7 @@ loop:		for(;;)
 		{
 			set = EncodingServer.getAvailableNames();
 		}
-		return set.toArray(new String[set.size()]);
+		return set.toArray(StandardUtilities.EMPTY_STRING_ARRAY);
 	} //}}}
 
 	//{{{ throwableToString() method
@@ -1534,7 +1574,7 @@ loop:		for(;;)
 	} //}}}
 
 	//{{{ getPathStart() method
-	private static int getPathStart(String path)
+	private static int getPathStart(@Nonnull String path)
 	{
 		if(path.startsWith("/"))
 			return 0;
@@ -1597,22 +1637,26 @@ loop:		for(;;)
 	//{{{ storeProperties() method
 	/**
 	 * Stores properties with sorted keys.
-     * @param props  Given properties.
-     * @param out  Output stream.
-     * @param comments  Description of the property list.
-     * @since jEdit 5.3
+	 * @param props  Given properties.
+	 * @param out  Output stream.
+	 * @param comments  Description of the property list.
+	 * @since jEdit 5.3
 	 */
 	public static void storeProperties(Properties props, OutputStream out, String comments)
         throws IOException
 	{
-		Properties sorted = new Properties() {
+		Properties sorted = new Properties()
+		{
 			@Override
-			public synchronized Enumeration<Object> keys() {
-				return Collections.enumeration(new TreeSet<Object>(props.keySet()));
+			public synchronized Enumeration<Object> keys()
+			{
+				return Collections.enumeration(new TreeSet<>(props.keySet()));
 			}
+
 			@Override
-			public synchronized Set<Map.Entry<Object,Object>> entrySet() {
-				return (new TreeMap<Object,Object>(props)).entrySet();
+			public synchronized Set<Map.Entry<Object,Object>> entrySet()
+			{
+				return (new TreeMap<>(props)).entrySet();
 			}
 
 		};
@@ -1620,7 +1664,8 @@ loop:		for(;;)
 		sorted.store(out, comments);
 	} //}}}
 
-	static VarCompressor svc = null;
+	@Nullable
+	static VarCompressor svc;
 
 	//{{{ VarCompressor class
 	/**
@@ -1630,9 +1675,9 @@ loop:		for(;;)
 	static class VarCompressor
 	{
 		/** a reverse mapping of values to environment variable names */
-		final Map<String, String> prefixMap = new HashMap<String, String>();
+		final Map<String, String> prefixMap = new HashMap<>();
 		/** previously compressed strings saved for quick access later */
-		final Map<String, String> previous = new HashMap<String, String>();
+		final Map<String, String> previous = new HashMap<>();
 
 		//{{{ VarCompressor constructor
 		VarCompressor()
@@ -1722,7 +1767,7 @@ loop:		for(;;)
 		//{{{ canBePathPrefix() method
 		// Returns true if the argument may absolutely point a directory.
 		// For speed, no access to file system or network should happen.
-		private boolean canBePathPrefix(String s)
+		private static boolean canBePathPrefix(String s)
 		{
 			// Do not use File#isDirectory() since it causes
 			// access to file system or network to check if

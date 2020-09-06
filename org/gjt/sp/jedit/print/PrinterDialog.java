@@ -158,7 +158,6 @@ public class PrinterDialog extends JDialog implements ListSelectionListener
             setContentPane( contents );
 
             // auto-select the default printer
-            /*
             PrintService defaultPrintService = PrintServiceLookup.lookupDefaultPrintService();
             if ( defaultPrintService != null )
             {
@@ -168,7 +167,6 @@ public class PrinterDialog extends JDialog implements ListSelectionListener
             {
                 printers.setSelectedIndex( 0 );
             }
-            */
 
 
             // loads some default values if needed
@@ -311,7 +309,7 @@ public class PrinterDialog extends JDialog implements ListSelectionListener
 
                     // show file chooser
                     String[] files = GUIUtilities.showVFSFileDialog( PrinterDialog.this, view, initialFile.getAbsolutePath(), VFSBrowser.SAVE_DIALOG, false );
-                    if ( files != null && files.length > 0 )
+                    if (files.length > 0)
                     {
                         File file = new File( files[0] );
                         selectedPrintService = getPostscriptPrintService( file );
@@ -873,7 +871,7 @@ public class PrinterDialog extends JDialog implements ListSelectionListener
                 printers.setSelectedValue(defaultPrintService, true);      
                 selectedPrintService = defaultPrintService;
             }
-            else 
+            if (selectedPrintService == null) 
             {
                 selectedPrintService = printers.getModel().getElementAt( 0 );
             }
@@ -1451,12 +1449,12 @@ public class PrinterDialog extends JDialog implements ListSelectionListener
                 String text = field.getText();
                 if ( text != null && !text.isEmpty() )
                 {
-                    currentUserMargin = new Float( text );
+                    currentUserMargin = Float.valueOf( text );
                 }
 
-                Float value = new Float( marginValues[i] );
-                Float minMargin = new Float( minMargins[i] );
-                Float maxMargin = new Float( maxMargins[i] );
+                Float value = Float.valueOf( marginValues[i] );
+                Float minMargin = Float.valueOf( minMargins[i] );
+                Float maxMargin = Float.valueOf( maxMargins[i] );
                 if ( currentUserMargin == null || currentUserMargin < minMargin || currentUserMargin > maxMargin )
                 {
 
@@ -1464,8 +1462,8 @@ public class PrinterDialog extends JDialog implements ListSelectionListener
                     field.setText( integerOnly ? String.valueOf( value.intValue() ) : String.valueOf( value ) );
                 }
 
-                field.setMinValue( integerOnly ? new Integer( minMargin.intValue() ) : new Float( minMargin ) );
-                field.setMaxValue( integerOnly ? new Integer( maxMargin.intValue() ) : new Float( maxMargin ) );
+                field.setMinValue( integerOnly ? Integer.valueOf( minMargin.intValue() ) : Float.valueOf( minMargin ) );
+                field.setMaxValue( integerOnly ? Integer.valueOf( maxMargin.intValue() ) : Float.valueOf( maxMargin ) );
                 field.setToolTipText( "Min: " + minMargin + ", max: " + maxMargin );
             }
         }
@@ -1500,13 +1498,13 @@ public class PrinterDialog extends JDialog implements ListSelectionListener
 
             // calculate the default margins
             float topMargin = supportedArea.getY( units );
-            topMargin = integerOnly ? new Double( Math.ceil( topMargin ) ).floatValue() : topMargin;
+            topMargin = integerOnly ? Double.valueOf( Math.ceil( topMargin ) ).floatValue() : topMargin;
             float leftMargin = supportedArea.getX( units );
-            leftMargin = integerOnly ? new Double( Math.ceil( leftMargin ) ).floatValue() : leftMargin;
+            leftMargin = integerOnly ? Double.valueOf( Math.ceil( leftMargin ) ).floatValue() : leftMargin;
             float rightMargin = Math.max( 0.0f, paperWidth - leftMargin - supportedArea.getWidth( units ) );
-            rightMargin = integerOnly ? new Double( Math.ceil( rightMargin ) ).floatValue() : rightMargin;
+            rightMargin = integerOnly ? Double.valueOf( Math.ceil( rightMargin ) ).floatValue() : rightMargin;
             float bottomMargin = Math.max( 0.0f, paperHeight - topMargin - supportedArea.getHeight( units ) );
-            bottomMargin = integerOnly ? new Double( Math.ceil( bottomMargin ) ).floatValue() : bottomMargin;
+            bottomMargin = integerOnly ? Double.valueOf( Math.ceil( bottomMargin ) ).floatValue() : bottomMargin;
 
             // adjust the margins for the paper orientation
             OrientationRequested orientationRequested = ( OrientationRequested )orientation.getSelectedItem();
@@ -1543,13 +1541,13 @@ public class PrinterDialog extends JDialog implements ListSelectionListener
 
             // calculate the maximum margins
             float topMargin = supportedArea.getY( units ) + supportedArea.getHeight( units );
-            topMargin = integerOnly ? new Double( Math.ceil( topMargin ) ).floatValue() : topMargin;
+            topMargin = integerOnly ? Double.valueOf( Math.ceil( topMargin ) ).floatValue() : topMargin;
             float leftMargin = supportedArea.getX( units ) + supportedArea.getWidth( units );
-            leftMargin = integerOnly ? new Double( Math.ceil( leftMargin ) ).floatValue() : leftMargin;
+            leftMargin = integerOnly ? Double.valueOf( Math.ceil( leftMargin ) ).floatValue() : leftMargin;
             float rightMargin = paperWidth - supportedArea.getX( units );
-            rightMargin = integerOnly ? new Double( Math.ceil( rightMargin ) ).floatValue() : rightMargin;
+            rightMargin = integerOnly ? Double.valueOf( Math.ceil( rightMargin ) ).floatValue() : rightMargin;
             float bottomMargin = paperHeight - supportedArea.getY( units );
-            bottomMargin = integerOnly ? new Double( Math.ceil( bottomMargin ) ).floatValue() : bottomMargin;
+            bottomMargin = integerOnly ? Double.valueOf( Math.ceil( bottomMargin ) ).floatValue() : bottomMargin;
 
             // adjust the margins for the paper orientation
             OrientationRequested orientationRequested = ( OrientationRequested )orientation.getSelectedItem();

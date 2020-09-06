@@ -28,7 +28,7 @@ import javax.swing.text.Segment;
  * A dummy token handler that discards tokens.
  *
  * @author Slava Pestov
- * @version $Id: DummyTokenHandler.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: DummyTokenHandler.java 25244 2020-04-15 15:14:49Z kpouer $
  * @since jEdit 4.1pre1
  */
 public class DummyTokenHandler implements TokenHandler
@@ -51,6 +51,7 @@ public class DummyTokenHandler implements TokenHandler
 	 * @param context The line context
 	 * @since jEdit 4.2pre3
 	 */
+	@Override
 	public void handleToken(Segment seg, byte id, int offset, int length,
 		TokenMarker.LineContext context) {} //}}}
 
@@ -62,6 +63,7 @@ public class DummyTokenHandler implements TokenHandler
 	 * retokenized).
 	 * @since jEdit 4.2pre6
 	 */
+	@Override
 	public void setLineContext(TokenMarker.LineContext lineContext)
 	{
 	} //}}}

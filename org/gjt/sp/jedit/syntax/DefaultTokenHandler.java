@@ -28,7 +28,7 @@ import javax.swing.text.Segment;
  * Builds a linked list of tokens without any additional processing.
  *
  * @author Slava Pestov
- * @version $Id: DefaultTokenHandler.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: DefaultTokenHandler.java 25244 2020-04-15 15:14:49Z kpouer $
  * @since jEdit 4.1pre1
  */
 public class DefaultTokenHandler implements TokenHandler
@@ -63,6 +63,7 @@ public class DefaultTokenHandler implements TokenHandler
 	 * @param context The line context
 	 * @since jEdit 4.2pre3
 	 */
+	@Override
 	public void handleToken(Segment seg, byte id, int offset, int length,
 		TokenMarker.LineContext context)
 	{
@@ -92,6 +93,7 @@ public class DefaultTokenHandler implements TokenHandler
 	 * retokenized).
 	 * @since jEdit 4.2pre6
 	 */
+	@Override
 	public void setLineContext(TokenMarker.LineContext lineContext)
 	{
 		this.lineContext = lineContext;

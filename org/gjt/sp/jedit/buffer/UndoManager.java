@@ -36,7 +36,7 @@ import org.gjt.sp.jedit.textarea.Selection;
  * called through, implements such protection.
  *
  * @author Slava Pestov
- * @version $Id: UndoManager.java 22171 2012-09-06 15:12:05Z ezust $
+ * @version $Id: UndoManager.java 25196 2020-04-11 17:08:33Z kpouer $
  * @since jEdit 4.0pre1
  */
 public class UndoManager
@@ -79,12 +79,12 @@ public class UndoManager
 			reviseUndoId();
 			undoCount--;
 
-			Selection s[] = undosLast.undo(this);
+			Selection[] selections = undosLast.undo(this);
 			redosFirst = undosLast;
 			undosLast = undosLast.prev;
 			if(undosLast == null)
 				undosFirst = null;
-			return s;
+			return selections;
 		}
 	} //}}}
 
@@ -261,7 +261,7 @@ public class UndoManager
 	//{{{ Private members
 
 	//{{{ Instance variables
-	private JEditBuffer buffer;
+	private final JEditBuffer buffer;
 
 	// queue of undos. last is most recent, first is oldest
 	private Edit undosFirst;

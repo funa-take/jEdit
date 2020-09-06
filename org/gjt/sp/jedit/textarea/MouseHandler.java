@@ -27,13 +27,15 @@ package org.gjt.sp.jedit.textarea;
 import java.awt.event.*;
 
 import org.gjt.sp.jedit.EditBus;
-import org.gjt.sp.jedit.Registers;
-import org.gjt.sp.jedit.OperatingSystem;
 import org.gjt.sp.jedit.msg.PositionChanging;
+
+import static java.awt.event.MouseEvent.BUTTON1;
+import static java.awt.event.MouseEvent.BUTTON2;
+import static java.awt.event.MouseEvent.BUTTON3;
 //}}}
 
-/** The mouseHandler used for jEdit.
- *
+/**
+ * The mouseHandler used for jEdit.
  */
 public class MouseHandler extends TextAreaMouseHandler
 {
@@ -41,157 +43,24 @@ public class MouseHandler extends TextAreaMouseHandler
 	public MouseHandler(JEditTextArea textArea)
 	{
 		super(textArea);
-		this.textArea = textArea;
 	} //}}}
 
 	//{{{ mousePressed() method
 	@Override
 	public void mousePressed(MouseEvent evt)
 	{
-		showCursor();
-
 		int btn = evt.getButton();
-		if (btn != MouseEvent.BUTTON1 && btn != MouseEvent.BUTTON2 && btn != MouseEvent.BUTTON3)
+		if (btn != BUTTON1 && btn != BUTTON2 && btn != BUTTON3)
 		{
 			// Suppress presses with unknown button, to avoid
 			// problems due to horizontal scrolling.
 			return;
 		}
 
-		control = (OperatingSystem.isMacOS() && evt.isMetaDown())
-			|| (!OperatingSystem.isMacOS() && evt.isControlDown());
-
-		ctrlForRectangularSelection = textArea.isCtrlForRectangularSelection();
-
-		// so that Home <mouse click> Home is not the same
-		// as pressing Home twice in a row
-		textArea.getInputHandler().resetLastActionCount();
-
-		quickCopyDrag = (textArea.isQuickCopyEnabled() &&
-			isMiddleButton(evt.getModifiers()));
-
-		if(!quickCopyDrag)
-		{
-			textArea.requestFocus();
-			TextArea.focusedComponent = textArea;
-		}
-
 		if(textArea.getBuffer().isLoading())
 			return;
+
 		EditBus.send(new PositionChanging(textArea));
-		int x = evt.getX();
-		int y = evt.getY();
-
-		dragStart = textArea.xyToOffset(x,y,
-			!(textArea.getPainter().isBlockCaretEnabled()
-			|| textArea.isOverwriteEnabled()));
-		dragStartLine = textArea.getLineOfOffset(dragStart);
-		dragStartOffset = dragStart - textArea.getLineStartOffset(
-			dragStartLine);
-
-		if(isPopupTrigger(evt)
-			&& textArea.getRightClickPopup() != null)
-		{
-			if(textArea.isRightClickPopupEnabled())
-				textArea.handlePopupTrigger(evt);
-			return;
-		}
-
-		dragged = false;
-
-		textArea.blink = true;
-		textArea.invalidateLine(textArea.getCaretLine());
-
-		clickCount = evt.getClickCount();
-
-		if(textArea.isDragEnabled()
-			&& textArea.selectionManager.insideSelection(x,y)
-			&& clickCount == 1 && !evt.isShiftDown())
-		{
-			maybeDragAndDrop = true;
-
-			textArea.moveCaretPosition(dragStart,false);
-			return;
-		}
-
-		maybeDragAndDrop = false;
-
-		if(quickCopyDrag)
-		{
-			// ignore double clicks of middle button
-			doSingleClick(evt);
-		}
-		else
-		{
-			switch(clickCount)
-			{
-			case 1:
-				doSingleClick(evt);
-				break;
-			case 2:
-				doDoubleClick();
-				break;
-			default: //case 3:
-				doTripleClick();
-				break;
-			}
-		}
+		super.mousePressed(evt);
 	} //}}}
-
-	//{{{ mouseReleased() method
-	@Override
-	public void mouseReleased(MouseEvent evt)
-	{
-		int btn = evt.getButton();
-		if (btn != MouseEvent.BUTTON1 && btn != MouseEvent.BUTTON2 && btn != MouseEvent.BUTTON3)
-		{
-			// Suppress releases with unknown button, to avoid
-			// problems due to horizontal scrolling.
-			return;
-		}
-
-		// middle mouse button drag inserts selection
-		// at caret position
-		Selection sel = textArea.getSelectionAtOffset(dragStart);
-		if(dragged && sel != null)
-		{
-			Registers.setRegister('%',textArea.getSelectedText(sel));
-			if(quickCopyDrag)
-			{
-				textArea.removeFromSelection(sel);
-				Registers.paste(TextArea.focusedComponent,
-					'%',sel instanceof Selection.Rect);
-
-				TextArea.focusedComponent.requestFocus();
-			}
-		}
-		else if(!dragged && textArea.isQuickCopyEnabled() &&
-			isMiddleButton(evt.getModifiers()))
-		{
-			textArea.requestFocus();
-			TextArea.focusedComponent = textArea;
-
-			textArea.setCaretPosition(dragStart,false);
-			if(!textArea.isEditable())
-				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
-			else
-				Registers.paste(textArea,'%',control);
-		}
-		else if(maybeDragAndDrop
-			&& !textArea.isMultipleSelectionEnabled())
-		{
-			textArea.selectNone();
-		}
-
-		maybeDragAndDrop = false;
-		dragged = false;
-		if(!(textArea.isRectangularSelectionEnabled()
-			|| (control && ctrlForRectangularSelection)))
-			// avoid scrolling away from rectangular selection
-			textArea.scrollToCaret(false);
-	} //}}}
-
-	//{{{ Private members
-	private JEditTextArea textArea;
-	//}}}
 }

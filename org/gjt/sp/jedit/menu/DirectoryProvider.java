@@ -24,7 +24,6 @@ package org.gjt.sp.jedit.menu;
 
 //{{{ Imports
 import javax.swing.*;
-import java.awt.event.*;
 import java.io.File;
 import java.util.Arrays;
 
@@ -36,7 +35,7 @@ import org.gjt.sp.util.StandardUtilities;
 
 /**
  * @author Slava Pestov
- * @version $Id: DirectoryProvider.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id: DirectoryProvider.java 25141 2020-04-07 22:43:40Z kpouer $
  */
 public class DirectoryProvider implements DynamicMenuProvider
 {
@@ -47,12 +46,14 @@ public class DirectoryProvider implements DynamicMenuProvider
 	} //}}}
 
 	//{{{ updateEveryTime() method
+	@Override
 	public boolean updateEveryTime()
 	{
 		return true;
 	} //}}}
 
 	//{{{ update() method
+	@Override
 	public void update(JMenu menu)
 	{
 		final View view = GUIUtilities.getView(menu);
@@ -69,25 +70,7 @@ public class DirectoryProvider implements DynamicMenuProvider
 		mi.setActionCommand(path);
 		mi.setIcon(FileCellRenderer.openDirIcon);
 
-		//{{{ ActionListeners
-		ActionListener fileListener = new ActionListener()
-		{
-			public void actionPerformed(ActionEvent evt)
-			{
-				jEdit.openFile(view,evt.getActionCommand());
-			}
-		};
-
-		ActionListener dirListener = new ActionListener()
-		{
-			public void actionPerformed(ActionEvent evt)
-			{
-				VFSBrowser.browseDirectory(view,
-					evt.getActionCommand());
-			}
-		}; //}}}
-
-		mi.addActionListener(dirListener);
+		mi.addActionListener(evt -> VFSBrowser.browseDirectory(view, evt.getActionCommand()));
 
 		menu.add(mi);
 		menu.addSeparator();
@@ -122,7 +105,7 @@ public class DirectoryProvider implements DynamicMenuProvider
 			int maxItems = jEdit.getIntegerProperty("menu.spillover",20);
 
 			Arrays.sort(list,
-				new StandardUtilities.StringCompare<File>(true));
+				new StandardUtilities.StringCompare<>(true));
 			for(int i = 0; i < list.length; i++)
 			{
 				File file = list[i];
@@ -138,9 +121,9 @@ public class DirectoryProvider implements DynamicMenuProvider
 					continue;
 
 				// skip backup files
-				if((backupPrefix.length() != 0
+				if((!backupPrefix.isEmpty()
 					&& name.startsWith(backupPrefix))
-					|| (backupSuffix.length() != 0
+					|| (!backupSuffix.isEmpty()
 					&& name.endsWith(backupSuffix)))
 					continue;
 
@@ -150,12 +133,17 @@ public class DirectoryProvider implements DynamicMenuProvider
 
 				mi = new JMenuItem(name);
 				mi.setActionCommand(file.getPath());
-				mi.addActionListener(file.isDirectory()
-					? dirListener
-					: fileListener);
-				mi.setIcon(file.isDirectory()
-					? FileCellRenderer.dirIcon
-					: FileCellRenderer.fileIcon);
+				if (file.isDirectory())
+				{
+					mi.addActionListener(evt -> VFSBrowser.browseDirectory(view, evt.getActionCommand()));
+					mi.setIcon(FileCellRenderer.dirIcon);
+				}
+				else
+				{
+					mi.addActionListener(evt -> jEdit.openFile(view,evt.getActionCommand()));
+					mi.setIcon(FileCellRenderer.fileIcon);
+				}
+
 
 				if(current.getItemCount() >= maxItems && i != list.length - 1)
 				{
