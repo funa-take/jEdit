@@ -175,9 +175,16 @@ public class DirectoryListSet extends BufferListSet
 		Method method = miscutil.getDeclaredMethod("exec", List.class, String.class, String.class);
 		
 		ArrayList<String> commands = new ArrayList();
-		commands.add("/bin/sh");
-		commands.add("-c");
-		String command = createGrepCommand(directory, skipBinary, skipHidden);
+		boolean forMsys2 = OperatingSystem.isWindows();
+		
+		if (forMsys2) {
+			commands.add("cmd");
+			commands.add("/c");
+		} else {
+			commands.add("/bin/sh");
+			commands.add("-c");
+		}
+		String command = createGrepCommand(directory, skipBinary, skipHidden, forMsys2);
 		Log.log(Log.MESSAGE,DirectoryListSet.class,command);
 		commands.add(command);
 		Object result = method.invoke(null, commands, "", "UTF-8");
@@ -253,10 +260,16 @@ public class DirectoryListSet extends BufferListSet
 	}
 	
 	private String createGrepCommand(String searchDirectory, boolean skipBinary, boolean skipHidden) {
+		return createGrepCommand(searchDirectory, skipBinary, skipHidden, false);
+	}
+	private String createGrepCommand(String searchDirectory, boolean skipBinary, boolean skipHidden, boolean forMsys2) {
 		// macで regextype オプションが使えないため、grepでファイルを絞り込み
 		// find "./te st" -type f -regextype posix-egrep  -iregex ".?(/[^.][^/] *)*(javA|text)" -print0 | xargs -0 grep -l  -i -E $'TEST'
 		// 以下のコマンドを実行する
 		// find "." -type f | grep -i -E "^.?(/[^.][^/]*)*$" | grep -i -E ".*(java|text)" | sed -e 's/ /\\ /g' | xargs grep -l  -i -E $'hoge4'
+		
+		// Windowsでmsys2を使う場合
+		// find "C:\data\temp\temp" -type f | sed -e 's/\\\\/\//g' | grep -E "^(.:)?(/[^.][^/]*)*$" | grep -i -E ".*$"  | sed -e 's/.*/"\\0"/g' | xargs grep -l -i -I -E 'hoge'
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("find ");
@@ -264,14 +277,27 @@ public class DirectoryListSet extends BufferListSet
 		sb.append("-type f ");
 		if (!recurse) {
 			sb.append("-maxdepth 1 ");
-		} 
+		}
+		
+		if (forMsys2) {
+			sb.append(" | sed -e 's/\\\\\\\\/\\//g'");
+		}
 		
 		if (skipHidden) {
-			sb.append(" | grep -E \"^(/[^.][^/]*)*$\"");
+			if (forMsys2) {
+				sb.append(" | grep -E \"^(.:)?(/[^.][^/]*)*$\"");
+			} else {
+				sb.append(" | grep -E \"^(/[^.][^/]*)*$\"");
+			}
 		}
 		
 		sb.append(" | grep -i -E \"").append(StandardUtilities.globToRE(glob)).append("$\" ");
-		sb.append(" | sed -e 's/ /\\\\ /g' ");
+		
+		if (forMsys2) {
+			sb.append(" | sed -e 's/.*/\"\\\\0\"/g' ");
+		} else {
+			sb.append(" | sed -e 's/ /\\\\ /g' ");
+		}
 		
 		sb.append(" | xargs grep -l ");
 		if (SearchAndReplace.getIgnoreCase()) {
@@ -293,7 +319,12 @@ public class DirectoryListSet extends BufferListSet
 			
 			searchString = searchString.replaceAll("\\\\\\\\", "\\\\\\\\\\\\\\\\");
 			searchString = searchString.replaceAll("'", "\\\\'");
-			sb.append("-E $'").append(searchString).append("' ");
+			if (forMsys2) {
+				sb.append("-E '");
+			} else {
+				sb.append("-E $'");
+			}
+			sb.append(searchString).append("' ");
 			// sb.append("-P $'").append(searchString).append("' ");
 		} else {
 			searchString = searchString.replaceAll("\"", "\\\\\"");
