@@ -180,6 +180,7 @@ public class DirectoryListSet extends BufferListSet
 		if (forMsys2) {
 			commands.add("cmd");
 			commands.add("/c");
+			directory = directory.replace('\\','/');
 		} else {
 			commands.add("/bin/sh");
 			commands.add("-c");
@@ -277,10 +278,6 @@ public class DirectoryListSet extends BufferListSet
 		sb.append("-type f ");
 		if (!recurse) {
 			sb.append("-maxdepth 1 ");
-		}
-		
-		if (forMsys2) {
-			sb.append(" | sed -e 's/\\\\\\\\/\\//g'");
 		}
 		
 		if (skipHidden) {
