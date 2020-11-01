@@ -1,28 +1,29 @@
 /*
- * TextUtilities.java - Various text functions
- * Copyright (C) 1998, 2005 Slava Pestov
- * :tabSize=4:indentSize=4:noTabs=false:
- * :folding=explicit:collapseFolds=1:
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
+* TextUtilities.java - Various text functions
+* Copyright (C) 1998, 2005 Slava Pestov
+* :tabSize=4:indentSize=4:noTabs=false:
+* :folding=explicit:collapseFolds=1:
+*
+* This program is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
 
 package org.gjt.sp.jedit;
 
 //{{{ Imports
 import java.util.*;
+import java.text.BreakIterator;
 import javax.swing.text.Segment;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.syntax.*;
@@ -51,8 +52,8 @@ public class TextUtilities
 	public static final int WHITESPACE = 0;
 	public static final int WORD_CHAR = 1;
 	public static final int SYMBOL = 2;
-
-
+	
+	
 	//{{{ getTokenAtOffset() method
 	/**
 	 * Returns the token that contains the specified offset.
@@ -64,19 +65,19 @@ public class TextUtilities
 	{
 		if(offset == 0 && tokens.id == Token.END)
 			return tokens;
-
+		
 		for(;;)
 		{
 			if(tokens.id == Token.END)
 				throw new ArrayIndexOutOfBoundsException("offset > line length");
-
+			
 			if(tokens.offset + tokens.length > offset)
 				return tokens;
 			else
 				tokens = tokens.next;
 		}
 	} //}}}
-
+	
 	//{{{ getComplementaryBracket() method
 	/**
 	 * Given an opening bracket, return the corresponding closing bracket
@@ -113,10 +114,10 @@ public class TextUtilities
 		case '⟧': if (direction != null) direction[0] = false; return '⟦';
 		case '⦃': if (direction != null) direction[0] = true;  return '⦄';
 		case '⦄': if (direction != null) direction[0] = false; return '⦃';
-		default:  return '\0';
+			default:  return '\0';
 		}
 	} //}}}
-
+	
 	//{{{ findMatchingBracket() method
 	/**
 	 * Returns the offset of the bracket matching the one at the
@@ -134,42 +135,42 @@ public class TextUtilities
 			throw new ArrayIndexOutOfBoundsException(offset + ":"
 				+ buffer.getLineLength(line));
 		}
-
+		
 		Segment lineText = new Segment();
 		buffer.getLineText(line,lineText);
-
+		
 		char c = lineText.array[lineText.offset + offset];
 		// false - backwards, true - forwards
 		boolean[] direction = new boolean[1];
-
+		
 		// corresponding character
 		char cprime = getComplementaryBracket(c,direction);
-
+		
 		if( cprime == '\0' )
 		{ // c is no bracket
 			return -1;
 		}
-
+		
 		// 1 because we've already 'seen' the first bracket
 		int count = 1;
-
+		
 		DefaultTokenHandler tokenHandler = new DefaultTokenHandler();
 		buffer.markTokens(line,tokenHandler);
-
+		
 		// Get the syntax token at 'offset'
 		// only tokens with the same type will be checked for
 		// the corresponding bracket
 		byte idOfBracket = getTokenAtOffset(tokenHandler.getTokens(),offset).id;
-
+		
 		boolean haveTokens = true;
-
+		
 		int startLine = line;
-
+		
 		//{{{ Forward search
 		if(direction[0])
 		{
 			offset++;
-
+			
 			for(;;)
 			{
 				for(int i = offset; i < lineText.count; i++)
@@ -202,7 +203,7 @@ public class TextUtilities
 						}
 					}
 				}
-
+				
 				//{{{ Go on to next line
 				line++;
 				if(line >= buffer.getLineCount() || (line - startLine) > BRACKET_MATCH_LIMIT)
@@ -217,7 +218,7 @@ public class TextUtilities
 		else
 		{
 			offset--;
-
+			
 			for(;;)
 			{
 				for(int i = offset; i >= 0; i--)
@@ -250,7 +251,7 @@ public class TextUtilities
 						}
 					}
 				}
-
+				
 				//{{{ Go on to previous line
 				line--;
 				if(line < 0 || (startLine - line) > BRACKET_MATCH_LIMIT)
@@ -261,11 +262,11 @@ public class TextUtilities
 				//}}}
 			}
 		} //}}}
-
+		
 		// Nothing found
 		return -1;
 	} //}}}
-
+	
 	//{{{ join() method
 	/** Similar to perl's join() method on lists,
 	 *    but works with all collections.
@@ -291,7 +292,7 @@ public class TextUtilities
 		}
 		return retval.toString();
 	} //}}}
-
+	
 	//{{{ findWordStart() methods
 	/**
 	 * Locates the start of the word at the specified position.
@@ -304,7 +305,7 @@ public class TextUtilities
 	{
 		return findWordStart(line, pos, noWordSep, true, false);
 	}
-
+	
 	/**
 	 * Locates the start of the word at the specified position.
 	 * @param line The text
@@ -314,12 +315,12 @@ public class TextUtilities
 	 * @since jEdit 4.3pre15
 	 */
 	public static int findWordStart(CharSequence line,
-					int pos,
-					String noWordSep)
+		int pos,
+		String noWordSep)
 	{
 		return findWordStart(line, pos, noWordSep, true, false, false);
 	}
-
+	
 	/**
 	 * Locates the start of the word at the specified position.
 	 * @param line The text
@@ -335,7 +336,7 @@ public class TextUtilities
 	{
 		return findWordStart(line,pos,noWordSep,joinNonWordChars,false);
 	}
-
+	
 	/**
 	 * Locates the start of the word at the specified position.
 	 * @param line The text
@@ -353,7 +354,7 @@ public class TextUtilities
 		return findWordStart(line, pos, noWordSep, joinNonWordChars,
 			false, eatWhitespace);
 	}
-
+	
 	/**
 	 * Locates the start of the word at the specified position.
 	 * @param line The text
@@ -371,10 +372,10 @@ public class TextUtilities
 		boolean eatWhitespace)
 	{
 		return findWordStart((CharSequence) line, pos, noWordSep,
-				     joinNonWordChars, camelCasedWords,
-				     eatWhitespace);
+			joinNonWordChars, camelCasedWords,
+			eatWhitespace);
 	}
-
+	
 	/**
 	 * Locates the start of the word at the specified position.
 	 * @param line The text
@@ -388,15 +389,15 @@ public class TextUtilities
 	 * @since jEdit 4.3pre15
 	 */
 	public static int findWordStart(CharSequence line,
-					int pos,
-					String noWordSep,
-					boolean joinNonWordChars,
-					boolean camelCasedWords,
-					boolean eatWhitespace)
+		int pos,
+		String noWordSep,
+		boolean joinNonWordChars,
+		boolean camelCasedWords,
+		boolean eatWhitespace)
 	{
 		return findWordStart(line, pos, noWordSep, joinNonWordChars, camelCasedWords, eatWhitespace, false);
 	}
-
+	
 	/**
 	 * Locates the start of the word at the specified position.
 	 * @param line The text
@@ -416,21 +417,28 @@ public class TextUtilities
 		boolean eatWhitespace, boolean eatOnlyAfterWord)
 	{
 		char ch = line.charAt(pos);
-
+		
 		if(noWordSep == null)
 			noWordSep = "";
-
+		
 		//{{{ the character under the cursor changes how we behave.
 		int type = getCharType(ch, noWordSep);
 		//}}}
-
+		// funa ascii以外の場合の単語移動
+		if (type == WORD_CHAR && !isAscii(ch)) {
+			int wordStart = findWordStartWithBreakInterator(line.toString(), pos);
+			if (wordStart != BreakIterator.DONE) {
+				return wordStart;
+			}
+		}
+		
 		for(int i = pos; i >= 0; i--)
 		{
 			char lastCh = ch;
 			ch = line.charAt(i);
 			switch(type)
 			{
-			//{{{ Whitespace...
+				//{{{ Whitespace...
 			case WHITESPACE:
 				// only select other whitespace in this case, unless eating only after words
 				if(Character.isWhitespace(ch))
@@ -448,12 +456,15 @@ public class TextUtilities
 				else
 					type = SYMBOL;
 				break; //}}}
-			//{{{ Word character...
+				//{{{ Word character...
 			case WORD_CHAR:
+				if (!isAscii(ch)) {
+					return i + 1;
+				}
 				// stop at next last (in writing direction) upper case char if camel cased
 				// (don't stop at every upper case char, don't treat noWordSep as word chars)
 				if (camelCasedWords && Character.isUpperCase(ch) && !Character.isUpperCase(lastCh)
-						&& Character.isLetterOrDigit(lastCh))
+					&& Character.isLetterOrDigit(lastCh))
 				{
 					return i;
 				}
@@ -478,11 +489,11 @@ public class TextUtilities
 				}
 				else
 					return i + 1; //}}}
-			//{{{ Symbol...
+				//{{{ Symbol...
 			case SYMBOL:
 				if(!joinNonWordChars && pos != i)
 					return i + 1;
-
+				
 				// whitespace; include in word if eating, but not if only eating after word
 				if(Character.isWhitespace(ch))
 				{
@@ -505,10 +516,10 @@ public class TextUtilities
 				} //}}}
 			}
 		}
-
+		
 		return 0;
 	} //}}}
-
+	
 	//{{{ findWordEnd() methods
 	/**
 	 * Locates the end of the word at the specified position.
@@ -521,7 +532,7 @@ public class TextUtilities
 	{
 		return findWordEnd(line, pos, noWordSep, true);
 	}
-
+	
 	/**
 	 * Locates the end of the word at the specified position.
 	 * @param line The text
@@ -531,12 +542,12 @@ public class TextUtilities
 	 * @since jEdit 4.3pre15
 	 */
 	public static int findWordEnd(CharSequence line,
-				      int pos,
-				      String noWordSep)
+		int pos,
+		String noWordSep)
 	{
 		return findWordEnd(line, pos, noWordSep, true, false, false);
 	}
-
+	
 	/**
 	 * Locates the end of the word at the specified position.
 	 * @param line The text
@@ -552,7 +563,7 @@ public class TextUtilities
 	{
 		return findWordEnd(line,pos,noWordSep,joinNonWordChars,false);
 	}
-
+	
 	/**
 	 * Locates the end of the word at the specified position.
 	 * @param line The text
@@ -570,7 +581,7 @@ public class TextUtilities
 		return findWordEnd(line, pos, noWordSep, joinNonWordChars,
 			false, eatWhitespace);
 	}
-
+	
 	/**
 	 * Locates the end of the word at the specified position.
 	 * @param line The text
@@ -588,10 +599,10 @@ public class TextUtilities
 		boolean eatWhitespace)
 	{
 		return findWordEnd((CharSequence)line, pos, noWordSep,
-				   joinNonWordChars, camelCasedWords,
-				   eatWhitespace);
+			joinNonWordChars, camelCasedWords,
+			eatWhitespace);
 	}
-
+	
 	/**
 	 * Locates the end of the word at the specified position.
 	 * @param line The text
@@ -605,43 +616,54 @@ public class TextUtilities
 	 * @since jEdit 4.3pre15
 	 */
 	public static int findWordEnd(CharSequence line,
-				      int pos,
-				      String noWordSep,
-				      boolean joinNonWordChars,
-				      boolean camelCasedWords,
-				      boolean eatWhitespace)
+		int pos,
+		String noWordSep,
+		boolean joinNonWordChars,
+		boolean camelCasedWords,
+		boolean eatWhitespace)
 	{
 		if(pos != 0)
 			pos--;
 
 		char ch = line.charAt(pos);
-
+		
 		if(noWordSep == null)
 			noWordSep = "";
-
+		
 		//{{{ the character under the cursor changes how we behave.
 		int type = getCharType(ch, noWordSep);
 		//}}}
-
+		
+		// funa ascii以外の場合の単語移動
+		if (type == WORD_CHAR && !isAscii(ch)) {
+			int wordEnd = findWordEndWithBreakInterator(line.toString(), pos);
+			if (wordEnd != BreakIterator.DONE) {
+				return wordEnd;
+			}
+		}
+		
 		for(int i = pos; i < line.length(); i++)
 		{
 			char lastCh = ch;
 			ch = line.charAt(i);
 			switch(type)
 			{
-			//{{{ Whitespace...
+				//{{{ Whitespace...
 			case WHITESPACE:
 				// only select other whitespace in this case
 				if(Character.isWhitespace(ch))
 					break;
 				else
 					return i; //}}}
-			//{{{ Word character...
+				//{{{ Word character...
 			case WORD_CHAR:
+				if (!isAscii(ch)) {
+					return i;
+				}
 				// stop at next last upper case char if camel cased
 				// (don't stop at every upper case char, don't treat noWordSep as word chars)
 				if (camelCasedWords && i > pos + 1 && !Character.isUpperCase(ch) && Character.isLetterOrDigit(ch)
-						&& Character.isUpperCase(lastCh))
+					&& Character.isUpperCase(lastCh))
 				{
 					return i - 1;
 				}
@@ -664,11 +686,11 @@ public class TextUtilities
 				}
 				else
 					return i; //}}}
-			//{{{ Symbol...
+				//{{{ Symbol...
 			case SYMBOL:
 				if(!joinNonWordChars && i != pos)
 					return i;
-
+				
 				// if we see whitespace, set flag.
 				if(Character.isWhitespace(ch))
 				{
@@ -691,10 +713,10 @@ public class TextUtilities
 				} //}}}
 			}
 		}
-
+		
 		return line.length();
 	} //}}}
-
+	
 	//{{{ getCharType() method
 	/**
 	 * Returns the type of the char.
@@ -713,13 +735,13 @@ public class TextUtilities
 			type = WHITESPACE;
 		else if(Character.isLetterOrDigit(ch)
 			|| noWordSep.indexOf(ch) != -1)
-			type = WORD_CHAR;
+		type = WORD_CHAR;
 		else
 			type = SYMBOL;
 		return type;
 	} //}}}
-
-
+	
+	
 	//{{{ spacesToTabs() method
 	/**
 	 * Converts consecutive spaces to tabs in the specified string.
@@ -749,7 +771,7 @@ public class TextUtilities
 				{
 					buf.append(StandardUtilities
 						.createWhiteSpace(whitespace,tabSize,
-						width - whitespace));
+							width - whitespace));
 				}
 				whitespace = 0;
 				width = 0;
@@ -760,7 +782,7 @@ public class TextUtilities
 				{
 					buf.append(StandardUtilities
 						.createWhiteSpace(whitespace,tabSize,
-						width - whitespace));
+							width - whitespace));
 					whitespace = 0;
 				}
 				buf.append(in.charAt(i));
@@ -768,16 +790,16 @@ public class TextUtilities
 				break;
 			}
 		}
-
+		
 		if(whitespace != 0)
 		{
 			buf.append(StandardUtilities.createWhiteSpace(whitespace,tabSize,
 				width - whitespace));
 		}
-
+		
 		return buf.toString();
 	} //}}}
-
+	
 	//{{{ tabsToSpaces() method
 	/**
 	 * Converts tabs to consecutive spaces in the specified string.
@@ -810,7 +832,7 @@ public class TextUtilities
 		}
 		return buf.toString();
 	} //}}}
-
+	
 	//{{{ format() method
 	/**
 	 * Formats the specified text by merging and breaking lines to the
@@ -822,30 +844,30 @@ public class TextUtilities
 	public static String format(String text, int maxLineLength, int tabSize)
 	{
 		StringBuilder buf = new StringBuilder();
-
+		
 		int index = 0;
-
+		
 		for(;;)
 		{
 			int newIndex = text.indexOf("\n\n",index);
 			if(newIndex == -1)
 				break;
-
+			
 			formatParagraph(text.substring(index,newIndex),
 				maxLineLength,tabSize,buf);
 			buf.append("\n\n");
 			index = newIndex + 2;
 		}
-
+		
 		if(index != text.length())
 		{
 			formatParagraph(text.substring(index),
 				maxLineLength,tabSize,buf);
 		}
-
+		
 		return buf.toString();
 	} //}}}
-
+	
 	//{{{ indexIgnoringWhitespace() method
 	/**
 	 * Inverse of <code>ignoringWhitespaceIndex()</code>.
@@ -861,7 +883,7 @@ public class TextUtilities
 			if(!Character.isWhitespace(str.charAt(i))) j++;
 		return j;
 	} //}}}
-
+	
 	//{{{ ignoringWhitespaceIndex() method
 	/**
 	 * Inverse of <code>indexIgnoringWhitespace()</code>.
@@ -877,20 +899,20 @@ public class TextUtilities
 		for(int i = 0;;i++)
 		{
 			if(!Character.isWhitespace(str.charAt(i))) j++;
-
+			
 			if(j > index)
 				return i;
 			if(i == str.length() - 1)
 				return i + 1;
 		}
 	} //}}}
-
+	
 	//{{{ getStringCase() methods
 	public static final int MIXED = 0;
 	public static final int LOWER_CASE = 1;
 	public static final int UPPER_CASE = 2;
 	public static final int TITLE_CASE = 3;
-
+	
 	/**
 	 * Returns if the specified string is all upper case, all lower case,
 	 * or title case (first letter upper case, rest lower case).
@@ -901,9 +923,9 @@ public class TextUtilities
 	{
 		if(str.length() == 0)
 			return MIXED;
-
+		
 		int state = -1;
-
+		
 		char ch = str.charAt(0);
 		if(Character.isLetter(ch))
 		{
@@ -912,13 +934,13 @@ public class TextUtilities
 			else
 				state = LOWER_CASE;
 		}
-
+		
 		for(int i = 1; i < str.length(); i++)
 		{
 			ch = str.charAt(i);
 			if(!Character.isLetter(ch))
 				continue;
-
+			
 			switch(state)
 			{
 			case UPPER_CASE:
@@ -937,10 +959,10 @@ public class TextUtilities
 				break;
 			}
 		}
-
+		
 		return state;
 	}
-
+	
 	/**
 	 * Returns if the specified string is all upper case, all lower case,
 	 * or title case (first letter upper case, rest lower case).
@@ -951,7 +973,7 @@ public class TextUtilities
 	{
 		return getStringCase((CharSequence) str);
 	} //}}}
-
+	
 	//{{{ toTitleCase() method
 	/**
 	 * Converts the specified string to title case, by capitalizing the
@@ -966,10 +988,10 @@ public class TextUtilities
 		else
 		{
 			return Character.toUpperCase(str.charAt(0))
-				+ str.substring(1).toLowerCase();
+			+ str.substring(1).toLowerCase();
 		}
 	} //}}}
-
+	
 	//{{{ escapeText() method
 	/**
 	 * Escapes a given string for use in a java.util.regex pattern.
@@ -992,9 +1014,9 @@ public class TextUtilities
 		int leadingWhitespaceCount = StandardUtilities.getLeadingWhiteSpace(text);
 		String leadingWhitespace = text.substring(0,leadingWhitespaceCount);
 		int leadingWhitespaceWidth = StandardUtilities.getLeadingWhiteSpaceWidth(text,tabSize);
-
+		
 		buf.append(leadingWhitespace);
-
+		
 		int lineLength = leadingWhitespaceWidth;
 		StringTokenizer st = new StringTokenizer(text);
 		while(st.hasMoreTokens())
@@ -1019,7 +1041,7 @@ public class TextUtilities
 			lineLength += word.length();
 		}
 	} //}}}
-
+	
 	//{{{ indexIgnoringWhitespace() method
 	public static void indexIgnoringWhitespace(String text, int maxLineLength,
 		int tabSize, StringBuffer buf)
@@ -1028,9 +1050,9 @@ public class TextUtilities
 		int leadingWhitespaceCount = StandardUtilities.getLeadingWhiteSpace(text);
 		String leadingWhitespace = text.substring(0,leadingWhitespaceCount);
 		int leadingWhitespaceWidth = StandardUtilities.getLeadingWhiteSpaceWidth(text,tabSize);
-
+		
 		buf.append(leadingWhitespace);
-
+		
 		int lineLength = leadingWhitespaceWidth;
 		StringTokenizer st = new StringTokenizer(text);
 		while(st.hasMoreTokens())
@@ -1055,7 +1077,7 @@ public class TextUtilities
 			lineLength += word.length();
 		}
 	} //}}}
-
+	
 	//}}}
 	
 	// funa edit
@@ -1063,51 +1085,79 @@ public class TextUtilities
 	public static int getCharWidth(char ch) {
 		// return getCharWidthForLocale(ch);
 		return getCharWidthForJapanese(ch);
-}
+	}
 	
 	public static int getCharWidthForJapanese(char ch) {
-		if (
-			( ch <= '\u007e' ) // 英数字
-		|| ( ch == '\u00a5' ) // \記号
-		|| ( ch == '\u203e' ) // ~記号
-		|| ( ch >= '\uff61' && ch <= '\uff9f' )) // 半角カナ
-		{
+		if (isAscii(ch) || isHalfKana(ch)) {
 			return 1;
 		} else {
 			return 2;
 		}
 	}
 	
+	public static boolean isAscii(char ch) {
+		if (
+			( ch <= '\u007e' ) // 英数字
+		|| ( ch == '\u00a5' ) // \記号
+		|| ( ch == '\u203e' )) // ~記号
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean isHalfKana(char ch) {
+		if ( ch >= '\uff61' && ch <= '\uff9f' ) { // 半角カナ
+			return true;
+		}
+		return false;
+	}
+	
+	public static int findWordEndWithBreakInterator(String line, int pos) {
+		BreakIterator boundary = BreakIterator.getWordInstance();
+		boundary.setText(line);
+		int end = boundary.following(pos);
+		return end;
+	}
+	
+	public static int findWordStartWithBreakInterator(String line, int pos) {
+		BreakIterator boundary = BreakIterator.getWordInstance();
+		boundary.setText(line);
+		int end = boundary.following(pos);
+		int start = boundary.previous();
+		return start;
+	}
+	
 	// private static List<String> EAST_ASIAN_LANGS =
 	// Arrays.asList("ja", "vi", "kr", "zh");
 	// 
 	// public static int getCharWidthForLocale(char ch) {
-		// return getCharWidthForLocale(ch, Locale.getDefault());
+	// return getCharWidthForLocale(ch, Locale.getDefault());
 	// }
 	// 
 	// public static int getCharWidthForLocale(char ch, Locale locale) {
-		// if(locale == null) {
-			// throw new NullPointerException("locale is null");
-		// }
-		// int value = com.ibm.icu.lang .UCharacter.getIntPropertyValue((int)ch, 
-			// com.ibm.icu.lang.UProperty.EAST_ASIAN_WIDTH);
-		// switch(value) {
-		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.NARROW:
-		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.NEUTRAL:
-		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.HALFWIDTH:
-			// return 1;
-		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.FULLWIDTH:
-		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.WIDE:
-			// return 2;
-		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.AMBIGUOUS:
-			// if(EAST_ASIAN_LANGS.contains(locale.getLanguage())) {
-				// return 2;
-			// } else {
-				// return 1;
-			// }
-		// default:
-			// return 1;
-		// }
+	// if(locale == null) {
+	// throw new NullPointerException("locale is null");
+	// }
+	// int value = com.ibm.icu.lang .UCharacter.getIntPropertyValue((int)ch, 
+	// com.ibm.icu.lang.UProperty.EAST_ASIAN_WIDTH);
+	// switch(value) {
+	// case com.ibm.icu.lang.UCharacter.EastAsianWidth.NARROW:
+	// case com.ibm.icu.lang.UCharacter.EastAsianWidth.NEUTRAL:
+	// case com.ibm.icu.lang.UCharacter.EastAsianWidth.HALFWIDTH:
+	// return 1;
+	// case com.ibm.icu.lang.UCharacter.EastAsianWidth.FULLWIDTH:
+	// case com.ibm.icu.lang.UCharacter.EastAsianWidth.WIDE:
+	// return 2;
+	// case com.ibm.icu.lang.UCharacter.EastAsianWidth.AMBIGUOUS:
+	// if(EAST_ASIAN_LANGS.contains(locale.getLanguage())) {
+	// return 2;
+	// } else {
+	// return 1;
+	// }
+	// default:
+	// return 1;
+	// }
 	// }
 	
 	//}}}
