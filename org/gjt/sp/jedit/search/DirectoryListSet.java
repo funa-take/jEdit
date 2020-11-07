@@ -275,10 +275,10 @@ public class DirectoryListSet extends BufferListSet
 		StringBuilder sb = new StringBuilder();
 		sb.append("find ");
 		sb.append("\"").append(searchDirectory).append("\" ");
-		sb.append("-type f ");
 		if (!recurse) {
 			sb.append("-maxdepth 1 ");
 		}
+		sb.append("-type f ");
 		
 		if (skipHidden) {
 			if (forMsys2) {
@@ -308,26 +308,29 @@ public class DirectoryListSet extends BufferListSet
 		}
 		
 		String searchString = SearchAndReplace.getSearchString();
+		String grepOption = "";
+		
 		if (SearchAndReplace.getRegexp()) {
-			// searchString = searchString.replaceAll("\n", "\\\\n");
-			// searchString = searchString.replaceAll("\\\\\\\\", "\\\\\\\\\\\\\\\\");
-			// searchString = searchString.replaceAll("'", "\\\\'");
-			// sb.append("-E $'").append(searchString).append("' ");
-			
-			searchString = searchString.replaceAll("\\\\\\\\", "\\\\\\\\\\\\\\\\");
-			searchString = searchString.replaceAll("'", "\\\\'");
-			if (forMsys2) {
-				sb.append("-E '");
-			} else {
-				sb.append("-E $'");
-			}
-			sb.append(searchString).append("' ");
-			// sb.append("-P $'").append(searchString).append("' ");
+			grepOption = "-E";
 		} else {
-			searchString = searchString.replaceAll("\"", "\\\\\"");
-			sb.append("-F \"").append(searchString).append("\" ");
+			grepOption = "-F";
+		}
+		if (forMsys2) {
+			searchString = searchString.replace("\"", "\"\"");
+			searchString = String.format("\"%s\"", searchString);
+		} else {
+			if (SearchAndReplace.getRegexp()) {
+				// 「\\」を検索する場合は「\\\\」を渡す
+				searchString = searchString.replace("\\\\", "\\\\\\\\");
+				searchString = searchString.replace("'", "\\'");
+				searchString = String.format("$'%s'", searchString);
+			} else {
+				searchString = searchString.replace("'", "'\\''");
+				searchString = String.format("'%s'", searchString);
+			}
 		}
 		
+		sb.append(grepOption).append(" ").append(searchString);
 		sb.append("| sort -f ");
 		
 		return sb.toString();
