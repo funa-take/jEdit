@@ -1021,7 +1021,8 @@ public abstract class TextArea extends JPanel
 		}
 		else
 		{
-			float xInLine = x - horizontalOffset;
+			// float xInLine = x - horizontalOffset;
+			float xInLine = x;
 			int offsetInLine = Chunk.xToOffset(lineInfo.chunks,
 				xInLine, false);
 			int lineStartOffset = getLineStartOffset(lineInfo.physicalLine);
@@ -2510,14 +2511,14 @@ loop:			for(int i = 0; i < text.length(); i++)
 			rectSelect && select);
 		if(newCaret == -1)
 		{
-			int end = getLineEndOffset(caretLine) - 1;
-			if(caret == end)
-			{
+			// int end = getLineEndOffset(caretLine) - 1;
+			// if(caret == end)
+			// {
 				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				return;
-			}
-			else
-				newCaret = end;
+			// }
+			// else
+			// 	newCaret = end;
 		}
 
 		_changeLine(select, newCaret);
@@ -2546,9 +2547,12 @@ loop:			for(int i = 0; i < text.length(); i++)
 		if(getFirstLine() + getVisibleLines() >= displayManager
 			.getScrollLineCount())
 		{
-			int lastVisibleLine = displayManager
-				.getLastVisibleLine();
-			newCaret = getLineEndOffset(lastVisibleLine) - 1;
+			// int lastVisibleLine = displayManager
+			// 	.getLastVisibleLine();
+			// newCaret = getLineEndOffset(lastVisibleLine) - 1;
+			int caretScreenLine = getLastScreenLine();
+			newCaret = xToScreenLineOffset(caretScreenLine,
+				magic,true);
 		}
 		else
 		{
@@ -2807,14 +2811,14 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 			rectSelect && select);
 		if(newCaret == -1)
 		{
-			int start = getLineStartOffset(caretLine);
-			if(caret == start)
-			{
+			// int start = getLineStartOffset(caretLine);
+			// if(caret == start)
+			// {
 				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				return;
-			}
-			else
-				newCaret = start;
+			// }
+			// else
+			// 	newCaret = start;
 		}
 
 		_changeLine(select, newCaret);
@@ -2843,9 +2847,12 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 
 		if(getFirstLine() == 0)
 		{
-			int firstVisibleLine = displayManager
-				.getFirstVisibleLine();
-			newCaret = getLineStartOffset(firstVisibleLine);
+			// int firstVisibleLine = displayManager
+			// 	.getFirstVisibleLine();
+			// newCaret = getLineStartOffset(firstVisibleLine);
+			int caretScreenLine = getScreenLineOfOffset(caret);
+			newCaret = xToScreenLineOffset(getFirstLine(),
+				magic,true);
 		}
 		else
 		{
