@@ -1106,10 +1106,23 @@ public class TextUtilities
 		return false;
 	}
 	
+	private static HashSet<Integer> halfKanaMap = null;
 	public static boolean isHalfKana(char ch) {
 		if ( ch >= '\uff61' && ch <= '\uff9f' ) { // 半角カナ
 			return true;
 		}
+		
+		if (halfKanaMap == null) {
+			halfKanaMap = new HashSet<Integer>();
+			String halfChars = jEdit.getProperty("half-characters");
+			if (halfChars != null) {
+				halfChars.chars().forEach(c -> halfKanaMap.add(c));
+			}
+		}
+		if (halfKanaMap.contains((int)ch)) {
+			return true;
+		}
+		
 		return false;
 	}
 	
