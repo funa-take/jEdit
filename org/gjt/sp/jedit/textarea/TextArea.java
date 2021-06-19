@@ -2564,12 +2564,13 @@ loop:			for(int i = 0; i < text.length(); i++)
 				magic,true);
 		}
 
-		if(select)
-			extendSelection(caret,newCaret);
-		else if(!multi)
-			selectNone();
+		// if(select)
+		// 	extendSelection(caret,newCaret);
+		// else if(!multi)
+		// 	selectNone();
 
-		moveCaretPosition(newCaret,false);
+		// moveCaretPosition(newCaret,false);
+		_changeLine(select, newCaret);
 
 		setMagicCaretPosition(magic);
 	} //}}}
@@ -2864,11 +2865,12 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 				magic,true);
 		}
 
-		if(select)
-			extendSelection(caret,newCaret);
-		else if(!multi)
-			selectNone();
-		moveCaretPosition(newCaret,false);
+		// if(select)
+		// 	extendSelection(caret,newCaret);
+		// else if(!multi)
+		// 	selectNone();
+		// moveCaretPosition(newCaret,false);
+		_changeLine(select, newCaret);
 
 		setMagicCaretPosition(magic);
 	} //}}}
@@ -5828,6 +5830,16 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 			return null;
 
 		int newLine = getLineOfOffset(newCaret);
+		if (rectangularSelectionMode) {
+			int currentLine = getLineOfOffset(caret);
+			if (newLine == currentLine) {
+				if (  caret < newCaret && newLine < getLineCount() - 1) {
+					newLine++;
+				} else if (  newCaret < caret && 0 < newLine) {
+					newLine--;
+				}
+			}
+		}
 		int[] totalVirtualWidth = new int[1];
 		int newOffset = buffer.getOffsetOfVirtualColumn(newLine,
 			virtualWidth,totalVirtualWidth);
