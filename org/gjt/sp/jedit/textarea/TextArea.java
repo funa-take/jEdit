@@ -2570,7 +2570,7 @@ loop:			for(int i = 0; i < text.length(); i++)
 		// 	selectNone();
 
 		// moveCaretPosition(newCaret,false);
-		_changeLine(select, newCaret);
+		_changeLine(select, newCaret, false);
 
 		setMagicCaretPosition(magic);
 	} //}}}
@@ -2870,7 +2870,7 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 		// else if(!multi)
 		// 	selectNone();
 		// moveCaretPosition(newCaret,false);
-		_changeLine(select, newCaret);
+		_changeLine(select, newCaret, false);
 
 		setMagicCaretPosition(magic);
 	} //}}}
@@ -5459,6 +5459,10 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 	//{{{ _changeLine() method
 	private void _changeLine(boolean select, int newCaret)
 	{
+		_changeLine(select, newCaret, true);
+	}
+	private void _changeLine(boolean select, int newCaret, boolean doElectricScroll)
+	{
 		if(select)
 		{
 			RectParams params = getRectParams(caret,newCaret);
@@ -5480,7 +5484,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		else if(!multi)
 			selectNone();
 
-		moveCaretPosition(newCaret);
+		moveCaretPosition(newCaret, doElectricScroll);
 	}//}}}
 
 	//{{{ lineContainsSpaceAndTabs() method
