@@ -1253,8 +1253,13 @@ public class Buffer extends JEditBuffer
 		}
 		if (mode != null)
 		{
+			// funa Edit
+			int longLineLimit = jEdit.getIntegerProperty("longLineLimit", 4000);
 			int largeBufferSize = jEdit.getIntegerProperty("largeBufferSize", 4000000);
-			if (!getFlag(TEMPORARY) && getLength() > largeBufferSize && largeBufferSize > 0)
+			if (!getFlag(TEMPORARY) && 
+				((getLength() > largeBufferSize && largeBufferSize > 0)
+					|| (0 < longLineLimit && 0 < getLineCount() && longLineLimit < (getLength() / getLineCount())))
+				)
 			{
 				mode.loadIfNecessary();
 				boolean contextInsensitive = mode.getBooleanProperty("contextInsensitive");
