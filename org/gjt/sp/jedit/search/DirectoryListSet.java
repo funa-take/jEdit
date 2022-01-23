@@ -182,7 +182,7 @@ public class DirectoryListSet extends BufferListSet
 			commands.add("/c");
 			directory = directory.replace('\\','/');
 		} else {
-			commands.add("/bin/sh");
+			commands.add("/bin/bash");
 			commands.add("-c");
 		}
 		String command = createGrepCommand(directory, skipBinary, skipHidden, forMsys2);
