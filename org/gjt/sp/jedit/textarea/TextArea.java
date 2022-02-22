@@ -1021,8 +1021,7 @@ public abstract class TextArea extends JPanel
 		}
 		else
 		{
-			// float xInLine = x - horizontalOffset;
-			float xInLine = x;
+			float xInLine = x - horizontalOffset;
 			int offsetInLine = Chunk.xToOffset(lineInfo.chunks,
 				xInLine, false);
 			int lineStartOffset = getLineStartOffset(lineInfo.physicalLine);
