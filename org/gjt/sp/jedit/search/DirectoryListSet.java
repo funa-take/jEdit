@@ -290,13 +290,13 @@ public class DirectoryListSet extends BufferListSet
 		
 		sb.append(" | grep -i -E \"").append(StandardUtilities.globToRE(glob)).append("$\" ");
 		
-		if (forMsys2) {
-			sb.append(" | sed -e 's/.*/\"\\\\0\"/g' ");
-		} else {
-			sb.append(" | sed -e 's/ /\\\\ /g' ");
-		}
+		// if (forMsys2) {
+		// 	sb.append(" | sed -e 's/.*/\"\\\\0\"/g' ");
+		// } else {
+		// 	sb.append(" | sed -e 's/ /\\\\ /g' ");
+		// }
 		
-		sb.append(" | xargs grep -l ");
+		sb.append(" | xargs -d '\\n' grep -l ");
 		if (SearchAndReplace.getIgnoreCase()) {
 			sb.append("-i ");
 		}
