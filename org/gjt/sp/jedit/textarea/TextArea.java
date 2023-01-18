@@ -2551,7 +2551,7 @@ loop:			for(int i = 0; i < text.length(); i++)
 			// newCaret = getLineEndOffset(lastVisibleLine) - 1;
 			int caretScreenLine = getLastScreenLine();
 			newCaret = xToScreenLineOffset(caretScreenLine,
-				magic,true);
+				magic + horizontalOffset,true);
 		}
 		else
 		{
@@ -2560,7 +2560,7 @@ loop:			for(int i = 0; i < text.length(); i++)
 			scrollDownPage();
 
 			newCaret = xToScreenLineOffset(caretScreenLine,
-				magic,true);
+				magic + horizontalOffset,true);
 		}
 
 		// if(select)
@@ -2852,7 +2852,7 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 			// newCaret = getLineStartOffset(firstVisibleLine);
 			int caretScreenLine = getScreenLineOfOffset(caret);
 			newCaret = xToScreenLineOffset(getFirstLine(),
-				magic,true);
+				magic + horizontalOffset,true);
 		}
 		else
 		{
@@ -2861,7 +2861,7 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 			scrollUpPage();
 
 			newCaret = xToScreenLineOffset(caretScreenLine,
-				magic,true);
+				magic + horizontalOffset,true);
 		}
 
 		// if(select)
