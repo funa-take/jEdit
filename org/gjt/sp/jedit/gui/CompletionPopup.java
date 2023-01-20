@@ -442,14 +442,16 @@ public class CompletionPopup extends JWindow
 					e.consume();
 					break;
 				case KeyEvent.VK_P:
-					if (e.getModifiersEx() == InputEvent.CTRL_DOWN_MASK)
+					// if (e.getModifiersEx() == InputEvent.CTRL_DOWN_MASK)
+					if (KeyEventTranslator.isControlDown(e))
 					{
 						moveRelative(-1);
 						e.consume();
 					}
 					break;
 				case KeyEvent.VK_N:
-					if (e.getModifiersEx() == InputEvent.CTRL_DOWN_MASK)
+					// if (e.getModifiersEx() == InputEvent.CTRL_DOWN_MASK)
+					if (KeyEventTranslator.isControlDown(e))
 					{
 						moveRelative(1);
 						e.consume();
@@ -486,10 +488,11 @@ public class CompletionPopup extends JWindow
 		public void keyTyped(KeyEvent e)
 		{
 			// Funa edit
-			if (e.isAltDown()){
+			if (KeyEventTranslator.isAltDown(e)){
 				return;
 			}
-			if (e.isControlDown())
+			// if (e.isControlDown())
+			if (KeyEventTranslator.isControlDown(e))
 			{
 				e.consume();
 			}

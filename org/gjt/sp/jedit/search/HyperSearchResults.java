@@ -37,6 +37,7 @@ import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.gui.DefaultFocusComponent;
 import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.gui.StyleEditor;
+import org.gjt.sp.jedit.gui.KeyEventTranslator;
 import org.gjt.sp.jedit.msg.*;
 import org.gjt.sp.jedit.search.SearchMatcher.Match;
 import org.gjt.sp.jedit.syntax.SyntaxStyle;
@@ -641,7 +642,8 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 			case KeyEvent.VK_ENTER:
 				goToSelectedNode(M_OPEN);
 				// Funa add
-				if (evt.isAltDown()){
+				// if (evt.isAltDown()){
+				if (KeyEventTranslator.isAltDown(evt)){
 					SwingUtilities.invokeLater(new Runnable()
 						{
 							public void run()
@@ -658,14 +660,16 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 				break;
 			// funa edit
 			case KeyEvent.VK_LEFT:
-				if (evt.isShiftDown()){
+				// if (evt.isShiftDown()){
+				if (KeyEventTranslator.isShiftDown(evt)){
 					new CollapseChildTreeNodesAction().actionPerformed(null);
 					evt.consume();
 				}
 				break;
 			// funa edit
 			case KeyEvent.VK_RIGHT:
-				if (evt.isShiftDown()){
+				// if (evt.isShiftDown()){
+				if (KeyEventTranslator.isShiftDown(evt)){
 					new ExpandChildTreeNodesAction().actionPerformed(null);
 					evt.consume();
 				}

@@ -265,7 +265,8 @@ public class HistoryTextField extends JTextField
 				}
 				break;
 			case KeyEvent.VK_UP:
-				if(evt.isShiftDown())
+				// if(evt.isShiftDown())
+				if(KeyEventTranslator.isShiftDown(evt))
 					controller.doBackwardSearch();
 				else
 					controller.historyPrevious();
@@ -276,13 +277,16 @@ public class HistoryTextField extends JTextField
 				// if(evt.isShiftDown())
 					// controller.doForwardSearch();
 				// else if(evt.isAltDown())
-				if(evt.isAltDown())
+				// if(evt.isAltDown())
+				if(KeyEventTranslator.isAltDown(evt))
 				{
 					controller.showPopupMenu(
-						evt.isShiftDown());
+						// evt.isShiftDown());
+						KeyEventTranslator.isShiftDown(evt));
 				}
 				//  funa add
-				else if(evt.isShiftDown()) {
+				// else if(evt.isShiftDown()) {
+				else if(KeyEventTranslator.isShiftDown(evt)) {
 					controller.doForwardSearch();
 				}
 				else
@@ -290,14 +294,16 @@ public class HistoryTextField extends JTextField
 				evt.consume();
 				break;
 			case KeyEvent.VK_TAB:
-				if(evt.isControlDown())
+				// if(evt.isControlDown())
+				if(KeyEventTranslator.isControlDown(evt))
 				{
 					controller.doBackwardSearch();
 					evt.consume();
 				}
 				break;
 			case KeyEvent.VK_CONTEXT_MENU:
-				controller.showPopupMenu(evt.isShiftDown());
+				// controller.showPopupMenu(evt.isShiftDown());
+				controller.showPopupMenu(KeyEventTranslator.isShiftDown(evt));
 				evt.consume();
 				break;				
 			}
@@ -322,7 +328,8 @@ public class HistoryTextField extends JTextField
 			if(evt.getX() >= getWidth() - insets.right
 				|| GenericGUIUtilities.isPopupTrigger(evt))
 			{
-				controller.showPopupMenu(evt.isShiftDown());
+				// controller.showPopupMenu(evt.isShiftDown());
+				controller.showPopupMenu(KeyEventTranslator.isShiftDown(evt));
 			}
 			else
 				super.processMouseEvent(evt);

@@ -138,28 +138,32 @@ public class HistoryTextArea extends JTextArea
 			switch(evt.getKeyCode())
 			{
 			case KeyEvent.VK_ENTER:
-				if(evt.isControlDown())
+				// if(evt.isControlDown())
+				if(KeyEventTranslator.isControlDown(evt))
 				{
 					replaceSelection("\n");
 					evt.consume();
 				}
 				break;
 			case KeyEvent.VK_TAB:
-				if(evt.isControlDown())
+				// if(evt.isControlDown())
+				if(KeyEventTranslator.isControlDown(evt))
 				{
 					replaceSelection("\t");
 					evt.consume();
 				}
 				break;
 			case KeyEvent.VK_PAGE_UP:
-				if(evt.isShiftDown())
+				// if(evt.isShiftDown())
+				if(KeyEventTranslator.isShiftDown(evt))
 					controller.doBackwardSearch();
 				else
 					controller.historyPrevious();
 				evt.consume();
 				break;
 			case KeyEvent.VK_PAGE_DOWN:
-				if(evt.isShiftDown())
+				// if(evt.isShiftDown())
+				if(KeyEventTranslator.isShiftDown(evt))
 					controller.doForwardSearch();
 				else
 					controller.historyNext();
@@ -175,15 +179,18 @@ public class HistoryTextArea extends JTextArea
 				// }
 				// break;
 			case KeyEvent.VK_DOWN:
-				if(evt.isAltDown())
+				// if(evt.isAltDown())
+				if(KeyEventTranslator.isAltDown(evt))
 				{
 					controller.showPopupMenu(
-						evt.isShiftDown());
+						// evt.isShiftDown());
+						KeyEventTranslator.isShiftDown(evt));
 					evt.consume();
 				}
 				break;
 			case KeyEvent.VK_CONTEXT_MENU:
-				controller.showPopupMenu(evt.isShiftDown());
+				// controller.showPopupMenu(evt.isShiftDown());
+				controller.showPopupMenu(KeyEventTranslator.isShiftDown(evt));
 				evt.consume();
 				break;
 			}
