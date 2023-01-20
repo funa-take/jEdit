@@ -34,6 +34,7 @@ import org.gjt.sp.jedit.OperatingSystem;
 
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.TaskManager;
+import org.gjt.sp.jedit.gui.KeyEventTranslator;
 //}}}
 
 /**
@@ -101,7 +102,8 @@ public class VFSFileNameField extends HistoryTextField
 				doComplete(path);
 				break;
 			case KeyEvent.VK_LEFT:
-				if ((evt.getModifiers() & KeyEvent.ALT_MASK) > 0)
+				// if ((evt.getModifiers() & KeyEvent.ALT_MASK) > 0)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					browser.previousDirectory();
 					evt.consume();
@@ -116,7 +118,8 @@ public class VFSFileNameField extends HistoryTextField
 				}
 				break;
 			case KeyEvent.VK_UP:
-				if ((evt.getModifiers() & KeyEvent.ALT_MASK)>0)
+				// if ((evt.getModifiers() & KeyEvent.ALT_MASK)>0)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					String p = browser.getDirectory();
 					browser.setDirectory(MiscUtilities.getParentOfPath(p));
@@ -129,7 +132,8 @@ public class VFSFileNameField extends HistoryTextField
 				}
 				break;
 			case KeyEvent.VK_RIGHT:
-				if ((evt.getModifiers() & KeyEvent.ALT_MASK)>0)
+				// if ((evt.getModifiers() & KeyEvent.ALT_MASK)>0)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					evt.consume();
 					browser.nextDirectory();
@@ -149,13 +153,14 @@ public class VFSFileNameField extends HistoryTextField
 				break;
 			case KeyEvent.VK_ENTER:
 				// Funa Edit
-				if (evt.isAltDown()){
+				if (KeyEventTranslator.isAltDown(evt)){
 					if (!OperatingSystem.isMacOS() && (OperatingSystem.isWindows() || OperatingSystem.isUnix())){
 						org.gjt.sp.jedit.GUIUtilities.getRobot().keyPress(KeyEvent.VK_ALT);
 					}
 				}
 				browser.filesActivated(
-					(evt.isShiftDown()
+					// (evt.isShiftDown()
+					(KeyEventTranslator.isShiftDown(evt)
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN),false);
 				setText(null);
@@ -171,7 +176,8 @@ public class VFSFileNameField extends HistoryTextField
 			char ch = evt.getKeyChar();
 			// Funa Edit
 			// if(ch > 0x20 && ch != 0x7f && ch != 0xff)
-			if(ch > 0x20 && ch != 0x7f && ch != 0xff && !evt.isAltDown())
+			// if(ch > 0x20 && ch != 0x7f && ch != 0xff && !evt.isAltDown())
+			if(ch > 0x20 && ch != 0x7f && ch != 0xff && !KeyEventTranslator.isAltDown(evt))
 			{
 				super.processKeyEvent(evt);
 				String path = getText();

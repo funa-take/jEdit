@@ -46,6 +46,7 @@ import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.ThreadUtilities;
+import org.gjt.sp.jedit.gui.KeyEventTranslator;
 //}}}
 
 /**
@@ -409,14 +410,15 @@ public class VFSDirectoryEntryTable extends JTable
 			{
 			case KeyEvent.VK_LEFT:
 				evt.consume();
-				if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+				// if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					browser.previousDirectory();
 				}
 				else 
 				{
 					// Funa Edit
-					if (evt.isShiftDown()) {
+					if (KeyEventTranslator.isShiftDown(evt)) {
 						String dir = browserView.getBrowser()
 						.getDirectory();
 						dir = MiscUtilities.getParentOfPath(dir);
@@ -450,7 +452,8 @@ public class VFSDirectoryEntryTable extends JTable
 				break;
 			case KeyEvent.VK_TAB:
 				evt.consume();
-				if ((evt.getModifiers() & InputEvent.SHIFT_MASK) > 0)
+				// if ((evt.getModifiers() & InputEvent.SHIFT_MASK) > 0)
+				if (KeyEventTranslator.isShiftDown(evt))
 				{
 					browserView.getParentDirectoryList().requestFocus();
 				}
@@ -464,7 +467,8 @@ public class VFSDirectoryEntryTable extends JTable
 				ac.invokeAction(evt, browserUp);
 				break;
 			case KeyEvent.VK_UP:
-				if ((evt.getModifiers() & InputEvent.ALT_MASK) >0)
+				// if ((evt.getModifiers() & InputEvent.ALT_MASK) >0)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					evt.consume();
 					ac.invokeAction(evt, browserUp);
@@ -476,7 +480,8 @@ public class VFSDirectoryEntryTable extends JTable
 				ac.invokeAction(evt, deleteAct);
 				break;
 			case KeyEvent.VK_N:
-				if ((evt.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
+				// if ((evt.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
+				if (KeyEventTranslator.isControlDown(evt))
 				{
 					evt.consume();
 					EditAction ea = ac.getAction("vfs.browser.new-file");
@@ -505,7 +510,8 @@ public class VFSDirectoryEntryTable extends JTable
 			case KeyEvent.VK_F6:
 			case KeyEvent.VK_RIGHT:
 				evt.consume();
-				if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+				// if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					browser.nextDirectory();
 				}
@@ -529,12 +535,13 @@ public class VFSDirectoryEntryTable extends JTable
 				evt.consume();
 				// Funa Edit
 				browserView.getBrowser().filesActivated(
-					!evt.isAltDown() && evt.isShiftDown()
+					// !evt.isAltDown() && evt.isShiftDown()
+					!KeyEventTranslator.isAltDown(evt) && KeyEventTranslator.isShiftDown(evt)
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN,false);
 
 				// Funa Edit
-				if (evt.isAltDown() && browserView.getBrowser().getMode() == VFSBrowser.BROWSER) {
+				if (KeyEventTranslator.isAltDown(evt) && browserView.getBrowser().getMode() == VFSBrowser.BROWSER) {
 					SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
 								browserView.getBrowser().focusOnDefaultComponent();
@@ -547,16 +554,15 @@ public class VFSDirectoryEntryTable extends JTable
 		}
 		else if(evt.getID() == KeyEvent.KEY_TYPED)
 		{
-
-			if(evt.isControlDown() || evt.isAltDown()
-				|| evt.isMetaDown())
+			if(KeyEventTranslator.isControlDown(evt) || KeyEventTranslator.isAltDown(evt)
+				|| KeyEventTranslator.isMetaDown(evt))
 			{
 				evt.consume();
 				return;
 			}
 
 			// hack...
-			if(evt.isShiftDown() && evt.getKeyChar() == '\n')
+			if(KeyEventTranslator.isShiftDown(evt) && evt.getKeyChar() == '\n')
 			{
 				evt.consume();
 				return;

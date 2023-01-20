@@ -410,6 +410,18 @@ public class KeyEventTranslator
 	} //}}}
 	// funa edit
 	// {{{
+	public static boolean isControlDown(InputEvent evt) {
+		return (evt.getModifiers() & c) != 0;
+	}
+	public static boolean isAltDown(InputEvent evt) {
+		return (evt.getModifiers() & a) != 0;
+	}
+	public static boolean isMetaDown(InputEvent evt) {
+		return (evt.getModifiers() & m) != 0;
+	}
+	public static boolean isShiftDown(InputEvent evt) {
+		return (evt.getModifiers() & s) != 0;
+	}
 	public static int translateModifiers(int mod) {
 		int translateMod = 0;
 		if ((mod & c) != 0) {
