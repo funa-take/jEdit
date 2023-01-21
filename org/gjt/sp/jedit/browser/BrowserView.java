@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.*;
 
 import org.gjt.sp.jedit.gui.DockableWindowManager;
+import org.gjt.sp.jedit.gui.KeyEventTranslator;
 import org.gjt.sp.jedit.io.*;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.util.GenericGUIUtilities;
@@ -606,17 +607,20 @@ class BrowserView extends JPanel
 			if((evt.getModifiers() & InputEvent.BUTTON1_MASK) != 0
 				&& evt.getClickCount() % 2 == 0)
 			{
-				browser.filesActivated(evt.isShiftDown()
+				// browser.filesActivated(evt.isShiftDown()
+				browser.filesActivated(KeyEventTranslator.isShiftDown(evt)
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN,true);
 			}
 			else if(GenericGUIUtilities.isMiddleButton(evt.getModifiers()))
 			{
-				if(evt.isShiftDown())
+				// if(evt.isShiftDown())
+				if(KeyEventTranslator.isShiftDown(evt))
 					table.getSelectionModel().addSelectionInterval(row,row);
 				else
 					table.getSelectionModel().setSelectionInterval(row,row);
-				browser.filesActivated(evt.isShiftDown()
+				// browser.filesActivated(evt.isShiftDown()
+				browser.filesActivated(KeyEventTranslator.isShiftDown(evt)
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN,true);
 			}
@@ -652,7 +656,8 @@ class BrowserView extends JPanel
 			{
 				if(row == -1)
 					return;
-				else if(evt.isShiftDown())
+				// else if(evt.isShiftDown())
+				else if(KeyEventTranslator.isShiftDown(evt))
 					table.getSelectionModel().addSelectionInterval(row,row);
 				else
 					table.getSelectionModel().setSelectionInterval(row,row);
@@ -724,6 +729,19 @@ class BrowserView extends JPanel
 		{
 			if (evt.getID() == KeyEvent.KEY_PRESSED)
 			{
+				// Funa Edit
+				if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class") != null) {
+					org.gjt.sp.jedit.gui.UserKey.consume(evt,
+						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+						true);
+					if (evt.isConsumed()) {
+						return;
+					}
+				}
+				
 				ActionContext ac = VFSBrowser.getActionContext();
 				int row = parentDirectories.getSelectedIndex();
 				switch(evt.getKeyCode())
@@ -737,7 +755,8 @@ class BrowserView extends JPanel
 					}
 					break;
 				case KeyEvent.VK_LEFT:
-					if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+					// if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+					if (KeyEventTranslator.isAltDown(evt))
 					{
 						evt.consume();
 						browser.previousDirectory();
@@ -747,7 +766,8 @@ class BrowserView extends JPanel
 					else evt.consume();
 					break;
 				case KeyEvent.VK_RIGHT:
-					if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+					// if ((evt.getModifiers() & InputEvent.ALT_MASK)>0)
+					if (KeyEventTranslator.isAltDown(evt))
 					{
 						evt.consume();
 						browser.nextDirectory();
@@ -758,7 +778,8 @@ class BrowserView extends JPanel
 					break;
 				case KeyEvent.VK_TAB:
 					evt.consume();
-					if ((evt.getModifiers() & InputEvent.SHIFT_MASK) > 0)
+					// if ((evt.getModifiers() & InputEvent.SHIFT_MASK) > 0)
+					if (KeyEventTranslator.isShiftDown(evt))
 						browser.focusOnDefaultComponent();
 					else
 						table.requestFocus();
@@ -820,8 +841,11 @@ class BrowserView extends JPanel
 			}
 			else if(evt.getID() == KeyEvent.KEY_TYPED)
 			{
-				if(evt.isControlDown() || evt.isAltDown()
-					|| evt.isMetaDown())
+				// if(evt.isControlDown() || evt.isAltDown()
+				// 	|| evt.isMetaDown())
+				if(KeyEventTranslator.isControlDown(evt)
+					|| KeyEventTranslator.isAltDown(evt)
+					|| KeyEventTranslator.isMetaDown(evt))
 				{
 					evt.consume();
 					return;
