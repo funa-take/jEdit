@@ -14,7 +14,7 @@ public class UserKey {
   public final static int ALLOW_CTRL = 1;
   /**  シフトキー判定用定数 KeyEvent.CTRL_SHIFT？ */
   public final static int ALLOW_SHIFT = 2;
-  public final static int MyMASK = KeyEvent.ALT_MASK;
+  public final static int MyMASK = InputEvent.ALT_DOWN_MASK;
   // public static final int ALT_NO_CENCEL = 1;
   // private static final int MyMASK = (OperatingSystem.isMacOS() ? KeyEvent.CTRL_MASK : KeyEvent.ALT_MASK);
   
@@ -26,14 +26,14 @@ public class UserKey {
    *@return      The consume value
    */
   private static boolean isConsume(int modifiers, int mod) {
-    if ((modifiers & KeyEvent.ALT_MASK) == 0) {
+    if ((modifiers & MyMASK) == 0) {
       return false;
     }
-    if ((modifiers & KeyEvent.CTRL_MASK) != 0 && (mod & ALLOW_CTRL) == 0) {
+    if ((modifiers & InputEvent.CTRL_DOWN_MASK) != 0 && (mod & ALLOW_CTRL) == 0) {
       return false;
     }
     
-    if ((modifiers & KeyEvent.SHIFT_MASK) != 0 && (mod & ALLOW_SHIFT) == 0) {
+    if ((modifiers & InputEvent.SHIFT_DOWN_MASK) != 0 && (mod & ALLOW_SHIFT) == 0) {
       return false;
     }
     
@@ -58,8 +58,7 @@ public class UserKey {
   public static void consume(KeyEvent evt, int mod_up, int mod_right, int mod_down, int mod_left,
     boolean blnUP_DOWN, boolean blnLEFT_REIGHT, boolean blnEdit, boolean blnESC, boolean blnHistory) 
   {
-    int translateModifiers = KeyEventTranslator.translateModifiers(evt.getModifiers());
-    
+    int translateModifiers = KeyEventTranslator.translateModifiersEx(evt.getModifiersEx());
     switch (evt.getKeyCode()) {
     case KeyEvent.VK_I:
       if (blnUP_DOWN && isConsume(translateModifiers, mod_up)) {
@@ -204,7 +203,7 @@ public class UserKey {
         Toolkit.getDefaultToolkit()
         .getSystemEventQueue().postEvent(
           new KeyEvent((Component)evt.getSource(), evt.getID(),
-            evt.getWhen(), translateModifiers & ~MyMASK | KeyEvent.ALT_MASK,
+            evt.getWhen(), translateModifiers & ~MyMASK | KeyEventTranslator.getModifierBeforeTranslate(KeyEvent.ALT_DOWN_MASK),
             KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED)
           );
         evt.consume();
