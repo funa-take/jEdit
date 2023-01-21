@@ -68,7 +68,7 @@ public class KeyEventTranslator
 	 */
 	public static Key translateKeyEvent(KeyEvent evt)
 	{
-		int modifiers = evt.getModifiers();
+		int modifiers = evt.getModifiersEx();
 		Key returnValue;
 
 		switch(evt.getID())
@@ -99,7 +99,7 @@ public class KeyEventTranslator
 					// KEY_PRESSED SPACE but not a
 					// KEY_TYPED SPACE, eg if you have to
 					// do a "<space> to insert ".
-					if((modifiers & ~InputEvent.SHIFT_MASK) == 0)
+					if((modifiers & ~InputEvent.SHIFT_DOWN_MASK) == 0)
 						returnValue = null;
                     else 
 						returnValue = new Key(modifiersToString(modifiers), 0, ' ');
@@ -122,7 +122,7 @@ public class KeyEventTranslator
 			case '\b':
 				return null;
 			case ' ':
-                if ((modifiers & ~InputEvent.SHIFT_MASK) != 0)
+                if ((modifiers & ~InputEvent.SHIFT_DOWN_MASK) != 0)
 					return null;
 			}
 
@@ -130,18 +130,18 @@ public class KeyEventTranslator
 			if(Debug.ALT_KEY_PRESSED_DISABLED)
 			{
 				/* on MacOS, A+ can be user input */
-				ignoreMods = InputEvent.SHIFT_MASK
-					| InputEvent.ALT_GRAPH_MASK
-					| InputEvent.ALT_MASK;
+				ignoreMods = InputEvent.SHIFT_DOWN_MASK
+					| InputEvent.ALT_GRAPH_DOWN_MASK
+					| InputEvent.ALT_DOWN_MASK;
 			}
 			else
 			{
 				/* on MacOS, A+ can be user input */
-				ignoreMods = InputEvent.SHIFT_MASK
-					| InputEvent.ALT_GRAPH_MASK;
+				ignoreMods = InputEvent.SHIFT_DOWN_MASK
+					| InputEvent.ALT_GRAPH_DOWN_MASK;
 			}
 
-			if((modifiers & InputEvent.ALT_GRAPH_MASK) == 0
+			if((modifiers & InputEvent.ALT_GRAPH_DOWN_MASK) == 0
 				&& (modifiers & ~ignoreMods) != 0)
 			{				
 				return null;
@@ -306,33 +306,48 @@ public class KeyEventTranslator
 	 *
 	 * @since jEdit 4.2pre3
 	 */
+	 private static int toModifierEx(int mod) {
+	 	 if ((mod & InputEvent.CTRL_MASK) != 0)
+	 	 	 return InputEvent.CTRL_DOWN_MASK;
+	 	 if ((mod & InputEvent.ALT_MASK) != 0)
+	 	 	 return InputEvent.ALT_DOWN_MASK;
+	 	 if ((mod & InputEvent.META_MASK) != 0)
+	 	 	 return InputEvent.META_DOWN_MASK;
+	 	 if ((mod & InputEvent.SHIFT_MASK) != 0)
+	 	 	 return InputEvent.SHIFT_DOWN_MASK;
+	 	 return mod;
+	 }
 	public static void setModifierMapping(int c, int a, int m, int s)
 	{
-
+		c = toModifierEx(c);
+		a = toModifierEx(a);
+		m = toModifierEx(m);
+		s = toModifierEx(s);
+		
 		int duplicateMapping =
 			(c & a) | (c & m) | (c & s) | (a & m) | (a & s) | (m & s);
 
-		if((duplicateMapping & InputEvent.CTRL_MASK) != 0)
+		if((duplicateMapping & InputEvent.CTRL_DOWN_MASK) != 0)
 		{
 			throw new IllegalArgumentException(
 				"CTRL is mapped to more than one modifier");
 		}
-		if((duplicateMapping & InputEvent.ALT_MASK) != 0)
+		if((duplicateMapping & InputEvent.ALT_DOWN_MASK) != 0)
 		{
 			throw new IllegalArgumentException(
 				"ALT is mapped to more than one modifier");
 		}
-		if((duplicateMapping & InputEvent.META_MASK) != 0)
+		if((duplicateMapping & InputEvent.META_DOWN_MASK) != 0)
 		{
 			throw new IllegalArgumentException(
 				"META is mapped to more than one modifier");
 		}
-		if((duplicateMapping & InputEvent.SHIFT_MASK) != 0)
+		if((duplicateMapping & InputEvent.SHIFT_DOWN_MASK) != 0)
 		{
 			throw new IllegalArgumentException(
 				"SHIFT is mapped to more than one modifier");
 		}
-
+		
 		KeyEventTranslator.c = c;
 		KeyEventTranslator.a = a;
 		KeyEventTranslator.m = m;
@@ -364,10 +379,10 @@ public class KeyEventTranslator
 
 	//{{{ modifiersToString() method
 	private static final int[] MODS = {
-		InputEvent.CTRL_MASK,
-		InputEvent.ALT_MASK,
-		InputEvent.META_MASK,
-		InputEvent.SHIFT_MASK
+		InputEvent.CTRL_DOWN_MASK,
+		InputEvent.ALT_DOWN_MASK,
+		InputEvent.META_DOWN_MASK,
+		InputEvent.SHIFT_DOWN_MASK
 	};
 
 	public static String modifiersToString(int mods)
@@ -399,58 +414,58 @@ public class KeyEventTranslator
 	{
 		StringBuilder buf = new StringBuilder();
 		if(evt.isControlDown())
-			buf.append(getSymbolicModifierName(InputEvent.CTRL_MASK));
+			buf.append(getSymbolicModifierName(InputEvent.CTRL_DOWN_MASK));
 		if(evt.isAltDown())
-			buf.append(getSymbolicModifierName(InputEvent.ALT_MASK));
+			buf.append(getSymbolicModifierName(InputEvent.ALT_DOWN_MASK));
 		if(evt.isMetaDown())
-			buf.append(getSymbolicModifierName(InputEvent.META_MASK));
+			buf.append(getSymbolicModifierName(InputEvent.META_DOWN_MASK));
 		if(evt.isShiftDown())
-			buf.append(getSymbolicModifierName(InputEvent.SHIFT_MASK));
+			buf.append(getSymbolicModifierName(InputEvent.SHIFT_DOWN_MASK));
 		return buf.length() == 0 ? null : buf.toString();
 	} //}}}
 	// funa edit
 	// {{{
 	public static boolean isControlDown(InputEvent evt) {
-		return (evt.getModifiers() & c) != 0;
+		return (evt.getModifiersEx() & c) != 0;
 	}
 	public static boolean isAltDown(InputEvent evt) {
-		return (evt.getModifiers() & a) != 0;
+		return (evt.getModifiersEx() & a) != 0;
 	}
 	public static boolean isMetaDown(InputEvent evt) {
-		return (evt.getModifiers() & m) != 0;
+		return (evt.getModifiersEx() & m) != 0;
 	}
 	public static boolean isShiftDown(InputEvent evt) {
-		return (evt.getModifiers() & s) != 0;
+		return (evt.getModifiersEx() & s) != 0;
 	}
-	public static int translateModifiers(int mod) {
+	public static int translateModifiersEx(int mod) {
 		int translateMod = 0;
 		if ((mod & c) != 0) {
-			translateMod |= InputEvent.CTRL_MASK;
+			translateMod |= InputEvent.CTRL_DOWN_MASK;
 		}
 		if ((mod & a) != 0) {
-			translateMod |= InputEvent.ALT_MASK;
+			translateMod |= InputEvent.ALT_DOWN_MASK;
 		}
 		if ((mod & m) != 0) {
-			translateMod |= InputEvent.META_MASK;
+			translateMod |= InputEvent.META_DOWN_MASK;
 		}
 		if ((mod & s) != 0) {
-			translateMod |= InputEvent.SHIFT_MASK;
+			translateMod |= InputEvent.SHIFT_DOWN_MASK;
 		}
 		return translateMod;
 	}
 	
 	public static int getModifierBeforeTranslate(int mod) {
 		int translateMod = 0;
-		if ((mod & InputEvent.CTRL_MASK) != 0) {
+		if ((mod & InputEvent.CTRL_DOWN_MASK) != 0) {
 			translateMod |= c;
 		}
-		if ((mod & InputEvent.ALT_MASK) != 0) {
+		if ((mod & InputEvent.ALT_DOWN_MASK) != 0) {
 			translateMod |= a;
 		}
-		if ((mod & InputEvent.META_MASK) != 0) {
+		if ((mod & InputEvent.META_DOWN_MASK) != 0) {
 			translateMod |= m;
 		}
-		if ((mod & InputEvent.SHIFT_MASK) != 0) {
+		if ((mod & InputEvent.SHIFT_DOWN_MASK) != 0) {
 			translateMod |= s;
 		}
 		return translateMod;
@@ -476,19 +491,19 @@ public class KeyEventTranslator
 		if(OperatingSystem.isMacOS())
 		{
 			setModifierMapping(
-				InputEvent.META_MASK,  /* == C+ */
-				InputEvent.CTRL_MASK,  /* == A+ */
+				InputEvent.META_DOWN_MASK,  /* == C+ */
+				InputEvent.CTRL_DOWN_MASK,  /* == A+ */
 				/* M+ discarded by key event workaround! */
-				InputEvent.ALT_MASK,   /* == M+ */
-				InputEvent.SHIFT_MASK  /* == S+ */);
+				InputEvent.ALT_DOWN_MASK,   /* == M+ */
+				InputEvent.SHIFT_DOWN_MASK  /* == S+ */);
 		}
 		else
 		{
 			setModifierMapping(
-				InputEvent.CTRL_MASK,
-				InputEvent.ALT_MASK,
-				InputEvent.META_MASK,
-				InputEvent.SHIFT_MASK);
+				InputEvent.CTRL_DOWN_MASK,
+				InputEvent.ALT_DOWN_MASK,
+				InputEvent.META_DOWN_MASK,
+				InputEvent.SHIFT_DOWN_MASK);
 		}
 	}
 
