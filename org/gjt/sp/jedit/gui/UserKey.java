@@ -203,7 +203,7 @@ public class UserKey {
         Toolkit.getDefaultToolkit()
         .getSystemEventQueue().postEvent(
           new KeyEvent((Component)evt.getSource(), evt.getID(),
-            evt.getWhen(), translateModifiers & ~MyMASK | KeyEvent.ALT_MASK,
+            evt.getWhen(), translateModifiers & ~MyMASK | KeyEventTranslator.getModifierBeforeTranslate(KeyEvent.ALT_DOWN_MASK),
             KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED)
           );
         evt.consume();
