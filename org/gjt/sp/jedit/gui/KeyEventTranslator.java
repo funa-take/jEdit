@@ -307,15 +307,42 @@ public class KeyEventTranslator
 	 * @since jEdit 4.2pre3
 	 */
 	 private static int toModifierEx(int mod) {
-	 	 if ((mod & InputEvent.CTRL_MASK) != 0)
-	 	 	 return InputEvent.CTRL_DOWN_MASK;
-	 	 if ((mod & InputEvent.ALT_MASK) != 0)
-	 	 	 return InputEvent.ALT_DOWN_MASK;
-	 	 if ((mod & InputEvent.META_MASK) != 0)
-	 	 	 return InputEvent.META_DOWN_MASK;
-	 	 if ((mod & InputEvent.SHIFT_MASK) != 0)
-	 	 	 return InputEvent.SHIFT_DOWN_MASK;
+	 	 if ((mod & InputEvent.CTRL_MASK) != 0) {
+	 	 	 mod &= ~InputEvent.CTRL_MASK;
+	 	 	 mod |= InputEvent.CTRL_DOWN_MASK;
+	 	 }
+	 	 if ((mod & InputEvent.ALT_MASK) != 0) {
+	 	 	 mod &= ~InputEvent.ALT_MASK;
+	 	 	 mod |= InputEvent.ALT_DOWN_MASK;
+	 	 }
+	 	 if ((mod & InputEvent.META_MASK) != 0) {
+	 	 	 mod &= ~InputEvent.META_MASK;
+	 	 	 mod |= InputEvent.META_DOWN_MASK;
+	 	 }
+	 	 if ((mod & InputEvent.SHIFT_MASK) != 0) {
+	 	 	 mod &= ~InputEvent.SHIFT_MASK;
+	 	 	 mod |= InputEvent.SHIFT_DOWN_MASK;
+	 	 }
 	 	 return mod;
+	 }
+	 private static int toModifier(int modEx) {
+	 	 if ((modEx & InputEvent.CTRL_DOWN_MASK) != 0) {
+	 	 	 modEx &= ~InputEvent.CTRL_DOWN_MASK;
+	 	 	 modEx |= InputEvent.CTRL_MASK;
+	 	 }
+	 	 if ((modEx & InputEvent.ALT_DOWN_MASK) != 0) {
+	 	 	 modEx &= ~InputEvent.ALT_DOWN_MASK;
+	 	 	 modEx |= InputEvent.ALT_MASK;
+	 	 }
+	 	 if ((modEx & InputEvent.META_DOWN_MASK) != 0) {
+	 	 	 modEx &= ~InputEvent.META_DOWN_MASK;
+	 	 	 modEx |= InputEvent.META_MASK;
+	 	 }
+	 	 if ((modEx & InputEvent.SHIFT_DOWN_MASK) != 0) {
+	 	 	 modEx &= ~InputEvent.SHIFT_DOWN_MASK;
+	 	 	 modEx |= InputEvent.SHIFT_MASK;
+	 	 }
+	 	 return modEx;
 	 }
 	public static void setModifierMapping(int c, int a, int m, int s)
 	{
@@ -452,6 +479,10 @@ public class KeyEventTranslator
 			translateMod |= InputEvent.SHIFT_DOWN_MASK;
 		}
 		return translateMod;
+	}
+	
+	public static int translateModifiers(int mod) {
+		return toModifier(translateModifiersEx(toModifierEx(mod)));
 	}
 	
 	public static int getModifierBeforeTranslate(int mod) {
