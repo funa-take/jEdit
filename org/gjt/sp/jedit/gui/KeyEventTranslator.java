@@ -485,7 +485,7 @@ public class KeyEventTranslator
 		return toModifier(translateModifiersEx(toModifierEx(mod)));
 	}
 	
-	public static int getModifierBeforeTranslate(int mod) {
+	public static int getModifierBeforeTranslateEx(int mod) {
 		int translateMod = 0;
 		if ((mod & InputEvent.CTRL_DOWN_MASK) != 0) {
 			translateMod |= c;
@@ -500,6 +500,10 @@ public class KeyEventTranslator
 			translateMod |= s;
 		}
 		return translateMod;
+	}
+	
+	public static int getModifierBeforeTranslate(int mod) {
+		return toModifier(getModifierBeforeTranslateEx(toModifierEx(mod)));
 	}
 	// }}}
 	static int c, a, m, s;
