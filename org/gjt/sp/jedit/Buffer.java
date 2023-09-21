@@ -201,8 +201,7 @@ public class Buffer extends JEditBuffer
 		// for untitled: re-read autosave file if enabled
 		if(reload || !getFlag(NEW_FILE) || (isUntitled() && autosaveUntitled))
 		{
-			if(file != null)
-				modTime = file.lastModified();
+			modTime = (file != null) ? file.lastModified() : this.getModifiedFromVFSFile(view);
 
 			// Only on initial load
 			if(!reload && autosaveFile != null && autosaveFile.exists())
@@ -473,9 +472,9 @@ public class Buffer extends JEditBuffer
 		if(path == null && getFlag(NEW_FILE))
 			return saveAs(view,rename);
 
-		if(path == null && file != null)
+		if(path == null)
 		{
-			long newModTime = file.lastModified();
+			long newModTime = (file != null) ? file.lastModified() : this.getModifiedFromVFSFile(view);
 
 			if((newModTime != modTime) && (getAutoReload() || getAutoReloadDialog()))
 			{
@@ -668,31 +667,42 @@ public class Buffer extends JEditBuffer
 		// oldModTime, due to the multithreading
 		// - only supported on local file system
 		// - for untitled, do not check
-		if(!isPerformingIO() && file != null && !getFlag(NEW_FILE) && !isUntitled())
+		if(!isPerformingIO() && !getFlag(NEW_FILE) && !isUntitled())
 		{
-			boolean newReadOnly = file.exists() && !file.canWrite();
-			if(newReadOnly != isFileReadOnly())
-			{
-				setFileReadOnly(newReadOnly);
-				EditBus.send(new BufferUpdate(this,null,
-					BufferUpdate.DIRTY_CHANGED));
-			}
-
-			long oldModTime = modTime;
-			long newModTime = file.lastModified();
-
-			if(newModTime != oldModTime)
-			{
-				modTime = newModTime;
-
-				if(!file.exists())
+			if (file != null) {
+				boolean newReadOnly = file.exists() && !file.canWrite();
+				if(newReadOnly != isFileReadOnly())
 				{
-					setFlag(NEW_FILE,true);
-					setDirty(true);
-					return FILE_DELETED;
+					setFileReadOnly(newReadOnly);
+					EditBus.send(new BufferUpdate(this,null,
+						BufferUpdate.DIRTY_CHANGED));
 				}
-				else
+	
+				long oldModTime = modTime;
+				long newModTime = file.lastModified();
+	
+				if(newModTime != oldModTime)
 				{
+					modTime = newModTime;
+	
+					if(!file.exists())
+					{
+						setFlag(NEW_FILE,true);
+						setDirty(true);
+						return FILE_DELETED;
+					}
+					else
+					{
+						return FILE_CHANGED;
+					}
+				}
+			} else {
+				long oldModTime = modTime;
+				long newModTime = this.getModifiedFromVFSFile(view);
+	
+				if(newModTime != oldModTime)
+				{
+					modTime = newModTime;
 					return FILE_CHANGED;
 				}
 			}
@@ -713,7 +723,42 @@ public class Buffer extends JEditBuffer
 	public long getLastModified()
 	{
 		return modTime;
-	} //}}}
+	} 
+	
+	public long getModifiedFromVFSFile(View view)
+	{
+		long modifiedTime = modTime;
+		
+		if (this.path == null) {
+			return modifiedTime;
+		}
+		
+		VFS vfs = VFSManager.getVFSForPath(path);
+		Object session = vfs.createVFSSession(path, view);
+		if(session == null) {
+			return modifiedTime;
+		}
+		
+		try {
+			VFSFile file = vfs._getFile(session,path,view);
+			if(file == null) {
+				return modifiedTime;
+			}
+			modifiedTime = file.getModified();
+	    } catch(IOException e) {
+	    	VFSManager.error(view,path,"ioerror",
+					new String[] { e.toString() });
+		} finally {
+			try{
+				vfs._endVFSSession(session,view);
+			} catch (Exception e){
+				VFSManager.error(view,path,"ioerror",
+					new String[] { e.toString() });
+			}
+		}
+		return modifiedTime;
+	}
+	//}}}
 
 	//{{{ setLastModified() method
 	/**
@@ -2277,9 +2322,8 @@ public class Buffer extends JEditBuffer
 		//{{{ Update this buffer for the new path
 		if(rename)
 		{
-			if(file != null)
-				modTime = file.lastModified();
-
+			modTime = (file != null) ? file.lastModified() : this.getModifiedFromVFSFile(view);
+			
 			if(!error)
 			{
 				// we do a write lock so that the
