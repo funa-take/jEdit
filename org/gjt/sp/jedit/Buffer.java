@@ -746,14 +746,16 @@ public class Buffer extends JEditBuffer
 			}
 			modifiedTime = file.getModified();
 	    } catch(IOException e) {
-	    	VFSManager.error(view,path,"ioerror",
-					new String[] { e.toString() });
+	    	// VFSManager.error(view,path,"ioerror",
+			// 		new String[] { e.toString() });
+			Log.log(Log.ERROR,this,e);
 		} finally {
 			try{
 				vfs._endVFSSession(session,view);
 			} catch (Exception e){
-				VFSManager.error(view,path,"ioerror",
-					new String[] { e.toString() });
+				// VFSManager.error(view,path,"ioerror",
+				// 	new String[] { e.toString() });
+				Log.log(Log.ERROR,this,e);
 			}
 		}
 		return modifiedTime;
