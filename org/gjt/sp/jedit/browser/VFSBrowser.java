@@ -702,6 +702,20 @@ public class VFSBrowser extends JPanel implements DefaultFocusComponent,
 	 */
 	public void delete(VFSFile[] files)
 	{
+		/*
+		* 対象のファイルを全て削除するまで待機してから後処理している。
+		* ディスパッチスレッドを待機させるとフリーズするので、
+		* ディスパッチスレッドで呼ばれた場合は、別スレッドに切り替える。
+		*/
+		if (EventQueue.isDispatchThread()) {
+			ThreadUtilities.runInBackground(new Runnable(){
+					public void run() {
+						delete(files);
+					}
+			});
+			return;
+		}
+		
 		String dialogType;
 
 		if(MiscUtilities.isURL(files[0].getDeletePath())
