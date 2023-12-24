@@ -1063,4 +1063,58 @@ public class TextUtilities
 	} //}}}
 
 	//}}}
+	
+	// funa edit
+	//{{{
+	public static int getCharWidth(char ch) {
+		// return getCharWidthForLocale(ch);
+		return getCharWidthForJapanese(ch);
+}
+	
+	public static int getCharWidthForJapanese(char ch) {
+		if (
+			( ch <= '\u007e' ) // 英数字
+		|| ( ch == '\u00a5' ) // \記号
+		|| ( ch == '\u203e' ) // ~記号
+		|| ( ch >= '\uff61' && ch <= '\uff9f' )) // 半角カナ
+		{
+			return 1;
+		} else {
+			return 2;
+		}
+	}
+	
+	// private static List<String> EAST_ASIAN_LANGS =
+	// Arrays.asList("ja", "vi", "kr", "zh");
+	// 
+	// public static int getCharWidthForLocale(char ch) {
+		// return getCharWidthForLocale(ch, Locale.getDefault());
+	// }
+	// 
+	// public static int getCharWidthForLocale(char ch, Locale locale) {
+		// if(locale == null) {
+			// throw new NullPointerException("locale is null");
+		// }
+		// int value = com.ibm.icu.lang .UCharacter.getIntPropertyValue((int)ch, 
+			// com.ibm.icu.lang.UProperty.EAST_ASIAN_WIDTH);
+		// switch(value) {
+		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.NARROW:
+		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.NEUTRAL:
+		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.HALFWIDTH:
+			// return 1;
+		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.FULLWIDTH:
+		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.WIDE:
+			// return 2;
+		// case com.ibm.icu.lang.UCharacter.EastAsianWidth.AMBIGUOUS:
+			// if(EAST_ASIAN_LANGS.contains(locale.getLanguage())) {
+				// return 2;
+			// } else {
+				// return 1;
+			// }
+		// default:
+			// return 1;
+		// }
+	// }
+	
+	//}}}
 }
