@@ -61,6 +61,18 @@ public class ParserRuleSet
 	//{{{ getModeName() method
 	public String getModeName()
 	{
+		// funa edit
+		// HTML内のJavascript等の対応
+		// まだ入れない。様子見。
+		// setNameが必ずしも mode と一致するわけじゃない。
+		// なので、この方法は完璧じゃないから見送りの方向。
+		// 各モードのxmlで対応しないとダメ。
+		
+		// org.gjt.sp.jedit.Mode mode = null;
+		// if (setName != null){
+			// mode = org.gjt.sp.jedit.jEdit.getMode(setName.toLowerCase());
+		// }
+		// return mode == null ? modeName : mode.getName();
 		return modeName;
 	} //}}}
 
@@ -114,6 +126,8 @@ public class ParserRuleSet
 				keywords.add(ruleset.keywords);
 			}
 		}
+		// funa
+		// このへんをいじったら、各モードの import句を処理できるじゃないかと思う
 		imports.clear();
 	} //}}}
 
@@ -157,13 +171,13 @@ public class ParserRuleSet
 
 	//{{{ addRule() method
 	private void addRule(char ch, ParserRule parserRule)
-	{
-		if (ch >= ruleArray.length)
 		{
+		if (ch >= ruleArray.length)
+			{
 			ruleArray = Arrays.copyOf(ruleArray,
 				Math.min(Math.min(ruleArray.length * 2, ch + 1),
 					Character.MAX_VALUE * 2 + 1));
-		}
+			}
 
 		List<ParserRule> parserRules = ruleArray[ch];
 		if (parserRules == null)
@@ -186,7 +200,7 @@ public class ParserRuleSet
 		if (rulesForNull.isEmpty())
 		{
 			if (rulesForKey == null)
-				return Collections.emptyList();
+			return Collections.emptyList();
 			return rulesForKey;
 		}
 
@@ -194,11 +208,11 @@ public class ParserRuleSet
 		if (rulesForKey == null || rulesForKey.isEmpty())
 			return rulesForNull;
 
-		int size = rulesForNull.size() + rulesForKey.size();
+			int size = rulesForNull.size() + rulesForKey.size();
 		List<ParserRule> mixed = new ArrayList<>(size);
-		mixed.addAll(rulesForKey);
-		mixed.addAll(rulesForNull);
-		return mixed;
+			mixed.addAll(rulesForKey);
+			mixed.addAll(rulesForNull);
+			return mixed;
 	} //}}}
 
 	//{{{ getRuleCount() method

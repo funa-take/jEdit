@@ -186,14 +186,14 @@ public class EditPane extends JPanel implements BufferSetListener
 		if (requestFocus)
 		{
 			SwingUtilities.invokeLater(() ->
-			{
-				// only do this if we are the current edit pane
-				if(view.getEditPane() == EditPane.this
-					&& (bufferSwitcher == null
-					|| !bufferSwitcher.isPopupVisible()))
 				{
-					textArea.requestFocus();
-				}
+					// only do this if we are the current edit pane
+					if(jEdit.getActiveView() == view && view.getEditPane() == EditPane.this
+						&& (bufferSwitcher == null
+						|| !bufferSwitcher.isPopupVisible()))
+					{
+						textArea.requestFocus();
+					}
 			});
 		}
 
@@ -202,16 +202,16 @@ public class EditPane extends JPanel implements BufferSetListener
 		if (!buffer.isLoading())
 		{
 			ThreadUtilities.runInDispatchThread(() ->
-			{
-				// avoid a race condition
-				// see bug #834338
-				if(buffer == getBuffer())
-					loadCaretInfo();
-				// This must happen after loadCaretInfo.
-				// Otherwise caret is not restored properly.
-				int check = jEdit.getIntegerProperty("checkFileStatus");
-				if (jEdit.isStartupDone() && (check & GeneralOptionPane.checkFileStatus_focusBuffer) > 0)
-					jEdit.checkBufferStatus(view, true);
+				{
+					// avoid a race condition
+					// see bug #834338
+					if(buffer == getBuffer())
+						loadCaretInfo();
+					// This must happen after loadCaretInfo.
+					// Otherwise caret is not restored properly.
+					int check = jEdit.getIntegerProperty("checkFileStatus");
+					if (jEdit.isStartupDone() && (check & GeneralOptionPane.checkFileStatus_focusBuffer) > 0)
+						jEdit.checkBufferStatus(view, true);
 			});
 		}
 	} //}}}
@@ -296,9 +296,9 @@ public class EditPane extends JPanel implements BufferSetListener
 		else
 		{
 			SwingUtilities.invokeLater(() ->
-			{
-				bufferSwitcher.requestFocus();
-				bufferSwitcher.showPopup();
+				{
+					bufferSwitcher.requestFocus();
+					bufferSwitcher.showPopup();
 			});
 		}
 	} //}}}

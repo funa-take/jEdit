@@ -538,6 +538,12 @@ public class Chunk extends Token
 			GlyphCache cache = getGlyphCache();
 			glyphData = cache.computeIfAbsent(cacheKey, key -> buildGlyphInfo(chars, fontRenderContext));
 			width = glyphData.getWidth();
+
+			// Rectangle2D logicalBounds;
+			// GlyphVector gv = style.getFont().createGlyphVector(
+			// 	fontRenderContext, str);
+			// logicalBounds = gv.getLogicalBounds();			
+			//  width = (float)logicalBounds.getWidth();
 		}
 		assert isInitialized();
 	} //}}}

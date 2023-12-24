@@ -113,7 +113,7 @@ public class Registers
 			textArea.setSelectedText("");
 		}
 		else
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 	} //}}}
 
 	//{{{ append() methods
@@ -153,7 +153,7 @@ public class Registers
 	{
 		if(cut && !textArea.isEditable())
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -171,11 +171,11 @@ public class Registers
 				try
 				{
 					String registerContents = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-					if(registerContents.endsWith(separator))
-						selection = registerContents + selection;
-					else
-						selection = registerContents + separator + selection;
-				}
+						if(registerContents.endsWith(separator))
+							selection = registerContents + selection;
+						else
+							selection = registerContents + separator + selection;
+					}
 				catch (UnsupportedFlavorException e)
 				{
 				}
@@ -230,7 +230,7 @@ public class Registers
 	{
 		if(!textArea.isEditable())
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -238,36 +238,41 @@ public class Registers
 
 		if(reg == null)
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
-		Transferable transferable = reg.getTransferable();
-		Mode mode = null;
-		String selection = null;
-		if (transferable.isDataFlavorSupported(JEditDataFlavor.jEditRichTextDataFlavor))
-		{
-			try
-			{
-				JEditRichText data = (JEditRichText) transferable.getTransferData(JEditDataFlavor.jEditRichTextDataFlavor);
-				mode = data.getMode();
-				selection = data.getText();
-			}
-			catch (UnsupportedFlavorException | IOException e)
-			{
-				Log.log(Log.ERROR, Registers.class, e);
-			}
-		}
-		else if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
-		{
-			selection = getTextFromTransferable(transferable, DataFlavor.stringFlavor);
-		}
+              // funa edit start
+		// Transferable transferable = reg.getTransferable();
+		// Mode mode = null;
+		// String selection = null;
+		// if (transferable.isDataFlavorSupported(JEditDataFlavor.jEditRichTextDataFlavor))
+		// {
+		// 	try
+		// 	{
+		// 		JEditRichText data = (JEditRichText) transferable.getTransferData(JEditDataFlavor.jEditRichTextDataFlavor);
+		// 		mode = data.getMode();
+		// 		selection = data.getText();
+		// 	}
+		// 	catch (UnsupportedFlavorException | IOException e)
+		// 	{
+		// 		Log.log(Log.ERROR, Registers.class, e);
+		// 	}
+		// }
+		// else if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+		// {
+		// 	selection = getTextFromTransferable(transferable, DataFlavor.stringFlavor);
+		// }
+		String selection = reg.toString();
+              //  funa edit end
 		if(selection == null)
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 		JEditBuffer buffer = textArea.getBuffer();
-		applyMode(mode, buffer);
+		// funa edit
+		// applyMode(mode, buffer);
+		
 		_paste(textArea, vertical, selection, buffer);
 	}
 
@@ -290,7 +295,7 @@ public class Registers
 		}
 		if(!textArea.isEditable())
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 
@@ -298,7 +303,7 @@ public class Registers
 
 		if(reg == null)
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 		Transferable transferable = reg.getTransferable();
@@ -313,7 +318,7 @@ public class Registers
 		}
 		if(selection == null)
 		{
-			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null);
+			javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 			return;
 		}
 		JEditBuffer buffer = textArea.getBuffer();

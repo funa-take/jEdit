@@ -40,7 +40,8 @@ import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.SyntaxUtilities;
 
-
+// funa add
+import java.awt.Robot;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -494,7 +495,7 @@ public class GUIUtilities
 				else
 				{
 					JButton b = loadToolButton(context,button);
-					toolB.add(b);
+						toolB.add(b);
 				}
 			}
 		}
@@ -1706,6 +1707,19 @@ public class GUIUtilities
 		return null;
 	} //}}}
 
+	// Funa add
+	public static Robot getRobot(){
+		if (robot == null){
+			try {
+				robot = new Robot();
+			} catch (Exception e){
+				
+			}
+			
+		}
+		return robot;
+	}
+
 	//{{{ setEnabledRecursively() method
 	/**
 	 * Call setEnabled() recursively on the container and its descendants.
@@ -1960,6 +1974,8 @@ public class GUIUtilities
 	//{{{ Private members
 	private static SplashScreen splash;
 	private static SoftReference<Map<String, Icon>> iconCache;
+	// funa add
+	private static Robot robot;
 	private static String iconPath = "jeditresource:/org/gjt/sp/jedit/icons/themes/";
 	private static final String defaultIconPath = "jeditresource:/org/gjt/sp/jedit/icons/themes/";
 	private static final HashMap<String, String> deprecatedIcons = new HashMap<>();
@@ -2106,7 +2122,7 @@ public class GUIUtilities
 	 * A combined ComponentListener and WindowStateListener to continually save a Frames size.<br />
 	 * For non-Frame's use {@link GUIUtilities#saveGeometry(Window,String)}
 	 *
-	 * @author Björn Kautler
+	 * @author Bjﾃｶrn Kautler
 	 * @version $Id: GUIUtilities.java 25221 2020-04-12 16:00:17Z kpouer $
 	 * @since jEdit 4.3pre6
 	 * @see GUIUtilities#saveGeometry(Window,Container,String)

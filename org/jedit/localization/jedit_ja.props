@@ -1675,6 +1675,9 @@ options.browser.general.doubleClickClose=開いているファイルをダブル
 options.browser.general.currentBufferFilter=ファイルダイアログのフィルタを\
 	現在のバッファの拡張子にする
 options.browser.general.useDefaultIcons=デフォルトアイコンを使用
+options.browser.general.parentDir.maxWidth=親ディレクトリ表示の最大の幅(0の場合は制限なし)
+options.browser.general.parentDir.maxHeight=親ディレクトリ表示の最大の高さ(0の場合は制限なし)
+
 #}}}
 
 #{{{ Browser Context Menu

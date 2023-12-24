@@ -106,7 +106,10 @@ public class HyperSearchResult implements HyperSearchNode
 
 		this.line = line;
 
-		str = (line + 1) + ": " + buffer.getLineText(line)
+		// str = (line + 1) + ": " + buffer.getLineText(line)
+		int longLineLimit = jEdit.getIntegerProperty("longLineLimit", 4000);
+		int lineLimit = Math.min(longLineLimit, buffer.getLineLength(line));
+		str = (line + 1) + ": " + buffer.getLineText(line).substring(0, lineLimit)
 			.replace('\t',' ').trim();
 	} //}}}
 

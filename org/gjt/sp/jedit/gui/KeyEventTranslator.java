@@ -306,8 +306,50 @@ public class KeyEventTranslator
 	 *
 	 * @since jEdit 4.2pre3
 	 */
+	 private static int toModifierEx(int mod) {
+	 	 if ((mod & InputEvent.CTRL_MASK) != 0) {
+	 	 	 mod &= ~InputEvent.CTRL_MASK;
+	 	 	 mod |= InputEvent.CTRL_DOWN_MASK;
+	 	 }
+	 	 if ((mod & InputEvent.ALT_MASK) != 0) {
+	 	 	 mod &= ~InputEvent.ALT_MASK;
+	 	 	 mod |= InputEvent.ALT_DOWN_MASK;
+	 	 }
+	 	 if ((mod & InputEvent.META_MASK) != 0) {
+	 	 	 mod &= ~InputEvent.META_MASK;
+	 	 	 mod |= InputEvent.META_DOWN_MASK;
+	 	 }
+	 	 if ((mod & InputEvent.SHIFT_MASK) != 0) {
+	 	 	 mod &= ~InputEvent.SHIFT_MASK;
+	 	 	 mod |= InputEvent.SHIFT_DOWN_MASK;
+	 	 }
+	 	 return mod;
+	 }
+	 private static int toModifier(int modEx) {
+	 	 if ((modEx & InputEvent.CTRL_DOWN_MASK) != 0) {
+	 	 	 modEx &= ~InputEvent.CTRL_DOWN_MASK;
+	 	 	 modEx |= InputEvent.CTRL_MASK;
+	 	 }
+	 	 if ((modEx & InputEvent.ALT_DOWN_MASK) != 0) {
+	 	 	 modEx &= ~InputEvent.ALT_DOWN_MASK;
+	 	 	 modEx |= InputEvent.ALT_MASK;
+	 	 }
+	 	 if ((modEx & InputEvent.META_DOWN_MASK) != 0) {
+	 	 	 modEx &= ~InputEvent.META_DOWN_MASK;
+	 	 	 modEx |= InputEvent.META_MASK;
+	 	 }
+	 	 if ((modEx & InputEvent.SHIFT_DOWN_MASK) != 0) {
+	 	 	 modEx &= ~InputEvent.SHIFT_DOWN_MASK;
+	 	 	 modEx |= InputEvent.SHIFT_MASK;
+	 	 }
+	 	 return modEx;
+	 }
 	public static void setModifierMapping(int c, int a, int m, int s)
 	{
+		c = toModifierEx(c);
+		a = toModifierEx(a);
+		m = toModifierEx(m);
+		s = toModifierEx(s);
 
 		int duplicateMapping =
 			(c & a) | (c & m) | (c & s) | (a & m) | (a & s) | (m & s);
@@ -408,7 +450,62 @@ public class KeyEventTranslator
 			buf.append(getSymbolicModifierName(InputEvent.SHIFT_DOWN_MASK));
 		return buf.length() == 0 ? null : buf.toString();
 	} //}}}
+	// funa edit
+	// {{{
+	public static boolean isControlDown(InputEvent evt) {
+		return (evt.getModifiersEx() & c) != 0;
+	}
+	public static boolean isAltDown(InputEvent evt) {
+		return (evt.getModifiersEx() & a) != 0;
+	}
+	public static boolean isMetaDown(InputEvent evt) {
+		return (evt.getModifiersEx() & m) != 0;
+	}
+	public static boolean isShiftDown(InputEvent evt) {
+		return (evt.getModifiersEx() & s) != 0;
+	}
+	public static int translateModifiersEx(int mod) {
+		int translateMod = 0;
+		if ((mod & c) != 0) {
+			translateMod |= InputEvent.CTRL_DOWN_MASK;
+		}
+		if ((mod & a) != 0) {
+			translateMod |= InputEvent.ALT_DOWN_MASK;
+		}
+		if ((mod & m) != 0) {
+			translateMod |= InputEvent.META_DOWN_MASK;
+		}
+		if ((mod & s) != 0) {
+			translateMod |= InputEvent.SHIFT_DOWN_MASK;
+		}
+		return translateMod;
+	}
 
+	public static int translateModifiers(int mod) {
+		return toModifier(translateModifiersEx(toModifierEx(mod)));
+	}
+	
+	public static int getModifierBeforeTranslateEx(int mod) {
+		int translateMod = 0;
+		if ((mod & InputEvent.CTRL_DOWN_MASK) != 0) {
+			translateMod |= c;
+		}
+		if ((mod & InputEvent.ALT_DOWN_MASK) != 0) {
+			translateMod |= a;
+		}
+		if ((mod & InputEvent.META_DOWN_MASK) != 0) {
+			translateMod |= m;
+		}
+		if ((mod & InputEvent.SHIFT_DOWN_MASK) != 0) {
+			translateMod |= s;
+		}
+		return translateMod;
+	}
+	
+	public static int getModifierBeforeTranslate(int mod) {
+		return toModifier(getModifierBeforeTranslateEx(toModifierEx(mod)));
+	}
+	// }}}
 	static int c, a, m, s;
 
 	//{{{ Private members

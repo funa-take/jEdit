@@ -23,6 +23,7 @@ package org.gjt.sp.jedit;
 
 //{{{ Imports
 import java.util.*;
+import java.text.BreakIterator;
 import javax.swing.text.Segment;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.syntax.*;
@@ -429,6 +430,13 @@ public class TextUtilities
 		//{{{ the character under the cursor changes how we behave.
 		int type = getCharType(ch, noWordSep);
 		//}}}
+		// funa ascii以外の場合の単語移動
+		if (type == WORD_CHAR && !isAscii(ch)) {
+			int wordStart = findWordStartWithBreakInterator(line.toString(), pos);
+			if (wordStart != BreakIterator.DONE) {
+				return wordStart;
+			}
+		}
 
 		for(int i = pos; i >= 0; i--)
 		{
@@ -456,6 +464,9 @@ public class TextUtilities
 				break; //}}}
 			//{{{ Word character...
 			case WORD_CHAR:
+				if (!isAscii(ch)) {
+					return i + 1;
+				}
 				// stop at next last (in writing direction) upper case char if camel cased
 				// (don't stop at every upper case char, don't treat noWordSep as word chars)
 				if (camelCasedWords && Character.isUpperCase(ch) && !Character.isUpperCase(lastCh)
@@ -629,6 +640,14 @@ public class TextUtilities
 		int type = getCharType(ch, noWordSep);
 		//}}}
 
+		// funa ascii以外の場合の単語移動
+		if (type == WORD_CHAR && !isAscii(ch)) {
+			int wordEnd = findWordEndWithBreakInterator(line.toString(), pos);
+			if (wordEnd != BreakIterator.DONE) {
+				return wordEnd;
+			}
+		}
+		
 		for(int i = pos; i < line.length(); i++)
 		{
 			char lastCh = ch;
@@ -644,6 +663,9 @@ public class TextUtilities
 					return i; //}}}
 			//{{{ Word character...
 			case WORD_CHAR:
+				if (!isAscii(ch)) {
+					return i;
+				}
 				// stop at next last upper case char if camel cased
 				// (don't stop at every upper case char, don't treat noWordSep as word chars)
 				if (camelCasedWords && i > pos + 1 && !Character.isUpperCase(ch) && Character.isLetterOrDigit(ch)
@@ -1072,16 +1094,57 @@ public class TextUtilities
 }
 	
 	public static int getCharWidthForJapanese(char ch) {
-		if (
-			( ch <= '\u007e' ) // 英数字
-		|| ( ch == '\u00a5' ) // \記号
-		|| ( ch == '\u203e' ) // ~記号
-		|| ( ch >= '\uff61' && ch <= '\uff9f' )) // 半角カナ
-		{
+		if (isAscii(ch) || isHalfKana(ch)) {
 			return 1;
 		} else {
 			return 2;
 		}
+	}
+	
+	public static boolean isAscii(char ch) {
+		if (
+			( ch <= '\u007e' ) // 英数字
+		|| ( ch == '\u00a5' ) // \記号
+		|| ( ch == '\u203e' )) // ~記号
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	private static HashSet<Integer> halfKanaMap = null;
+	public static boolean isHalfKana(char ch) {
+		if ( ch >= '\uff61' && ch <= '\uff9f' ) { // 半角カナ
+			return true;
+		}
+		
+		if (halfKanaMap == null) {
+			halfKanaMap = new HashSet<Integer>();
+			String halfChars = jEdit.getProperty("half-characters");
+			if (halfChars != null) {
+				halfChars.chars().forEach(c -> halfKanaMap.add(c));
+			}
+		}
+		if (halfKanaMap.contains((int)ch)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public static int findWordEndWithBreakInterator(String line, int pos) {
+		BreakIterator boundary = BreakIterator.getWordInstance();
+		boundary.setText(line);
+		int end = boundary.following(pos);
+		return end;
+	}
+	
+	public static int findWordStartWithBreakInterator(String line, int pos) {
+		BreakIterator boundary = BreakIterator.getWordInstance();
+		boundary.setText(line);
+		int end = boundary.following(pos);
+		int start = boundary.previous();
+		return start;
 	}
 	
 	// private static List<String> EAST_ASIAN_LANGS =
@@ -1115,6 +1178,6 @@ public class TextUtilities
 			// return 1;
 		// }
 	// }
-	
+
 	//}}}
 }

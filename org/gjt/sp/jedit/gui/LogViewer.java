@@ -34,6 +34,7 @@ import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.msg.PropertiesChanged;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.ThreadUtilities;
+import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.swing.event.UniqueActionDocumentListener;
 //}}}
 
@@ -95,6 +96,13 @@ public class LogViewer extends JPanel implements DefaultFocusComponent
 		model.removeListDataListener(listModel);
 
 		list = new LogList(listModel);
+		// funa edit
+		TextAreaPainter painter = jEdit.getActiveView().getTextArea().getPainter();
+		list.setBackground(painter.getBackground());
+		list.setForeground(painter.getForeground());
+		list.setSelectionBackground(painter.getSelectionColor());
+		list.setSelectionForeground(painter.getForeground());
+		
 		listModel.setList(list);
 		cellRenderer = new ColorizerCellRenderer(list);
 		list.setCellRenderer(cellRenderer);
@@ -203,7 +211,23 @@ public class LogViewer extends JPanel implements DefaultFocusComponent
 	private void scrollLaterIfRequired()
 	{
 		if (tailIsOn)
-			ThreadUtilities.runInDispatchThread(this::scrollToTail);
+		ThreadUtilities.runInBackground(new Runnable() {
+				public void run() {
+					try {
+						Thread.sleep(10);
+					} catch (Exception e){
+					}
+					
+					ThreadUtilities.runInDispatchThread(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								scrollToTail();
+							}
+						});
+		}});
+		
 	} //}}}
 
 	//}}}
@@ -347,14 +371,18 @@ public class LogViewer extends JPanel implements DefaultFocusComponent
 		}
 		
 		@Override
-		public Dimension getPreferredSize()
+		public Dimension getPreferredSize() 
 		{
 			return new Dimension(width, height);	
 		}
 		
 		@Override
-		public void paint(Graphics g)
+		public void paint(Graphics g) 
 		{
+			// funa edit
+			Graphics2D g2 = (Graphics2D)g;
+			g2.setRenderingHints(jEdit.getActiveView().getTextArea().getPainter().getRenderingHints());
+			
 			int currentWidth = (int)list.getFontMetrics(list.getFont()).getStringBounds(text, g).getWidth();
 			width = Math.max(width, currentWidth);
 			g.setColor(getBackground());
@@ -378,11 +406,14 @@ public class LogViewer extends JPanel implements DefaultFocusComponent
 			if (isSelected)
 			{
 				setBackground(list.getSelectionBackground());
-				setForeground(list.getSelectionForeground());
+				// funa edit
+				// setForeground(list.getSelectionForeground());
 			}
 			else
 			{
 				setBackground(list.getBackground());
+				// funa edit
+			}
 				Color color = list.getForeground();
 				if (text.contains("[debug]"))
 				{
@@ -405,7 +436,7 @@ public class LogViewer extends JPanel implements DefaultFocusComponent
 					color = errorColor;
 				}
 				setForeground(color);
-			}
+			// }
 			return this;
 		}
 

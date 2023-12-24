@@ -242,6 +242,20 @@ public class HistoryTextField extends JTextField
 
 		if(evt.getID() == KeyEvent.KEY_PRESSED)
 		{
+			// Funa add
+			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
+				org.gjt.sp.jedit.gui.UserKey.consume(evt, 
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					true, true, true, true, true);
+				if (evt.isConsumed()){
+					return;
+				}
+			}
+			
+			
 			switch(evt.getKeyCode())
 			{
 			case KeyEvent.VK_ENTER:
@@ -255,33 +269,45 @@ public class HistoryTextField extends JTextField
 				}
 				break;
 			case KeyEvent.VK_UP:
-				if(evt.isShiftDown())
+				// if(evt.isShiftDown())
+				if(KeyEventTranslator.isShiftDown(evt))
 					controller.doBackwardSearch();
 				else
 					controller.historyPrevious();
 				evt.consume();
 				break;
 			case KeyEvent.VK_DOWN:
-				if(evt.isShiftDown())
-					controller.doForwardSearch();
-				else if(evt.isAltDown())
+				// Funa add
+				// if(evt.isShiftDown())
+					// controller.doForwardSearch();
+				// else if(evt.isAltDown())
+				// if(evt.isAltDown())
+				if(KeyEventTranslator.isAltDown(evt))
 				{
 					controller.showPopupMenu(
-						evt.isShiftDown());
+						// evt.isShiftDown());
+						KeyEventTranslator.isShiftDown(evt));
+				}
+				//  funa add
+				// else if(evt.isShiftDown()) {
+				else if(KeyEventTranslator.isShiftDown(evt)) {
+					controller.doForwardSearch();
 				}
 				else
 					controller.historyNext();
 				evt.consume();
 				break;
 			case KeyEvent.VK_TAB:
-				if(evt.isControlDown())
+				// if(evt.isControlDown())
+				if(KeyEventTranslator.isControlDown(evt))
 				{
 					controller.doBackwardSearch();
 					evt.consume();
 				}
 				break;
 			case KeyEvent.VK_CONTEXT_MENU:
-				controller.showPopupMenu(evt.isShiftDown());
+				// controller.showPopupMenu(evt.isShiftDown());
+				controller.showPopupMenu(KeyEventTranslator.isShiftDown(evt));
 				evt.consume();
 				break;				
 			}
@@ -307,7 +333,8 @@ public class HistoryTextField extends JTextField
 			if(evt.getX() >= getWidth() - insets.right
 				|| GenericGUIUtilities.isPopupTrigger(evt))
 			{
-				controller.showPopupMenu(evt.isShiftDown());
+				// controller.showPopupMenu(evt.isShiftDown());
+				controller.showPopupMenu(KeyEventTranslator.isShiftDown(evt));
 			}
 			else
 				super.processMouseEvent(evt);
@@ -354,9 +381,9 @@ public class HistoryTextField extends JTextField
 		public void mouseReleased(MouseEvent evt)
 		{
 			SwingUtilities.invokeLater(() ->
-			{
-				if(selectAll)
-					selectAll();
+				{
+					if(selectAll)
+						selectAll();
 			});
 		} //}}}
 

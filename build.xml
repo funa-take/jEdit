@@ -669,7 +669,7 @@
 		description="run jEdit">
 		<java jar="${jar.location}/${jar.filename}"
 		      fork="true"
-		      spawn="true">
+		      spawn="false">
 			<arg value="-settings=${build.dir}/settings"/>
 		</java>
 	</target>
@@ -850,6 +850,7 @@
 					<compilerarg line="${config.build.compilerarg}"/>
 				</javac>
 				<javadoc locale="en"
+					 additionalparam="-J-Duser.language=en "
 					 sourcepath="${basedir}"
 					 destdir="${classes.dir}/javadoc/api"
 					 packagenames="org.*"
@@ -1260,13 +1261,13 @@
 		<copy todir="${dist.dir}/classes/mac/jEdit.app/Contents/Java/"
 		      overwrite="true">
 			<fileset dir="${dist.dir}"
-				   includes="doc/**
-					     jars/**
-					     keymaps/**
-					     macros/**
-					     modes/**
-					     properties/**
-					     startup/**"/>
+				     includes="doc/**
+					       jars/**
+					       keymaps/**
+					       macros/**
+					       modes/**
+					       properties/**
+					       startup/**"/>
 		</copy>
 		<copy todir="${dist.dir}/classes/mac/"
 		      overwrite="true">

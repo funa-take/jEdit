@@ -2507,14 +2507,14 @@ loop:			for(int i = 0; i < text.length(); i++)
 			rectSelect && select);
 		if(newCaret == -1)
 		{
-			int end = getLineEndOffset(caretLine) - 1;
-			if(caret == end)
-			{
+			// int end = getLineEndOffset(caretLine) - 1;
+			// if(caret == end)
+			// {
 				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				return;
-			}
-			else
-				newCaret = end;
+			// }
+			// else
+			// 	newCaret = end;
 		}
 
 		_changeLine(select, newCaret);
@@ -2543,9 +2543,12 @@ loop:			for(int i = 0; i < text.length(); i++)
 		if(getFirstLine() + getVisibleLines() >= displayManager
 			.getScrollLineCount())
 		{
-			int lastVisibleLine = displayManager
-				.getLastVisibleLine();
-			newCaret = getLineEndOffset(lastVisibleLine) - 1;
+			// int lastVisibleLine = displayManager
+			// 	.getLastVisibleLine();
+			// newCaret = getLineEndOffset(lastVisibleLine) - 1;
+			int caretScreenLine = getLastScreenLine();
+			newCaret = xToScreenLineOffset(caretScreenLine,
+				magic + horizontalOffset,true);
 		}
 		else
 		{
@@ -2554,15 +2557,16 @@ loop:			for(int i = 0; i < text.length(); i++)
 			scrollDownPage();
 
 			newCaret = xToScreenLineOffset(caretScreenLine,
-				magic,true);
+				magic + horizontalOffset,true);
 		}
 
-		if(select)
-			extendSelection(caret,newCaret);
-		else if(!multi)
-			selectNone();
+		// if(select)
+		// 	extendSelection(caret,newCaret);
+		// else if(!multi)
+		// 	selectNone();
 
-		moveCaretPosition(newCaret,false);
+		// moveCaretPosition(newCaret,false);
+		_changeLine(select, newCaret, false);
 
 		setMagicCaretPosition(magic);
 	} //}}}
@@ -2804,14 +2808,14 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 			rectSelect && select);
 		if(newCaret == -1)
 		{
-			int start = getLineStartOffset(caretLine);
-			if(caret == start)
-			{
+			// int start = getLineStartOffset(caretLine);
+			// if(caret == start)
+			// {
 				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
 				return;
-			}
-			else
-				newCaret = start;
+			// }
+			// else
+			// 	newCaret = start;
 		}
 
 		_changeLine(select, newCaret);
@@ -2840,9 +2844,12 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 
 		if(getFirstLine() == 0)
 		{
-			int firstVisibleLine = displayManager
-				.getFirstVisibleLine();
-			newCaret = getLineStartOffset(firstVisibleLine);
+			// int firstVisibleLine = displayManager
+			// 	.getFirstVisibleLine();
+			// newCaret = getLineStartOffset(firstVisibleLine);
+			int caretScreenLine = getScreenLineOfOffset(caret);
+			newCaret = xToScreenLineOffset(getFirstLine(),
+				magic + horizontalOffset,true);
 		}
 		else
 		{
@@ -2851,14 +2858,15 @@ loop:		for(int i = getCaretPosition() - 1; i >= 0; i--)
 			scrollUpPage();
 
 			newCaret = xToScreenLineOffset(caretScreenLine,
-				magic,true);
+				magic + horizontalOffset,true);
 		}
 
-		if(select)
-			extendSelection(caret,newCaret);
-		else if(!multi)
-			selectNone();
-		moveCaretPosition(newCaret,false);
+		// if(select)
+		// 	extendSelection(caret,newCaret);
+		// else if(!multi)
+		// 	selectNone();
+		// moveCaretPosition(newCaret,false);
+		_changeLine(select, newCaret, false);
 
 		setMagicCaretPosition(magic);
 	} //}}}
@@ -4883,8 +4891,8 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		// propotional fonts.
 		String charWidthSample = "mix";
 		charWidthDouble = painter.getFont().getStringBounds(charWidthSample,
-			painter.getFontRenderContext()).getWidth() / charWidthSample.length();
-		charWidth = (int)Math.round(charWidthDouble);
+				painter.getFontRenderContext()).getWidth() / charWidthSample.length();
+	    charWidth = (int)Math.round(charWidthDouble);
 
 		String oldWrap = wrap;
 		wrap = buffer.getStringProperty("wrap");
@@ -5098,10 +5106,10 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 			final int visible = visibleLines - (lastLinePartial ? 1 : 0);
 
 			ThreadUtilities.runInDispatchThread(() ->
-			{
-				vertical.setValues(firstLine,visible,0,lineCount);
-				vertical.setUnitIncrement(2);
-				vertical.setBlockIncrement(visible);
+				{
+					vertical.setValues(firstLine,visible,0,lineCount);
+					vertical.setUnitIncrement(2);
+					vertical.setBlockIncrement(visible);
 			});
 		}
 	} //}}}
@@ -5439,6 +5447,10 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 	//{{{ _changeLine() method
 	private void _changeLine(boolean select, int newCaret)
 	{
+		_changeLine(select, newCaret, true);
+	}
+	private void _changeLine(boolean select, int newCaret, boolean doElectricScroll)
+	{
 		if(select)
 		{
 			RectParams params = getRectParams(caret,newCaret);
@@ -5460,7 +5472,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		else if(!multi)
 			selectNone();
 
-		moveCaretPosition(newCaret);
+		moveCaretPosition(newCaret, doElectricScroll);
 	}//}}}
 
 	//{{{ lineContainsSpaceAndTabs() method
@@ -5810,6 +5822,16 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 			return null;
 
 		int newLine = getLineOfOffset(newCaret);
+		if (rectangularSelectionMode) {
+			int currentLine = getLineOfOffset(caret);
+			if (newLine == currentLine) {
+				if (  caret < newCaret && newLine < getLineCount() - 1) {
+					newLine++;
+				} else if (  newCaret < caret && 0 < newLine) {
+					newLine--;
+				}
+			}
+		}
 		int[] totalVirtualWidth = new int[1];
 		int newOffset = buffer.getOffsetOfVirtualColumn(newLine,
 			virtualWidth,totalVirtualWidth);
@@ -5991,7 +6013,10 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 			if(softWrap)
 			{
 				wrapToWidth = true;
-				wrapMargin = painter.getWidth() - charWidth * 3;
+				// funa edit
+				// wrapMargin = painter.getWidth() - charWidth * 3;
+				wrapMargin = (int)(getWidth() - gutter.getPreferredSize().getWidth() - verticalBox.getPreferredSize().getWidth()) - charWidth * 3;
+				
 			}
 			else
 			{

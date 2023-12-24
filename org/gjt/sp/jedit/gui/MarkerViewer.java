@@ -35,7 +35,9 @@ import org.gjt.sp.jedit.msg.EditPaneUpdate;
 import org.gjt.sp.jedit.msg.ViewUpdate;
 //}}}
 /** Dockable view of markers in the current buffer */
-public class MarkerViewer extends JPanel implements ActionListener
+// Funa add
+// public class MarkerViewer extends JPanel implements ActionListener
+public class MarkerViewer extends JPanel implements ActionListener,DefaultFocusComponent
 {
 	//{{{ MarkerViewer constructor
 	public MarkerViewer(View view)
@@ -85,6 +87,7 @@ public class MarkerViewer extends JPanel implements ActionListener
 		markerList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		markerList.setCellRenderer(new Renderer());
 		markerList.addMouseListener(new MouseHandler());
+		// funa add
 		markerList.addKeyListener(new KeyHandler());
 		markerListScroller = new JScrollPane(markerList);
 
@@ -100,7 +103,14 @@ public class MarkerViewer extends JPanel implements ActionListener
 	{
 		markerList.requestFocus();
 		return true;
-	} //}}}
+	} 
+
+	// Funa add
+	public void focusOnDefaultComponent() {
+        	markerList.requestFocus();
+	}
+	
+	//}}}
 
 	//{{{ actionPerformed() method
 	@Override
@@ -207,16 +217,24 @@ public class MarkerViewer extends JPanel implements ActionListener
 	} //}}}
 
 	//{{{ goToSelectedMarker() method
-	private void goToSelectedMarker()
-	{
+	// funa add
+	private void goToSelectedMarker(boolean requestFocus) {
 		Marker mark = markerList.getSelectedValue();
 		if (mark == null)
 			return;
 
 		view.getTextArea().setCaretPosition(mark.getPosition());
+		if (requestFocus) {
 		view.toFront();
 		view.requestFocus();
 		view.getTextArea().requestFocus();
+		}
+	}
+	
+	// Funa add
+	private void goToSelectedMarker()
+	{
+		goToSelectedMarker(true);
 	} //}}}
 
 	//{{{ updateSelection() method
@@ -228,12 +246,12 @@ public class MarkerViewer extends JPanel implements ActionListener
 		for (int i = 0; i < model.getSize(); i++)
 		{
 			Marker mark = model.getElementAt(i);
-			if (buffer.getLineOfOffset(mark.getPosition()) == currentLine)
-			{
-				markerList.setSelectedIndex(i);
-				break;
+				if (buffer.getLineOfOffset(mark.getPosition()) == currentLine)
+				{
+					markerList.setSelectedIndex(i);
+					break;
+				}
 			}
-		}
 
 	} //}}}
 
@@ -292,14 +310,25 @@ public class MarkerViewer extends JPanel implements ActionListener
 		@Override
 		public void keyPressed(KeyEvent evt)
 		{			
+			// Funa edit
+			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
+				org.gjt.sp.jedit.gui.UserKey.consume(evt,0,0,0,0,true);
+				if (evt.isConsumed()){
+					return;
+				}
+			}
+			
 			if(evt.getKeyCode() == KeyEvent.VK_SPACE
 			   || evt.getKeyCode() == KeyEvent.VK_ENTER)
 			{
 				evt.consume();
-				goToSelectedMarker();
+				if (evt.isAltDown()){
+					goToSelectedMarker(false);	
+				} else {
+					goToSelectedMarker(true);
+			}
+				// goToSelectedMarker();
 			}
 		}
 	} //}}}
-
-	//}}}
 }
