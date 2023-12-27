@@ -149,7 +149,8 @@ public class DisplayTokenHandler extends DefaultTokenHandler
 
 	// Don't have chunks longer than a limit to avoid slowing things down.
 	// For example, too long chunks are hardly clipped out at rendering.
-	public static int MAX_CHUNK_LEN = 1;
+	// public static int MAX_CHUNK_LEN = 1;
+	public static int MAX_CHUNK_LEN = 100;
 
 	//{{{ Instance variables
 	private SyntaxStyle[] styles;
