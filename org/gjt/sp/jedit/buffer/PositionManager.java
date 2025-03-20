@@ -156,11 +156,13 @@ class PositionManager
 	{
 		int offset;
 		int ref;
+		int beforeOffset;
 
 		//{{{ PosBottomHalf constructor
 		PosBottomHalf(int offset)
 		{
 			this.offset = offset;
+			saveBeforeOffset();
 		} //}}}
 
 		//{{{ ref() method
@@ -176,12 +178,26 @@ class PositionManager
 				positions.remove(this);
 		} //}}}
 
+		private void saveBeforeOffset() {
+			this.beforeOffset = this.offset;
+		}
+		
+		private int getBeforeOffset() {
+			return this.beforeOffset;
+		}
+
 		//{{{ contentInserted() method
 		void contentInserted(int offset, int length)
 		{
 			if(offset > this.offset)
 				throw new ArrayIndexOutOfBoundsException();
+			int beforeOffset = getBeforeOffset();
+			if (this.offset != beforeOffset && beforeOffset <= buffer.getLength()) {
+				this.offset = beforeOffset;
+			} else {
 			this.offset += length;
+			}
+			saveBeforeOffset();
 			checkInvariants();
 		} //}}}
 
@@ -190,10 +206,14 @@ class PositionManager
 		{
 			if(offset > this.offset)
 				throw new ArrayIndexOutOfBoundsException();
-			if(this.offset <= offset + length)
+			if(this.offset <= offset + length) {
+				saveBeforeOffset();
 				this.offset = offset;
-			else
+			} else {
 				this.offset -= length;
+				saveBeforeOffset();
+			}
+			
 			checkInvariants();
 		} //}}}
 
