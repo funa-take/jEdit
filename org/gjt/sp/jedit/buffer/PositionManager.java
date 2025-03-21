@@ -192,10 +192,14 @@ class PositionManager
 			if(offset > this.offset)
 				throw new ArrayIndexOutOfBoundsException();
 			int beforeOffset = getBeforeOffset();
-			if (this.offset != beforeOffset && beforeOffset <= buffer.getLength()) {
+			if (this.offset != beforeOffset 
+				&& offset <= beforeOffset
+				&& beforeOffset <= offset + length)
+			{
+				// System.out.println("resotre " + offset + " : " + beforeOffset);
 				this.offset = beforeOffset;
 			} else {
-			this.offset += length;
+				this.offset += length;
 			}
 			saveBeforeOffset();
 			checkInvariants();
