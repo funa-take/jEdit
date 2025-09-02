@@ -316,6 +316,9 @@ public class SearchDialog extends EnhancedDialog
 		focusOrder.add(searchSubDirectories);
 		focusOrder.add(skipHidden);
 		focusOrder.add(skipBinaryFiles);
+		if (jEdit.getPlugin("funa.util.FunaUtilPlugin") != null) {
+			focusOrder.add(useGrep);
+		}
 	} //}}}
 
 	//{{{ dispose() method
@@ -351,6 +354,7 @@ public class SearchDialog extends EnhancedDialog
 	private JCheckBox searchSubDirectories;
 	private JCheckBox skipBinaryFiles;
 	private JCheckBox skipHidden;
+	private JCheckBox useGrep;
 
 	private JButton choose;
 	private JButton synchronize;
@@ -466,6 +470,11 @@ public class SearchDialog extends EnhancedDialog
 
 		stringReplace = new JRadioButton(jEdit.getProperty(
 			"search.string-replace-btn"));
+		// funa edit
+		String mnemonic = jEdit.getProperty("search.string-replace-btn.mnemonic");
+		if (mnemonic != null){
+			stringReplace.setMnemonic(mnemonic.charAt(0));
+		}
 		stringReplace.addActionListener(replaceActionHandler);
 		grp.add(stringReplace);
 		cons.gridwidth = 1;
@@ -475,6 +484,11 @@ public class SearchDialog extends EnhancedDialog
 		cons.insets = new Insets(0,12,0,0);
 		beanShellReplace = new JRadioButton(jEdit.getProperty(
 			"search.beanshell-replace-btn"));
+		// funa edit
+		mnemonic = jEdit.getProperty("search.beanshell-replace-btn.mnemonic");
+		if (mnemonic != null){
+			beanShellReplace.setMnemonic(mnemonic.charAt(0));
+		}
 		beanShellReplace.addActionListener(replaceActionHandler);
 		grp.add(beanShellReplace);
 		fieldPanel.add(beanShellReplace,cons);
@@ -689,7 +703,10 @@ public class SearchDialog extends EnhancedDialog
 		cons.gridy++;
 		cons.gridwidth = 3;
 
-		JPanel dirCheckBoxPanel = new JPanel();
+		JPanel dirCheckBoxPanel = new JPanel(new VariableGridLayout(
+			VariableGridLayout.FIXED_NUM_COLUMNS,3));
+		dirCheckBoxPanel.setBorder(new EmptyBorder(0,0,12,12));
+		
  		searchSubDirectories = new JCheckBox(jEdit.getProperty(
  			"search.subdirs"));
  		String mnemonic = jEdit.getProperty(
@@ -697,12 +714,20 @@ public class SearchDialog extends EnhancedDialog
 		searchSubDirectories.setMnemonic(mnemonic.charAt(0));
 		searchSubDirectories.setSelected(jEdit.getBooleanProperty("search.subdirs.toggle"));
 		skipHidden = new JCheckBox(jEdit.getProperty("search.skipHidden"));
+		skipHidden.setMnemonic(jEdit.getProperty("search.skipHidden.mnemonic").charAt(0));
 		skipHidden.setSelected(jEdit.getBooleanProperty("search.skipHidden.toggle", true));
 		skipBinaryFiles = new JCheckBox(jEdit.getProperty("search.skipBinary"));
+		skipBinaryFiles.setMnemonic(jEdit.getProperty("search.skipBinary.mnemonic").charAt(0));
 		skipBinaryFiles.setSelected(jEdit.getBooleanProperty("search.skipBinary.toggle", true));
+		useGrep = new JCheckBox(jEdit.getProperty("search.useGrep"));
+		useGrep.setMnemonic(jEdit.getProperty("search.useGrep.mnemonic").charAt(0));
+		useGrep.setSelected(jEdit.getBooleanProperty("search.useGrep.toggle", false));
 		dirCheckBoxPanel.add(searchSubDirectories);
 		dirCheckBoxPanel.add(skipHidden);
 		dirCheckBoxPanel.add(skipBinaryFiles);
+		if (jEdit.getPlugin("funa.util.FunaUtilPlugin") != null) {
+			dirCheckBoxPanel.add(useGrep);
+		}
 
 		cons.insets = new Insets(0, 0, 0, 0);
 		cons.gridy++;
@@ -781,6 +806,7 @@ public class SearchDialog extends EnhancedDialog
 		searchSubDirectories.setEnabled(searchDirs);
 		skipHidden.setEnabled(searchDirs);
 		skipBinaryFiles.setEnabled(searchDirs);
+		useGrep.setEnabled(searchDirs);
 
 		synchronize.setEnabled(searchAllBuffers.isSelected()
 			|| searchDirectory.isSelected());
@@ -812,6 +838,7 @@ public class SearchDialog extends EnhancedDialog
 			jEdit.setBooleanProperty("search.subdirs.toggle", searchSubDirectories.isSelected());
 			jEdit.setBooleanProperty("search.skipHidden.toggle", skipHidden.isSelected());
 			jEdit.setBooleanProperty("search.skipBinary.toggle", skipBinaryFiles.isSelected());
+			jEdit.setBooleanProperty("search.useGrep.toggle", useGrep.isSelected());
 
 			String filter = this.filter.getText();
 			this.filter.addCurrentToHistory();
@@ -1227,4 +1254,8 @@ public class SearchDialog extends EnhancedDialog
 	} //}}}
 
 	//}}}
+	
+	public DirectoryListSet getDirectoryListSet() {
+		return new DirectoryListSet(directoryField.getText(), filter.getText(), searchSubDirectories.isSelected());
+	}
 }

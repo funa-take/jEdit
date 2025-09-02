@@ -39,6 +39,8 @@ import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.SyntaxUtilities;
 
+// funa add
+import java.awt.Robot;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -955,7 +957,7 @@ public class GUIUtilities
 	 * @return an integer indicating the option selected by the user
 	 * @since jEdit 4.3pre12
 	 */
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({"unchecked"}) 
 	public static int listConfirm(final Component comp, final String name, final String[] args,
 		final Object[] listModel, final List selectedItems)
 	{
@@ -1486,6 +1488,19 @@ public class GUIUtilities
 		return null;
 	} //}}}
 
+	// Funa add
+	public static Robot getRobot(){
+		if (robot == null){
+			try {
+				robot = new Robot();
+			} catch (Exception e){
+				
+			}
+			
+		}
+		return robot;
+	}
+
 	//{{{ getView() method
 	/**
 	 * Finds the view parent of the specified component.
@@ -1665,6 +1680,8 @@ public class GUIUtilities
 	//{{{ Private members
 	private static SplashScreen splash;
 	private static SoftReference<Map<String, Icon>> iconCache;
+	// funa add
+	private static Robot robot;
 	private static String iconPath = "jeditresource:/org/gjt/sp/jedit/icons/themes/";
 	private static final String defaultIconPath = "jeditresource:/org/gjt/sp/jedit/icons/themes/";
 	private static final Map<String, String> deprecatedIcons = new HashMap<>();
@@ -1811,7 +1828,7 @@ public class GUIUtilities
 	 * A combined ComponentListener and WindowStateListener to continually save a Frames size.<br />
 	 * For non-Frame's use {@link GUIUtilities#saveGeometry(Window,String)}
 	 *
-	 * @author Björn Kautler
+	 * @author Bjﾃｶrn Kautler
 	 * @version $Id$
 	 * @since jEdit 4.3pre6
 	 * @see GUIUtilities#saveGeometry(Window,Container,String)
@@ -1872,7 +1889,7 @@ public class GUIUtilities
 					break;
 			}
 		} //}}}
-
+		
 		//{{{ cancelResizeSave() method
 		private void cancelResizeSave()
 		{

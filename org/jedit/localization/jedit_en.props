@@ -1027,8 +1027,12 @@ search.find.tooltip=PgUp/PgDown or right-click to recall previous
 search.find.mnemonic=s
 search.replace=Replace with:
 search.replace.mnemonic=w
-search.string-replace-btn=Text
-search.beanshell-replace-btn=Return value of a BeanShell snippet
+# funa edit start
+search.string-replace-btn=Text (1)
+search.string-replace-btn.mnemonic=1
+search.beanshell-replace-btn=Return value of a BeanShell snippet (2)
+search.beanshell-replace-btn.mnemonic=2
+# funa edit end
 
 search.settings=Settings:
 search.keep=Keep dialog
@@ -1040,8 +1044,8 @@ search.case=Ignore case
 search.case.mnemonic=i
 search.regexp=Regular expressions
 search.regexp.mnemonic=x
-search.hypersearch=HyperSearch
-search.hypersearch.mnemonic=h
+search.hypersearch=HyperSearch (3)
+search.hypersearch.mnemonic=3
 search.wrap=Auto wrap
 search.wrap.mnemonic=t
 
@@ -1064,11 +1068,14 @@ search.skipHidden=Skip hiddens/backups
 search.skipBinary=Skip binary files
 search.skipHidden.mnemonic=h
 search.skipBinary.mnemonic=b
+search.useGrep=Use Grep
+search.useGrep.mnemonic=g
 
 search.directoryField=Directory:
 search.directoryField.mnemonic=y
 search.filterField=Filter:
-search.filterField.mnemonic=f
+# funa edit
+search.filterField.mnemonic=t
 glob.tooltip={*.c,*.h} for multiple extensions
 search.subdirs=Search subdirectories
 search.subdirs.mnemonic=u
@@ -1934,6 +1941,8 @@ options.browser.general.doubleClickClose=Double-clicking an open file closes it
 options.browser.general.currentBufferFilter=Filter in file dialogs is \
 	current buffer extension
 options.browser.general.useDefaultIcons=Use default icons
+options.browser.general.parentDir.maxWidth=Max width of parent directory window(0 is no limit)
+options.browser.general.parentDir.maxHeight=Max height of parent directory window(0 is no limit)
 #}}}
 
 #{{{ Browser Context Menu
@@ -2048,8 +2057,13 @@ vfs.browser.title.open=File Browser - Open
 vfs.browser.title.save=File Browser - Save
 vfs.browser.title.dialog=File Browser - Open
 vfs.browser.path=Path:
-vfs.browser.path.mnemonic=p
+# Funa Edit
+# vfs.browser.path.mnemonic=p
+vfs.browser.path.mnemonic=a
 vfs.browser.filter=Filter:
+# funa add
+vfs.browser.filter.mnemonic=t
+
 vfs.browser.tree.loading=Loading...
 
 vfs.browser.name=Name
@@ -2073,6 +2087,9 @@ vfs.browser.browse-window.label=Browse in New Window
 vfs.browser.browse.label=Browse
 vfs.browser.close.label=Close
 vfs.browser.copy-path.label=Copy
+# edit funa
+vfs.browser.copy-path2.label=Copy Path Name
+
 vfs.browser.delete.label=Delete...
 vfs.browser.home.label=Home Directory
 vfs.browser.properties.label=Properties
@@ -2101,7 +2118,9 @@ vfs.browser.next.label=Next Directory
 #}}}
 
 #{{{ Commands menu
-vfs.browser.commands.label=$Commands
+# funa edit
+# vfs.browser.commands.label=$Commands
+vfs.browser.commands.label=Co$mmands
 vfs.browser.commands.encoding.label=Encoding
 vfs.browser.commands.encoding.auto-detect=Auto-detect
 

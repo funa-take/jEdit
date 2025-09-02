@@ -24,6 +24,7 @@ package org.gjt.sp.jedit.gui;
 
 //{{{ Imports
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.text.*;
 import java.awt.event.*;
 import org.gjt.sp.jedit.*;
@@ -274,6 +275,8 @@ public class HistoryText
 			return;
 		}
 
+		// Funa Add
+		ActionHandler actionListener = new ActionHandler();
 		popup = new JPopupMenu()
 		{
 			@Override
@@ -286,12 +289,32 @@ public class HistoryText
 				super.setVisible(b);
 			}
 		};
+		popup.addMenuKeyListener(new MenuKeyListener(){
+				@Override
+				public void menuKeyPressed(MenuKeyEvent evt){
+					if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
+						org.gjt.sp.jedit.gui.UserKey.consume(evt,0,0,0,0,true);
+						if (evt.isConsumed()){
+							return;
+						}
+					}
+				}
+				@Override
+				public void menuKeyReleased(MenuKeyEvent evt){
+				}
+				@Override
+				public void menuKeyTyped(MenuKeyEvent evt){
+				}
+		});
 		JMenuItem caption = new JMenuItem(jEdit.getProperty(
 			"history.caption"));
 		caption.addActionListener(e -> new ListModelEditor().open(historyModel));
  		popup.add(caption);
  		popup.addSeparator();
-
+		// Funa Add
+		int maxItems = jEdit.getIntegerProperty("menu.spillover",20);
+		JMenu menu = null;
+		int count = 0;
 		for(int i = 0; i < historyModel.getSize(); i++)
 		{
 			String item = historyModel.getItem(i);
@@ -299,9 +322,28 @@ public class HistoryText
 			{
 				JMenuItem menuItem = new JMenuItem(item);
 				menuItem.setActionCommand(String.valueOf(i));
-				menuItem.addActionListener(
-					new ActionHandler());
+				// Funa edit
+				// menuItem.addActionListener(
+				// new ActionHandler());
+				menuItem.addActionListener(actionListener);
+				if (count >= maxItems && i < historyModel.getSize() - 1){
+					JMenu newMenu = new JMenu(jEdit.getProperty("common.more"));
+					if (menu != null){
+						menu.add(newMenu);
+					} else {
+						popup.add(newMenu);
+					}
+					menu = newMenu;
+					count = 0;
+				}
+				
+				if (menu != null){
+					menu.add(menuItem);
+				} else {
 				popup.add(menuItem);
+			}
+				// Funa add
+				count++;
 			}
 		}
 

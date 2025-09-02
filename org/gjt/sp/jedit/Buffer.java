@@ -224,8 +224,7 @@ public class Buffer extends JEditBuffer
 		// for untitled: re-read autosave file if enabled
 		if(reload || !getFlag(NEW_FILE) || (isUntitled() && autosaveUntitled))
 		{
-			if(file != null)
-				modTime = file.lastModified();
+			modTime = (file != null) ? file.lastModified() : this.getModifiedFromVFSFile(view);
 
 			// Only on initial load
 			if(!reload && autosaveFile != null && autosaveFile.exists())
@@ -498,9 +497,9 @@ public class Buffer extends JEditBuffer
 		if(path == null && getFlag(NEW_FILE))
 			return saveAs(view,rename);
 
-		if(path == null && file != null)
+		if(path == null)
 		{
-			long newModTime = file.lastModified();
+			long newModTime = (file != null) ? file.lastModified() : this.getModifiedFromVFSFile(view);
 
 			if((newModTime != modTime) && (getAutoReload() || getAutoReloadDialog()))
 			{
@@ -690,8 +689,9 @@ public class Buffer extends JEditBuffer
 		// oldModTime, due to the multithreading
 		// - only supported on local file system
 		// - for untitled, do not check
-		if(!isPerformingIO() && file != null && !getFlag(NEW_FILE) && !isUntitled())
+		if(!isPerformingIO() && !getFlag(NEW_FILE) && !isUntitled())
 		{
+			if (file != null) {
 			boolean newReadOnly = file.exists() && !file.canWrite();
 			if(newReadOnly != isFileReadOnly())
 			{
@@ -718,6 +718,16 @@ public class Buffer extends JEditBuffer
 					return FILE_CHANGED;
 				}
 			}
+			} else {
+				long oldModTime = modTime;
+				long newModTime = this.getModifiedFromVFSFile(view);
+	
+				if(newModTime != oldModTime)
+				{
+					modTime = newModTime;
+					return FILE_CHANGED;
+				}
+			}
 		}
 
 		return FILE_NOT_CHANGED;
@@ -735,7 +745,44 @@ public class Buffer extends JEditBuffer
 	public long getLastModified()
 	{
 		return modTime;
-	} //}}}
+	} 
+	
+	public long getModifiedFromVFSFile(View view)
+	{
+		long modifiedTime = modTime;
+		
+		if (this.path == null) {
+			return modifiedTime;
+		}
+		
+		VFS vfs = VFSManager.getVFSForPath(path);
+		Object session = vfs.createVFSSession(path, view);
+		if(session == null) {
+			return modifiedTime;
+		}
+		
+		try {
+			VFSFile file = vfs._getFile(session,path,view);
+			if(file == null) {
+				return modifiedTime;
+			}
+			modifiedTime = file.getModified();
+	    } catch(IOException e) {
+	    	// VFSManager.error(view,path,"ioerror",
+			// 		new String[] { e.toString() });
+			Log.log(Log.ERROR,this,e);
+		} finally {
+			try{
+				vfs._endVFSSession(session,view);
+			} catch (Exception e){
+				// VFSManager.error(view,path,"ioerror",
+				// 	new String[] { e.toString() });
+				Log.log(Log.ERROR,this,e);
+			}
+		}
+		return modifiedTime;
+	}
+	//}}}
 
 	//{{{ setLastModified() method
 	/**
@@ -1257,12 +1304,12 @@ public class Buffer extends JEditBuffer
 		if (parentValue != null)
 			return parentValue;
 
-		ParserRuleSet rules = getRuleSetAtOffset(offset);
+			ParserRuleSet rules = getRuleSetAtOffset(offset);
 
 		Object value = jEdit.getMode(rules.getModeName()).getProperty(name);
 
-		if(value == null)
-			value = mode.getProperty(name);
+			if(value == null)
+				value = mode.getProperty(name);
 
 		if(value == null)
 			return null;
@@ -1297,8 +1344,13 @@ public class Buffer extends JEditBuffer
 		}
 		if (mode != null)
 		{
+			// funa Edit
+			int longLineLimit = jEdit.getIntegerProperty("longLineLimit", 4000);
 			int largeBufferSize = jEdit.getIntegerProperty("largeBufferSize", 4000000);
-			if (!getFlag(TEMPORARY) && getLength() > largeBufferSize && largeBufferSize > 0)
+			if (!getFlag(TEMPORARY) && 
+				((getLength() > largeBufferSize && largeBufferSize > 0)
+					|| (0 < longLineLimit && 0 < getLineCount() && longLineLimit < (getLength() / getLineCount())))
+				)
 			{
 				mode.loadIfNecessary();
 				boolean contextInsensitive = mode.getBooleanProperty("contextInsensitive");
@@ -2222,9 +2274,9 @@ public class Buffer extends JEditBuffer
 		}
 		else
 		{
-			initialLength = getLength();
-			md5hash = calculateHash();
-		}
+		initialLength = getLength();
+		md5hash = calculateHash();
+	}
 	}
 
 	//{{{ finishLoading() method
@@ -2312,8 +2364,7 @@ public class Buffer extends JEditBuffer
 		//{{{ Update this buffer for the new path
 		if(rename)
 		{
-			if(file != null)
-				modTime = file.lastModified();
+			modTime = (file != null) ? file.lastModified() : this.getModifiedFromVFSFile(view);
 
 			if(!error)
 			{

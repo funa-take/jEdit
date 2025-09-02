@@ -57,14 +57,14 @@ class PositionManager
 		PosBottomHalf existing;
 		Position posTopHalf;
 		synchronized (this)
-		{
-			PosBottomHalf bh = new PosBottomHalf(offset);
+	{
+		PosBottomHalf bh = new PosBottomHalf(offset);
 			existing = positions.get(bh);
-			if(existing == null)
-			{
-				positions.put(bh,bh);
-				existing = bh;
-			}
+		if(existing == null)
+		{
+			positions.put(bh,bh);
+			existing = bh;
+		}
 
 			posTopHalf = new PosTopHalf(existing);
 			existing.ref();
@@ -161,11 +161,13 @@ class PositionManager
 	{
 		private int offset;
 		private int ref;
+		int beforeOffset;
 
 		//{{{ PosBottomHalf constructor
 		PosBottomHalf(int offset)
 		{
 			this.offset = offset;
+			saveBeforeOffset();
 		} //}}}
 
 		//{{{ getOffset() method
@@ -187,12 +189,30 @@ class PositionManager
 				positions.remove(this);
 		} //}}}
 
+		private void saveBeforeOffset() {
+			this.beforeOffset = this.offset;
+		}
+		
+		private int getBeforeOffset() {
+			return this.beforeOffset;
+		}
+
 		//{{{ contentInserted() method
 		void contentInserted(int offset, int length)
 		{
 			if(offset > this.offset)
 				throw new ArrayIndexOutOfBoundsException(offset);
+			int beforeOffset = getBeforeOffset();
+			if (this.offset != beforeOffset 
+				&& offset <= beforeOffset
+				&& beforeOffset <= offset + length)
+			{
+				// System.out.println("resotre " + offset + " : " + beforeOffset);
+				this.offset = beforeOffset;
+			} else {
 			this.offset += length;
+			}
+			saveBeforeOffset();
 			checkInvariants();
 		} //}}}
 
@@ -201,10 +221,14 @@ class PositionManager
 		{
 			if(offset > this.offset)
 				throw new ArrayIndexOutOfBoundsException(offset);
-			if(this.offset <= offset + length)
+			if(this.offset <= offset + length) {
+				saveBeforeOffset();
 				this.offset = offset;
-			else
+			} else {
 				this.offset -= length;
+				saveBeforeOffset();
+			}
+			
 			checkInvariants();
 		} //}}}
 

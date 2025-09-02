@@ -1,0 +1,102 @@
+○履歴はgitで管理
+
+○2019/06/18
+  HyperSearchの結果表示で、 １行に複数箇所マッチしても最初の１つしかハイライトされないバグを修正
+
+○2019/06/03
+  ActivityLogのフォントのアンチエイリアスとカラーを修正
+  
+○2019/04/22
+  ファイルブラウザでC+c、C+vでファイルのコピペをできるように修正
+  
+○2018/11/03
+  ファイルブラウザでカレントファイルに移動する際に、移動先のファイルがリストの最後の場合にスクロールバーが正しい位置にスクロールしない問題を修正。
+○2018/08/24
+  修飾キーの変換方法を変更
+○2018/08/11
+  UserKeyのマスクをKeyEventTranslate後のALT_MASKに固定。
+
+○2018/05/25
+  FileBrowserの親ディレクトリ表示の高さ（ダイアログ表示の場合は幅）が
+  自動で拡張されるときに最大の高さ（幅）を設定できるように修正。
+  オプション画面のGeneralに項目を２つ追加した。
+  
+○2018/05/24
+  jEdit 5.5.0に対応。
+
+○2018/04/08
+  ・Java9、Java10でエラーが発生しないように修正
+    org\gjt\sp\jedit\proto\jeditresource\Handler.java
+    の
+    c.connect();
+    をコメントアウト
+
+○2017/10/20
+  ・検索ダイアログのHyperSearchのショートカットを alt + h から alt + 3 に変更
+  alt + h はテキストボックスで使用するとダイアログボックスを消す機能を付けたため
+  
+○2017/01/11
+  ・ファイルブラウザでファイル選択時にファイル名以外にサイズと更新日を表示するように修正
+
+○2015/06/11
+  ・矩形選択したものを貼り付ける際に、全角文字を１文字幅でカウントしていたのを修正
+  
+○2015/02/11
+  ・全角文字のカウントを2文字に変更し、矩形選択の時に全角があってもずれないように修正
+
+○2015/02/11 以前
+  ・EOLの変更
+    +--------------------+----------+
+    |Unix（\n）          |下矢印    |
+    +--------------------+----------+
+    |DOS/Windows（\r\n） |下、左矢印|
+    +--------------------+----------+
+    |Mac（\r）           |左矢印    |
+    +--------------------+----------+
+    
+  ・EOFのマークとして [EOF] を表示
+
+○以下未整理
+○2011/10/16
+ jEdit 4.4.2 へ対応
+
+○2011/07/24
+ FileBrower で Copy File Path を追加
+
+○2011/07/07
+ HyperSearch Results で shift + alt + i などが使えるように修正
+
+○2011/06/30
+ 起動時のリモートファイルの読込のバグを修正
+
+○2011/06/26
+ jEdit 4.4.1 に以下の修正内容を適用
+
+○2011/02/16
+  ・Registersの Paste関数の処理を変更（余計な機能を削除）
+
+○2011/02/11
+  4.4 pre1 リリースのため以下の変更を適用
+  ・CompletionPopup.java　のキー操作
+  ・区切り文字追加（DisplayTokenHandler,TokenMaker ）
+  ・EOF,EOLの変更
+  ・TextUtilities に isWordSeparator追加
+  ・GUIUtilities に getRobot追加
+  ・HistoryText.javaの履歴表示を変更
+    プロパティ値menu.spilloverを使って表示するように変更
+  ・HistoryTextField、HistoryTextAreaのキー操作変更
+  ・HyperSearchResults のキー操作修正
+  ・VFSのpath、Filter に ショートカット追加
+  ・VSFBrowser の各コマンドボタンを使用可能に
+  ・PasteFromListDialog.java
+    にキー操作追加。
+    KeyHandlerクラスの追加
+  ・MarkerViewerにキー操作を追加
+  ・TextAreaの再表示の計算
+  ・KeyEventWorkaround の修正はこのバージョンでは行わない。
+  ・FileBrowserでファイル選択時に下のバーに名前を表示
+  ・VFSDirectoryEntryTable　でのキー操作修正
+  ・VFSFileChooserDialog 
+    / を入力したときにrootに移動
+  ・VFSFileNameField
+    キー操作、Alt+Fの操作、Enter時の動作を変更

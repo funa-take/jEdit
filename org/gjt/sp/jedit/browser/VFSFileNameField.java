@@ -31,9 +31,12 @@ import java.util.Set;
 import org.gjt.sp.jedit.gui.HistoryTextField;
 import org.gjt.sp.jedit.io.*;
 import org.gjt.sp.jedit.MiscUtilities;
+// funa add
+import org.gjt.sp.jedit.OperatingSystem;
 
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.TaskManager;
+import org.gjt.sp.jedit.gui.KeyEventTranslator;
 //}}}
 
 /**
@@ -64,11 +67,35 @@ public class VFSFileNameField extends HistoryTextField
 	} //}}}
 
 	//{{{ processKeyEvent() method
+	// Funa Edit
+	public void requestFocus() {
+		VFSFile[] list = browser.getBrowserView().getTable().getSelectedFiles();
+		if (list.length > 0 && list[0].getType() == VFSFile.FILE) {
+			setText(list[0].getPath());
+			setSelectionStart(0);
+			setSelectionEnd(getText().length());
+		}
+		browser.getBrowserView().getTable().clearSelection();
+		super.requestFocus();
+	}
+	
 	@Override
 	public void processKeyEvent(KeyEvent evt)
 	{
 		if(evt.getID() == KeyEvent.KEY_PRESSED)
 		{
+			//  Funa Edit
+			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class") != null) {
+				org.gjt.sp.jedit.gui.UserKey.consume(evt,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+					true);
+				if (evt.isConsumed()) {
+					return;
+				}
+			}
 			String path = getText();
 
 			switch(evt.getKeyCode())
@@ -77,10 +104,14 @@ public class VFSFileNameField extends HistoryTextField
 				doComplete(path);
 				break;
 			case KeyEvent.VK_LEFT:
-				if ((evt.getModifiersEx() & InputEvent.ALT_DOWN_MASK) == InputEvent.ALT_DOWN_MASK)
+				// if ((evt.getModifiersEx() & InputEvent.ALT_DOWN_MASK) == InputEvent.ALT_DOWN_MASK)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					browser.previousDirectory();
 					evt.consume();
+					// Funa edit
+				} else if (getCaretPosition() == 0) {
+					browser.getBrowserView().getTable().processKeyEvent(evt);
 				}
 				else
 				{
@@ -89,7 +120,8 @@ public class VFSFileNameField extends HistoryTextField
 				}
 				break;
 			case KeyEvent.VK_UP:
-				if ((evt.getModifiersEx() & InputEvent.ALT_DOWN_MASK) == InputEvent.ALT_DOWN_MASK)
+				// if ((evt.getModifiersEx() & InputEvent.ALT_DOWN_MASK) == InputEvent.ALT_DOWN_MASK)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					String p = browser.getDirectory();
 					browser.setDirectory(MiscUtilities.getParentOfPath(p));
@@ -102,10 +134,15 @@ public class VFSFileNameField extends HistoryTextField
 				}
 				break;
 			case KeyEvent.VK_RIGHT:
-				if ((evt.getModifiersEx() & InputEvent.ALT_DOWN_MASK) == InputEvent.ALT_DOWN_MASK)
+				// if ((evt.getModifiersEx() & InputEvent.ALT_DOWN_MASK) == InputEvent.ALT_DOWN_MASK)
+				if (KeyEventTranslator.isAltDown(evt))
 				{
 					evt.consume();
 					browser.nextDirectory();
+					// Funa edit
+				} else if (getCaretPosition() == getDocument().getLength()) {
+					// System.out.println("test");
+					browser.getBrowserView().getTable().processKeyEvent(evt);
 				}
 				else
 					super.processKeyEvent(evt);
@@ -117,8 +154,15 @@ public class VFSFileNameField extends HistoryTextField
 					.processKeyEvent(evt);
 				break;
 			case KeyEvent.VK_ENTER:
+				// Funa Edit
+				if (KeyEventTranslator.isAltDown(evt)){
+					if (!OperatingSystem.isMacOS() && (OperatingSystem.isWindows() || OperatingSystem.isUnix())){
+						org.gjt.sp.jedit.GUIUtilities.getRobot().keyPress(KeyEvent.VK_ALT);
+					}
+				}
 				browser.filesActivated(
-					(evt.isShiftDown()
+					// (evt.isShiftDown()
+					(KeyEventTranslator.isShiftDown(evt)
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN),false);
 				setText(null);
@@ -132,7 +176,10 @@ public class VFSFileNameField extends HistoryTextField
 		else if(evt.getID() == KeyEvent.KEY_TYPED)
 		{
 			char ch = evt.getKeyChar();
-			if(ch > 0x20 && ch != 0x7f && ch != 0xff)
+			// Funa Edit
+			// if(ch > 0x20 && ch != 0x7f && ch != 0xff)
+			// if(ch > 0x20 && ch != 0x7f && ch != 0xff && !evt.isAltDown())
+			if(ch > 0x20 && ch != 0x7f && ch != 0xff && !KeyEventTranslator.isAltDown(evt))
 			{
 				super.processKeyEvent(evt);
 				String path = getText();

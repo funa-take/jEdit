@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.*;
 
 import org.gjt.sp.jedit.gui.DockableWindowManager;
+import org.gjt.sp.jedit.gui.KeyEventTranslator;
 import org.gjt.sp.jedit.io.*;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.util.GenericGUIUtilities;
@@ -71,6 +72,44 @@ class BrowserView extends JPanel
 		parentScroller.setMinimumSize(new Dimension(0,0));
 
 		table = new VFSDirectoryEntryTable(this);
+		
+		// funa edit 
+		Action copyAction = new AbstractAction("vfs.browser.copy-path") {
+			@Override
+			public void actionPerformed(ActionEvent evt)
+			{
+				VFSFile[] files = getSelectedFiles();
+				org.gjt.sp.jedit.datatransfer.ListVFSFileTransferable transferable =
+				new org.gjt.sp.jedit.datatransfer.ListVFSFileTransferable(files);
+				Registers.setRegister('$',transferable);
+			}
+		};
+		Action pasteAction = new AbstractAction("vfs.browser.paste") {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				try {
+					VFSFile[] files = getSelectedFiles();
+					if (files.length != 1)
+						return;
+					browser.paste(files[0]);
+				} catch (Exception e){
+					Log.log(Log.ERROR, this, e, e);
+				}
+				
+			}
+		};
+		
+		// KeyStrokeがOSやLookAndFeelによって変わるので、アクション名を指定してcopy、pasteの挙動を上書きする
+		// "copy", "paste"を指定しても良いが、念の為 TransferHandlerに定義されているアクションから名前を取得する
+		// KeyStroke copyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, java.awt.event.InputEvent.CTRL_DOWN_MASK);
+		// KeyStroke pasteStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, java.awt.event.InputEvent.CTRL_DOWN_MASK);
+		ActionMap amap = table.getActionMap();
+		// InputMap imap = table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		amap.put(TransferHandler.getCopyAction().getValue(Action.NAME), copyAction);
+		// imap.put(copyStroke, copyAction.getValue(Action.NAME));
+		amap.put(TransferHandler.getPasteAction().getValue(Action.NAME), pasteAction);
+		// imap.put(pasteStroke, pasteAction.getValue(Action.NAME));
+		
 		table.addMouseListener(new TableMouseHandler());
 		table.addKeyListener(new TableKeyListener());
 		table.setName("file");
@@ -138,10 +177,19 @@ class BrowserView extends JPanel
 		loadDirectory(node, path, addToHistory, null);
 	} //}}}
 
-
+	// funa edit
 	//{{{ loadDirectory() method
 	public void loadDirectory(final Object node, String path,
 		final boolean addToHistory, final Runnable delayedAWTTask)
+	{
+		loadDirectory(node, path, addToHistory, delayedAWTTask, null);
+	} //}}}
+	
+	// funa edit
+	//{{{ loadDirectory() method
+	public void loadDirectory(final Object node, String path,
+		final boolean addToHistory, final Runnable delayedAWTTask, 
+		final String[] selectedPaths)
 	{
 		path = MiscUtilities.constructPath(browser.getDirectory(),path);
 		VFS vfs = VFSManager.getVFSForPath(path);
@@ -163,7 +211,7 @@ class BrowserView extends JPanel
 		final Object[] loadInfo = new Object[2];
 		Runnable awtRunnable = () ->
 		{
-			browser.directoryLoaded(node,loadInfo,addToHistory);
+				browser.directoryLoaded(node,loadInfo,addToHistory, selectedPaths);
 			if (delayedAWTTask != null)
 				delayedAWTTask.run();
 
@@ -183,7 +231,8 @@ class BrowserView extends JPanel
 	 * @param path
 	 * @param directory
 	 */
-	public void directoryLoaded(Object node, String path, java.util.List<VFSFile> directory)
+	// funa edit
+	public void directoryLoaded(Object node, String path, java.util.List<VFSFile> directory, String[] selectedPaths)
 	{
 		//{{{ If reloading root, update parent directory list
 		if(node == null)
@@ -247,7 +296,7 @@ class BrowserView extends JPanel
 		} //}}}
 
 		table.setDirectory(VFSManager.getVFSForPath(path),
-			node,directory,tmpExpanded);
+			node,directory,tmpExpanded, selectedPaths);
 	} //}}}
 
 	//{{{ updateFileView() method
@@ -554,17 +603,20 @@ class BrowserView extends JPanel
 			if(GenericGUIUtilities.isLeftButton(evt)
 				&& evt.getClickCount() % 2 == 0)
 			{
-				browser.filesActivated(evt.isShiftDown()
+				// browser.filesActivated(evt.isShiftDown()
+				browser.filesActivated(KeyEventTranslator.isShiftDown(evt)
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN,true);
 			}
 			else if(GenericGUIUtilities.isMiddleButton(evt))
 			{
-				if(evt.isShiftDown())
+				// if(evt.isShiftDown())
+				if(KeyEventTranslator.isShiftDown(evt))
 					table.getSelectionModel().addSelectionInterval(row,row);
 				else
 					table.getSelectionModel().setSelectionInterval(row,row);
-				browser.filesActivated(evt.isShiftDown()
+				// browser.filesActivated(evt.isShiftDown()
+				browser.filesActivated(KeyEventTranslator.isShiftDown(evt)
 					? VFSBrowser.M_OPEN_NEW_VIEW
 					: VFSBrowser.M_OPEN,true);
 			}
@@ -600,7 +652,8 @@ class BrowserView extends JPanel
 			{
 				if(row == -1)
 					return;
-				else if(evt.isShiftDown())
+				// else if(evt.isShiftDown())
+				else if(KeyEventTranslator.isShiftDown(evt))
 					table.getSelectionModel().addSelectionInterval(row,row);
 				else
 					table.getSelectionModel().setSelectionInterval(row,row);
@@ -643,38 +696,86 @@ class BrowserView extends JPanel
 	class ParentDirectoryList extends JList
 	{
 		@Override
+		public Dimension getPreferredSize() {
+			int maxHeight = 0;
+			int maxWidth = 0;
+			try {
+				maxHeight = Integer.parseInt(jEdit.getProperty("vfs.browser.parentDir.maxHeight","0"));
+			} catch (Exception e){}
+			try {
+				maxWidth = Integer.parseInt(jEdit.getProperty("vfs.browser.parentDir.maxWidth","0"));
+			} catch (Exception e){}
+			
+			Dimension d = super.getPreferredSize();
+			
+			int width = d.width + 3;
+			int height = d.height + 3;
+			if (maxWidth > 0) {
+				width = Math.min(width, maxWidth);
+			}
+			if (maxHeight > 0) {
+				height = Math.min(height, maxHeight);
+			}
+			splitPane.setDividerLocation(browser.isHorizontalLayout() ? width : height);
+			return d;
+		}
+		
+		@Override
 		protected void processKeyEvent(KeyEvent evt)
 		{
 			if (evt.getID() == KeyEvent.KEY_PRESSED)
 			{
+				// Funa Edit
+				if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class") != null) {
+					org.gjt.sp.jedit.gui.UserKey.consume(evt,
+						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
+						true);
+					if (evt.isConsumed()) {
+						return;
+					}
+				}
+				
 				ActionContext ac = VFSBrowser.getActionContext();
 				int row = parentDirectories.getSelectedIndex();
 				switch(evt.getKeyCode())
 				{
 				case KeyEvent.VK_DOWN:
 					evt.consume();
-					if (row < parentDirectories.getSize().height-1)
+					if (row < parentDirectories.getSize().height-1) { 
 						parentDirectories.setSelectedIndex(++row);
+						// funa add
+						parentDirectories.ensureIndexIsVisible(row);
+					}
 					break;
 				case KeyEvent.VK_LEFT:
-					if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
+					// if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
+					if (KeyEventTranslator.isAltDown(evt))
 					{
 						evt.consume();
 						browser.previousDirectory();
 					}
-					else super.processEvent(evt);
+					//  Funa edit
+					// else super.processEvent(evt);
+					else evt.consume();
 					break;
 				case KeyEvent.VK_RIGHT:
-					if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
+					// if ((evt.getModifiersEx() & ALT_DOWN_MASK) == ALT_DOWN_MASK)
+					if (KeyEventTranslator.isAltDown(evt))
 					{
 						evt.consume();
 						browser.nextDirectory();
 					}
-					else super.processEvent(evt);
+					// Funa edit
+					// else super.processEvent(evt);
+					else evt.consume();
 					break;
 				case KeyEvent.VK_TAB:
 					evt.consume();
-					if ((evt.getModifiersEx() & SHIFT_DOWN_MASK) == SHIFT_DOWN_MASK)
+					// if ((evt.getModifiersEx() & SHIFT_DOWN_MASK) == SHIFT_DOWN_MASK)
+					if (KeyEventTranslator.isShiftDown(evt))
 						browser.focusOnDefaultComponent();
 					else
 						table.requestFocus();
@@ -684,6 +785,8 @@ class BrowserView extends JPanel
 					if (row > 0)
 					{
 						parentDirectories.setSelectedIndex(--row);
+						// funa add
+						parentDirectories.ensureIndexIsVisible(row);
 					}
 					break;
 				case KeyEvent.VK_BACK_SPACE:
@@ -734,8 +837,11 @@ class BrowserView extends JPanel
 			}
 			else if(evt.getID() == KeyEvent.KEY_TYPED)
 			{
-				if(evt.isControlDown() || evt.isAltDown()
-					|| evt.isMetaDown())
+				// if(evt.isControlDown() || evt.isAltDown()
+				// 	|| evt.isMetaDown())
+				if(KeyEventTranslator.isControlDown(evt)
+					|| KeyEventTranslator.isAltDown(evt)
+					|| KeyEventTranslator.isMetaDown(evt))
 				{
 					evt.consume();
 					return;

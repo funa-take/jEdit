@@ -946,6 +946,12 @@ tip.show=true
 #}}}
 
 #{{{ VFS browser
+# Funa Edit
+# vfs.browser.path.mnemonic=p
+vfs.browser.path.mnemonic=a
+vfs.browser.filter=Filter:
+# funa add
+vfs.browser.filter.mnemonic=t
 vfs.browser.default-filter=*[^~#]
 vfs.browser.filter-enabled=true
 vfs.browser.file.icon=16x16/mimetypes/text-x-generic.png
@@ -960,6 +966,8 @@ vfs.browser.collapse.icon=16x16/actions/group-collapse.png
 vfs.browser.dock-position=left
 
 #{{{ Actions
+vfs.browser.delete.label=Delete...
+vfs.browser.delete.shortcut=DELETE
 vfs.browser.home.icon=22x22/actions/go-home.png
 vfs.browser.new-directory.icon=22x22/actions/folder-new.png
 vfs.browser.new-file.icon=22x22/actions/document-new.png
