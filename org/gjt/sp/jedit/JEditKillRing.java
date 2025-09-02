@@ -41,7 +41,7 @@ import javax.swing.*;
 /**
  * The basic KillRing of jEdit.
  * @author Matthieu Casanova
- * @version $Id: ParserRuleSet.java 5471 2006-06-22 06:31:23Z kpouer $
+ * @version $Id$
  */
 class JEditKillRing extends KillRing
 {

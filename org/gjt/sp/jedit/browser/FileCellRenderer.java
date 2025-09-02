@@ -39,7 +39,7 @@ import org.gjt.sp.jedit.manager.BufferManagerImpl;
 
 /**
  * Local filesystem VFS.
- * @version $Id: FileCellRenderer.java 25239 2020-04-14 20:00:17Z kpouer $
+ * @version $Id$
  */
 public class FileCellRenderer extends DefaultTableCellRenderer
 {

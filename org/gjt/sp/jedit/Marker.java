@@ -36,7 +36,7 @@ import javax.swing.text.Position;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: Marker.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 public class Marker
 {

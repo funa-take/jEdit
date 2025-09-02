@@ -34,7 +34,7 @@ import org.gjt.sp.util.*;
 /**
  * A buffer autosave request.
  * @author Slava Pestov
- * @version $Id: BufferAutosaveRequest.java 25270 2020-04-18 19:11:28Z kpouer $
+ * @version $Id$
  */
 public class BufferAutosaveRequest extends BufferIORequest
 {

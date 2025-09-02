@@ -37,7 +37,7 @@ import org.gjt.sp.jedit.OperatingSystem;
 /**
  * A VFS that lists local root filesystems.
  * @author Slava Pestov
- * @version $Id: FileRootsVFS.java 25330 2020-05-09 14:21:52Z kpouer $
+ * @version $Id$
  */
 public class FileRootsVFS extends VFS
 {

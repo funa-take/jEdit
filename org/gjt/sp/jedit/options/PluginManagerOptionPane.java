@@ -35,7 +35,7 @@ import org.gjt.sp.util.*;
 /**
  * The plugin manager option pane.
  * 
- * @version $Id: PluginManagerOptionPane.java 25233 2020-04-13 15:32:00Z kpouer $
+ * @version $Id$
  */
 public class PluginManagerOptionPane extends AbstractOptionPane
 {

@@ -34,7 +34,7 @@ package org.gjt.sp.jedit;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: EBMessage.java 25218 2020-04-12 15:51:13Z kpouer $
+ * @version $Id$
  *
  * @since jEdit 2.2pre6
  */

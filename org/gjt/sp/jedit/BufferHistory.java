@@ -41,7 +41,7 @@ import org.gjt.sp.util.IOUtilities;
 /**
  * Recent file list.
  * @author Slava Pestov
- * @version $Id: BufferHistory.java 24428 2016-06-23 02:49:29Z daleanson $
+ * @version $Id$
  */
 public class BufferHistory
 {

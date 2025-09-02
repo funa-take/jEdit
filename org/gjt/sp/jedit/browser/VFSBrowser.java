@@ -59,7 +59,7 @@ import org.gjt.sp.jedit.menu.MenuItemTextComparator;
  * VFSFileChooserDialog.
  *
  * @author Slava Pestov
- * @version $Id: VFSBrowser.java 25239 2020-04-14 20:00:17Z kpouer $
+ * @version $Id$
  */
 public class VFSBrowser extends JPanel implements DefaultFocusComponent,
 	DockableWindow

@@ -34,7 +34,7 @@ import javax.swing.border.*;
  * other border in javax.swing.borders.
  *
  * @author Dale Anson, 25 Feb 2004
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class DropShadowBorder extends AbstractBorder
 {

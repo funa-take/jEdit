@@ -30,7 +30,7 @@ import java.util.Objects;
 /**
  * Message sent when a view-related change occurs.
  * @author Slava Pestov
- * @version $Id: ViewUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @version $Id$
  *
  * @since jEdit 2.2pre6
  */

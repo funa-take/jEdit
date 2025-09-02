@@ -27,7 +27,7 @@ import javax.swing.text.Segment;
 /**
  * A fold handler that does nothing.
  * @author Slava Pestov
- * @version $Id: DummyFoldHandler.java 22962 2013-04-30 13:55:18Z kpouer $
+ * @version $Id$
  * @since jEdit 4.0pre1
  */
 public class DummyFoldHandler extends FoldHandler

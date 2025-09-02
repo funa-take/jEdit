@@ -41,7 +41,7 @@ import org.gjt.sp.jedit.gui.ShortcutPrefixActiveEvent;
  * {@link #processKeyEvent(java.awt.event.KeyEvent, int, boolean)}
  *
  * @author Matthieu Casanova
- * @version $Id: FoldHandler.java 5568 2006-07-10 20:52:23Z kpouer $
+ * @version $Id$
  */
 public abstract class AbstractInputHandler<E extends JEditAbstractEditAction>
 {

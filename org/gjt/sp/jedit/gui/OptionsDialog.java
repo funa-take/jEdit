@@ -41,7 +41,7 @@ import org.gjt.sp.util.Log;
 
 /** An abstract options dialog box.
  * @author Slava Pestov
- * @version $Id: OptionsDialog.java 24464 2016-07-19 14:47:33Z ezust $
+ * @version $Id$
  * @todo refactor to use OptionGroupPane
  */
 public abstract class OptionsDialog extends EnhancedDialog

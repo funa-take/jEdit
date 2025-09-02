@@ -87,7 +87,7 @@ import org.gjt.sp.util.ThreadUtilities;
  * @see View#getEditPanes()
  *
  * @author Slava Pestov
- * @version $Id: EditPane.java 25334 2020-05-10 09:51:15Z kpouer $
+ * @version $Id$
  */
 public class EditPane extends JPanel implements BufferSetListener
 {

@@ -31,7 +31,7 @@ import org.gjt.sp.util.XMLUtilities;
 //}}}
 
 /**
- * @version $Id: PluginListHandler.java 25274 2020-04-19 16:30:10Z kpouer $
+ * @version $Id$
  */
 class PluginListHandler extends DefaultHandler
 {

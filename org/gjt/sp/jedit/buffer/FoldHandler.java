@@ -39,7 +39,7 @@ import javax.swing.text.Segment;
  * See {@link org.gjt.sp.jedit.ServiceManager} for details.
  *
  * @author Slava Pestov
- * @version $Id: FoldHandler.java 23981 2015-08-10 14:56:24Z daleanson $
+ * @version $Id$
  * @since jEdit 4.3pre3
  */
 public abstract class FoldHandler

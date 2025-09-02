@@ -27,7 +27,7 @@ package org.gjt.sp.jedit;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: EBComponent.java 12504 2008-04-22 23:12:43Z ezust $
+ * @version $Id$
  *
  * @since jEdit 2.2pre6
  */

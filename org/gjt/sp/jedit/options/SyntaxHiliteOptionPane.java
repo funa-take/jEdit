@@ -44,7 +44,7 @@ import org.gjt.sp.util.SyntaxUtilities;
 /**
  * Style option pane.
  * @author Slava Pestov
- * @version $Id: SyntaxHiliteOptionPane.java 24411 2016-06-19 11:02:53Z kerik-sf $
+ * @version $Id$
  */
 public class SyntaxHiliteOptionPane extends AbstractOptionPane
 {

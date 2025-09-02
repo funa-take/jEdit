@@ -53,7 +53,7 @@ import org.gjt.sp.util.*;
  * <li>Displaying memory status
  * </ul>
  *
- * @version $Id: StatusBar.java 25335 2020-05-10 09:57:11Z kpouer $
+ * @version $Id$
  * @author Slava Pestov
  * @since jEdit 3.2pre2
  */

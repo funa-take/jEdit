@@ -32,7 +32,7 @@ import org.gjt.sp.util.StandardUtilities;
 /**
  * A file set for searching a user-specified list of buffers.
  * @author Slava Pestov
- * @version $Id: BufferListSet.java 25108 2020-03-31 22:41:49Z kpouer $
+ * @version $Id$
  */
 public abstract class BufferListSet implements SearchFileSet
 {

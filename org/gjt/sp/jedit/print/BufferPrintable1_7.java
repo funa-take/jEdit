@@ -44,7 +44,7 @@ import org.gjt.sp.util.*;
  * A new buffer printable that does a lot more than the old one, like properly
  * printing ranges of pages, reverse page printing, printing just a selection,
  * and so on.
- * @version $Id: BufferPrintable.java 24442 2016-06-29 23:29:25Z daleanson $
+ * @version $Id$
  */
 class BufferPrintable1_7 implements Printable
 {

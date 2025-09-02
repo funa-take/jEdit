@@ -46,7 +46,7 @@ import org.gjt.sp.jedit.io.EncodingServer;
  * Menu provider for actions to reload the current buffer with a
  * specific encoding.
  *
- * @version $Id: ReloadWithEncodingProvider.java 25326 2020-05-09 10:08:52Z kpouer $
+ * @version $Id$
  */
 public class ReloadWithEncodingProvider implements ActionListener, DynamicMenuProvider
 {	

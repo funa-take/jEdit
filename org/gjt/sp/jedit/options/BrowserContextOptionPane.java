@@ -28,7 +28,7 @@ import org.gjt.sp.jedit.jEdit;
  * Right-click context menu editor.
  *
  * @author Matthieu Casanova
- * @version $Id: ContextOptionPane.java 12504 2008-04-22 23:12:43Z ezust $
+ * @version $Id$
  */
 public class BrowserContextOptionPane extends AbstractContextOptionPane
 {

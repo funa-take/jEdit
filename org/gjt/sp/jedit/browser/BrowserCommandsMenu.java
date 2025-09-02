@@ -38,7 +38,7 @@ import org.gjt.sp.util.GenericGUIUtilities;
 //}}}
 
 /**
- * @version $Id: BrowserCommandsMenu.java 25239 2020-04-14 20:00:17Z kpouer $
+ * @version $Id$
  * @author Slava Pestov and Jason Ginchereau
  */
 public class BrowserCommandsMenu extends JPopupMenu

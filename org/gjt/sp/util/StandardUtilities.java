@@ -39,7 +39,7 @@ import java.util.Stack;
  * Several tools that depends on JDK only.
  *
  * @author Matthieu Casanova
- * @version $Id: StandardUtilities.java 25030 2020-03-25 20:30:05Z kpouer $
+ * @version $Id$
  * @since 4.3pre5
  */
 public class StandardUtilities

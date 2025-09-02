@@ -61,7 +61,7 @@ import java.util.*;
  *
  * @author Shlomy Reinstein
  * @author Matthieu Casanova
- * @version $Id: Buffer.java 8190 2006-12-07 07:58:34Z kpouer $
+ * @version $Id$
  * @since jEdit 4.3pre11
  */
 public abstract class FilteredTableModel<E extends TableModel> extends AbstractTableModel implements TableModelListener

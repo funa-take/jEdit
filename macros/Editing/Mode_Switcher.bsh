@@ -31,7 +31,7 @@
  *  effort, and keypresses.
  *  It also has the benefit of auto-completion of mode names.
  * 
- * $Id: Mode_Switcher.bsh 21353 2012-03-14 09:46:51Z jojaba_67 $
+ * $Id$
  */
 
 import javax.swing.border.EmptyBorder;

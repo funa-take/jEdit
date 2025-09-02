@@ -39,7 +39,7 @@ import java.util.*;
  *
  * @author Slava Pestov
  * @author Eric Le Lay
- * @version $Id: HistoryModel.java 24427 2016-06-22 22:29:03Z daleanson $
+ * @version $Id$
  */
 public class HistoryModel extends DefaultListModel<String>
 	implements MutableListModel<String>

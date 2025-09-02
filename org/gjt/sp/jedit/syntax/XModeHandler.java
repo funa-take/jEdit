@@ -39,7 +39,7 @@ import org.gjt.sp.util.XMLUtilities;
 
 /**
  * XML handler for mode definition files.
- * @version $Id: XModeHandler.java 25244 2020-04-15 15:14:49Z kpouer $
+ * @version $Id$
  */
 public abstract class XModeHandler extends DefaultHandler
 {

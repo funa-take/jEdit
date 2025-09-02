@@ -26,7 +26,7 @@ import org.gjt.sp.jedit.io.VFSFile;
 /**
  * A browser event listener.
  * @author Slava Pestov
- * @version $Id: BrowserListener.java 12504 2008-04-22 23:12:43Z ezust $
+ * @version $Id$
  */
 public interface BrowserListener extends EventListener
 {

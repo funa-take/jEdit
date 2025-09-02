@@ -96,7 +96,7 @@ import org.gjt.sp.jedit.buffer.FoldHandler;
  *
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: ServiceManager.java 25067 2020-03-29 16:44:44Z kpouer $
+ * @version $Id$
  */
 public class ServiceManager
 {

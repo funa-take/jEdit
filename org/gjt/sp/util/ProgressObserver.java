@@ -26,7 +26,7 @@ package org.gjt.sp.util;
  * Interface used to monitor things that can progress.
  *
  * @author Matthieu Casanova
- * @version $Id: ProgressObserver.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  * @since jEdit 4.3pre3
  */
 public interface ProgressObserver

@@ -35,7 +35,7 @@ import org.gjt.sp.jedit.syntax.SyntaxStyle;
  * to make them available for plugins.
  *
  * @author Shlomy Reinstein
- * @version $Id: $
+ * @version $Id$
  * @since 4.4pre1
  */
 

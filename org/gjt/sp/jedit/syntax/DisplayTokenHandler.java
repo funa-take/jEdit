@@ -32,7 +32,7 @@ import java.text.CharacterIterator;
 
 /**
  * Creates {@link Chunk} objects that can be painted on screen.
- * @version $Id: DisplayTokenHandler.java 25345 2020-05-29 16:42:56Z kpouer $
+ * @version $Id$
  */
 public class DisplayTokenHandler extends DefaultTokenHandler
 {

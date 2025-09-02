@@ -7,7 +7,7 @@
     <!-- :xml.root=users-guide.xml:                                 -->
     <!-- This file contains an extended discussion of a             -->
     <!-- dialog-based macro example "Add_Prefix_and_Suffix.bsh"     -->
-    <!-- $Id: dialog-macro.xml 23334 2013-11-15 00:19:31Z ezust $   -->
+    <!-- $Id$   -->
 
     <para>Now we will look at a more complicated macro which will demonstrate
     some useful techniques and BeanShell features.</para>

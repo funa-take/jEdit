@@ -42,7 +42,7 @@ import org.gjt.sp.util.Log;
  * The array is resized when the TextArea geometry changes  
  *
  * @author Slava Pestov
- * @version $Id: ChunkCache.java 25338 2020-05-16 16:47:21Z kpouer $
+ * @version $Id$
  */
 class ChunkCache
 {

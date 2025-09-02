@@ -35,7 +35,7 @@ import java.nio.charset.UnsupportedCharsetException;
 /**
  * A buffer save request.
  * @author Slava Pestov
- * @version $Id: BufferSaveRequest.java 25003 2020-03-22 08:40:48Z kpouer $
+ * @version $Id$
  */
 public class BufferSaveRequest extends BufferIORequest
 {

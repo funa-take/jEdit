@@ -35,7 +35,7 @@ import org.gjt.sp.util.*;
  *
  * @author     Martin Raspe
  * created    May 20, 2005
- * modified   $Date: 2006/03/10 12:49:17 $ by $Author: hertzhaft $
+ * modified   $Date$ by $Author$
  */
 public class MarkersSaveRequest extends Task
 {

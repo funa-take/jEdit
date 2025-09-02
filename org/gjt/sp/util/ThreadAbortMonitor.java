@@ -23,7 +23,7 @@ package org.gjt.sp.util;
 
 /**
  * @author Matthieu Casanova
- * @author $Id: VFS.java 7129 2006-09-25 20:05:57Z kpouer $
+ * @author $Id$
  */
 public interface ThreadAbortMonitor
 {

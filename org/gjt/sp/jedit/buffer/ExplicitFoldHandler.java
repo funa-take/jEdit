@@ -29,7 +29,7 @@ import javax.swing.text.Segment;
  * embedded in the text.
  *
  * @author Slava Pestov
- * @version $Id: ExplicitFoldHandler.java 25193 2020-04-11 17:02:18Z kpouer $
+ * @version $Id$
  * @since jEdit 4.0pre1
  */
 public class ExplicitFoldHandler extends FoldHandler

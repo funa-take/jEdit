@@ -45,7 +45,7 @@ import org.gjt.sp.util.Log;
 /**
  * Local filesystem VFS.
  * @author Slava Pestov
- * @version $Id: FileVFS.java 25330 2020-05-09 14:21:52Z kpouer $
+ * @version $Id$
  */
 public class FileVFS extends VFS
 {

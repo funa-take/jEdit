@@ -26,7 +26,7 @@ import javax.swing.text.Segment;
 /**
  * Contains utility functions used by the syntax highlighting code.
  * @since jEdit 4.2pre1
- * @version $Id: SyntaxUtilities.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  * @author Slava Pestov
  */
 public class SyntaxUtilities

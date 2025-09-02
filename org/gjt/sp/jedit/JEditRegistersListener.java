@@ -25,7 +25,7 @@ import org.gjt.sp.jedit.msg.RegisterChanged;
 /**
  * The concrete RegistersListener of jEdit.
  * @author Matthieu Casanova
- * @version $Id: FoldHandler.java 5568 2006-07-10 20:52:23Z kpouer $
+ * @version $Id$
  */
 class JEditRegistersListener implements RegistersListener
 {

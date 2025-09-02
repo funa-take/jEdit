@@ -47,7 +47,7 @@ import java.util.regex.*;
  * This class works like a singleton, the instance is initialized by jEdit.
  *
  * @author Matthieu Casanova
- * @version $Id: Buffer.java 8190 2006-12-07 07:58:34Z kpouer $
+ * @version $Id$
  * @since jEdit 4.3pre10
  */
 public class ModeProvider

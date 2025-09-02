@@ -55,7 +55,7 @@ import org.gjt.sp.jedit.print.PageBreakExtension;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: JEditTextArea.java 25032 2020-03-25 23:17:29Z kpouer $
+ * @version $Id$
  */
 public class JEditTextArea extends TextArea
 {

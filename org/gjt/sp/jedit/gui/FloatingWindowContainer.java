@@ -42,7 +42,7 @@ import org.gjt.sp.util.GenericGUIUtilities;
 /**
  * A container for dockable windows. This class should never be used
  * directly.
- * @version $Id: FloatingWindowContainer.java 25333 2020-05-10 09:40:02Z kpouer $
+ * @version $Id$
  * @since jEdit 4.0pre1
  */
 public class FloatingWindowContainer extends JFrame implements DockableWindowContainer, PropertyChangeListener

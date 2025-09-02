@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * text substrings without the overhead of creating a new string object.
  *
  * @author Slava Pestov, Mike Dillon
- * @version $Id: KeywordMap.java 25244 2020-04-15 15:14:49Z kpouer $
+ * @version $Id$
  */
 public class KeywordMap
 {

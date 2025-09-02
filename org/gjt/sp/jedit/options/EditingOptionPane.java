@@ -35,7 +35,7 @@ import org.gjt.sp.jedit.*;
  * Panel to load three option panes into tabs: EditModesPane, ModeSettingsPane,
  * and UndoPane.
  * @author Dale Anson
- * @version $Id: EditingOptionPane.java 24376 2016-05-15 20:07:57Z daleanson $
+ * @version $Id$
  */
 public class EditingOptionPane extends AbstractOptionPane
 {

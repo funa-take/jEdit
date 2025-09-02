@@ -44,7 +44,7 @@ import org.gjt.sp.util.Log;
 //}}}
 
 /**
- * @version $Id: MirrorList.java 25233 2020-04-13 15:32:00Z kpouer $
+ * @version $Id$
  */
 public class MirrorList
 {

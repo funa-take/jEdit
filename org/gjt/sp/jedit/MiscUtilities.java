@@ -60,7 +60,7 @@ import javax.annotation.Nullable;
  * <li>{@link #constructPath(String,String)}</li>
  * </ul>
  *
- * @version $Id: MiscUtilities.java 25348 2020-06-09 19:56:24Z kpouer $
+ * @version $Id$
  */
 public class MiscUtilities
 {

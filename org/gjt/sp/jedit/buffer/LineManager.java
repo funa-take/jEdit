@@ -37,7 +37,7 @@ import org.gjt.sp.util.Log;
  * called through, implements such protection.
  *
  * @author Slava Pestov
- * @version $Id: LineManager.java 24459 2016-07-16 02:42:50Z ezust $
+ * @version $Id$
  * @since jEdit 4.2pre3
  */
 public class LineManager

@@ -33,7 +33,7 @@ package org.gjt.sp.jedit.buffer;
  * <code>JEditBuffer.removeBufferUndoListener</code>, respectively.
  *
  * @author Shlomy Reinstein
- * @version $Id: BufferUndoListener.java 23981 2015-08-10 14:56:24Z daleanson $
+ * @version $Id$
  * @since jEdit 4.3pre18
  */
 public interface BufferUndoListener

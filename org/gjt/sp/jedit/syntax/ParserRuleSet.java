@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 /**
  * A set of parser rules.
  * @author mike dillon
- * @version $Id: ParserRuleSet.java 25293 2020-04-26 09:05:14Z kpouer $
+ * @version $Id$
  */
 public class ParserRuleSet
 {

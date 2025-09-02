@@ -32,7 +32,7 @@
  *  08-Jun-04: If an infinite loop is hit (1000 iterations) in the comment
  *           : parsing, it now opens the default save dialog, rather than
  *           : just returning.
- * $Id: Java_File_Save.bsh 24163 2015-11-28 15:03:20Z kerik-sf $
+ * $Id$
  */
 
 //Localization

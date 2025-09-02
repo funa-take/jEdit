@@ -38,7 +38,7 @@ import org.gjt.sp.util.GenericGUIUtilities;
  * Files changed on disk dialog.
  *
  * @author Slava Pestov
- * @version $Id: FilesChangedDialog.java 25239 2020-04-14 20:00:17Z kpouer $
+ * @version $Id$
  */
 public class FilesChangedDialog extends EnhancedDialog
 {

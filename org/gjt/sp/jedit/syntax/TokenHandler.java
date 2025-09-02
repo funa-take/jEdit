@@ -29,7 +29,7 @@ import javax.swing.text.Segment;
  * Token markers send tokens to implementations of this interface.
  *
  * @author Slava Pestov
- * @version $Id: TokenHandler.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  * @since jEdit 4.1pre1
  */
 public interface TokenHandler

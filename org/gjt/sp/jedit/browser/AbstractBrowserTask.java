@@ -29,7 +29,7 @@ import org.gjt.sp.util.*;
 
 /**
  * @author Matthieu Casanova
- * @version $Id: AbstractBrowserTask.java 25025 2020-03-25 16:57:05Z kpouer $
+ * @version $Id$
  */
 abstract class AbstractBrowserTask extends Task
 {

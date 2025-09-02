@@ -35,7 +35,7 @@ import org.gjt.sp.util.StandardUtilities;
 
 /**
  * @author Slava Pestov
- * @version $Id: DirectoryProvider.java 25141 2020-04-07 22:43:40Z kpouer $
+ * @version $Id$
  */
 public class DirectoryProvider implements DynamicMenuProvider
 {

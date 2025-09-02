@@ -43,7 +43,7 @@ import java.util.jar.Attributes.Name;
  * A class loader implementation that loads classes from JAR files. All
  * instances share the same set of classes.
  * @author Slava Pestov
- * @version $Id: JARClassLoader.java 24913 2019-07-28 18:32:11Z daleanson $
+ * @version $Id$
  */
 public class JARClassLoader extends ClassLoader
 {

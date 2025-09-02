@@ -34,7 +34,7 @@ import org.gjt.sp.util.Log;
  * Java's keyboard handling is crap, to put it mildly.
  *
  * @author Slava Pestov
- * @version $Id: KeyEventWorkaround.java 24859 2018-04-10 23:06:33Z daleanson $
+ * @version $Id$
  */
 public class KeyEventWorkaround
 {

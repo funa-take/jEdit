@@ -52,7 +52,7 @@ import static org.gjt.sp.jedit.MiscUtilities.getEncodings;
  * @author Björn Kautler
  * @author Matthieu Casanova
  * @since jEdit 4.3pre6
- * @version $Id: EncodingsOptionPane.java 24377 2016-05-15 20:11:56Z daleanson $
+ * @version $Id$
  */
 public class EncodingsOptionPane extends AbstractOptionPane
 {

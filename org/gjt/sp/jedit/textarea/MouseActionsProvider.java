@@ -25,7 +25,7 @@ import java.awt.event.MouseEvent;
 
 /**
  * @author Matthieu Casanova
- * @version $Id: MouseActionsProvider.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 public interface MouseActionsProvider
 {

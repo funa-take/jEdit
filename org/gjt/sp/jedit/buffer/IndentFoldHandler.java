@@ -30,7 +30,7 @@ import javax.swing.text.Segment;
 /**
  * A fold handler that folds lines based on their indent level.
  * @author Slava Pestov
- * @version $Id: IndentFoldHandler.java 25194 2020-04-11 17:03:59Z kpouer $
+ * @version $Id$
  * @since jEdit 4.0pre1
  */
 public class IndentFoldHandler extends FoldHandler

@@ -33,7 +33,7 @@ import org.gjt.sp.util.GenericGUIUtilities;
 /**
  * Text area with a history.
  * @author Slava Pestov
- * @version $Id: HistoryTextArea.java 24859 2018-04-10 23:06:33Z daleanson $
+ * @version $Id$
  */
 public class HistoryTextArea extends JTextArea
 {

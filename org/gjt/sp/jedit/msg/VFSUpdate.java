@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Message sent when a file or directory changes.
  * @author Slava Pestov
- * @version $Id: VFSUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @version $Id$
  *
  * @since jEdit 2.6pre4
  */

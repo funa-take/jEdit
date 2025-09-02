@@ -107,7 +107,7 @@ import javax.annotation.Nullable;
  * @see VFSManager#getVFSForProtocol(String)
  *
  * @author Slava Pestov
- * @author $Id: VFS.java 25330 2020-05-09 14:21:52Z kpouer $
+ * @author $Id$
  */
 public abstract class VFS
 {

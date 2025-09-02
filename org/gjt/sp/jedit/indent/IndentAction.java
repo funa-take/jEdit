@@ -27,7 +27,7 @@ import org.gjt.sp.util.StandardUtilities;
 
 /** Abstract Indentation Action 
  * @author Slava Pestov
- * @version $Id: IndentAction.java 25223 2020-04-12 16:14:27Z kpouer $
+ * @version $Id$
  */
 public interface IndentAction
 {

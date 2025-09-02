@@ -42,7 +42,7 @@ import org.gjt.sp.util.ThreadUtilities;
 //}}}
 
 /**
- * @version $Id: PluginManager.java 25263 2020-04-18 10:21:06Z kpouer $
+ * @version $Id$
  */
 public class PluginManager extends JFrame
 {

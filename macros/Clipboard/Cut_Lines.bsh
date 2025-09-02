@@ -6,7 +6,7 @@
 * Copyright (C) 2003 Ollie Rutherfurd <oliver@jedit.org>
 * Copyright (c) 2008 encorejane@users.sourceforge.net
 *
-* $Id: Cut_Lines.bsh 24764 2017-10-15 12:20:28Z ezust $
+* $Id$
 */
 
 cutLines(){

@@ -64,7 +64,7 @@ import javax.annotation.Nullable;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: Registers.java 25316 2020-05-08 08:04:09Z kpouer $
+ * @version $Id$
  */
 public class Registers
 {

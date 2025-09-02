@@ -88,7 +88,7 @@ import org.gjt.sp.util.ThreadUtilities;
 
  *
  * @author Slava Pestov
- * @version $Id: Buffer.java 25241 2020-04-15 14:34:21Z kpouer $
+ * @version $Id$
  */
 public class Buffer extends JEditBuffer
 {

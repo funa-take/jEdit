@@ -39,7 +39,7 @@ import java.util.*;
  *
  * @since jEdit 4.3pre13
  * @author Slava Pestov
- * @version $Id: ActionContext.java 6884 2006-09-06 02:38:55Z ezust $
+ * @version $Id$
  */
 public abstract class JEditActionContext<F extends JEditAbstractEditAction, E extends JEditActionSet<F>>
 {

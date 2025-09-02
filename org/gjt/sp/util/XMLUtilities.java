@@ -44,7 +44,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * XML utility methods that only depend on the JDK.
  *
  * @author Marcelo Vanzin
- * @version $Id: XMLUtilities.java 24859 2018-04-10 23:06:33Z daleanson $
+ * @version $Id$
  * @since 4.3pre6
  */
 public class XMLUtilities

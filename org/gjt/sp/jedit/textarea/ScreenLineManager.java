@@ -33,7 +33,7 @@ import org.gjt.sp.util.Log;
  * 
  * @since jEdit 4.3pre1
  * @author Slava Pestov
- * @version $Id: ScreenLineManager.java 25262 2020-04-18 08:12:07Z kpouer $
+ * @version $Id$
  */
 class ScreenLineManager
 {

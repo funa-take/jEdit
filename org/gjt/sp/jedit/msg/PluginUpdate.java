@@ -32,7 +32,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Message sent when plugins are loaded and unloaded.
  * @author Slava Pestov
- * @version $Id: PluginUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @version $Id$
  *
  * @since jEdit 4.2pre1
  */

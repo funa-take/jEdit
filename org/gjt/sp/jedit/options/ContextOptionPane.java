@@ -29,7 +29,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Right-click context menu editor.
  * @author Slava Pestov
- * @version $Id: ContextOptionPane.java 21981 2012-08-06 19:19:16Z jarekczek $
+ * @version $Id$
  */
 public class ContextOptionPane extends AbstractContextOptionPane
 {

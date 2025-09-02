@@ -43,7 +43,7 @@ import org.gjt.sp.util.StandardUtilities;
 /**
  * Option pane to set available edit modes and to add modes from a file.
  * @author Dale Anson
- * @version $Id: EditModesPane.java 24012 2015-08-12 08:48:07Z kpouer $
+ * @version $Id$
  */
 public class EditModesPane extends AbstractOptionPane
 {

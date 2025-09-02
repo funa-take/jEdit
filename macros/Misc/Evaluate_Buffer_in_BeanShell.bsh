@@ -20,7 +20,7 @@
  * along with the jEdit program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Evaluate_Buffer_in_BeanShell.bsh 10596 2007-09-19 00:02:50Z Vampire0 $
+ * $Id$
  *
  * Checked for jEdit 4.0 API
  *

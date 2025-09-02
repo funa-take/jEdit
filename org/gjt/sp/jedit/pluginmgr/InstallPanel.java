@@ -59,7 +59,7 @@ import java.util.List;
 //}}}
 
 /**
- * @version $Id: InstallPanel.java 25285 2020-04-22 19:08:46Z kpouer $
+ * @version $Id$
  */
 class InstallPanel extends JPanel implements EBComponent
 {

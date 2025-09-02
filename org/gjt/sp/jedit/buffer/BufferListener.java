@@ -39,7 +39,7 @@ package org.gjt.sp.jedit.buffer;
  * implementing it directly.
  *
  * @author Slava Pestov
- * @version $Id: BufferListener.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  * @since jEdit 4.3pre3
  */
 public interface BufferListener

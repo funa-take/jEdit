@@ -71,7 +71,7 @@ import org.gjt.sp.util.StandardUtilities;
 /** A container for dockable windows. This class should never be used
  * directly.
  * @author Slava Pestov
- * @version $Id: PanelWindowContainer.java 25051 2020-03-28 17:27:53Z kpouer $
+ * @version $Id$
  * @since jEdit 4.0pre1
  */
 public class PanelWindowContainer implements DockableWindowContainer, DockingArea

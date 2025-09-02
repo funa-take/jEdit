@@ -36,7 +36,7 @@ import org.gjt.sp.util.*;
 /**
  * A buffer load request.
  * @author Slava Pestov
- * @version $Id: BufferLoadRequest.java 25308 2020-05-03 22:08:41Z kpouer $
+ * @version $Id$
  */
 public class BufferLoadRequest extends BufferIORequest
 {

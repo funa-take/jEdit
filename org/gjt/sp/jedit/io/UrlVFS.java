@@ -32,7 +32,7 @@ import org.gjt.sp.util.Log;
 /**
  * URL VFS.
  * @author Slava Pestov
- * @version $Id: UrlVFS.java 25000 2020-03-21 19:40:09Z kpouer $
+ * @version $Id$
  */
 public class UrlVFS extends VFS
 {

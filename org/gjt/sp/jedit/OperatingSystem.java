@@ -37,7 +37,7 @@ import org.gjt.sp.util.Log;
 /**
  * Operating system detection routines.
  * @author Slava Pestov
- * @version $Id: OperatingSystem.java 24918 2019-08-13 14:18:47Z vampire0 $
+ * @version $Id$
  * @since jEdit 4.0pre4
  */
 public class OperatingSystem

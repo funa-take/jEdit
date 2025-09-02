@@ -34,7 +34,7 @@ import org.gjt.sp.util.*;
 /**
  * A buffer insert request.
  * @author Slava Pestov
- * @version $Id: BufferInsertRequest.java 24414 2016-06-19 11:07:43Z kerik-sf $
+ * @version $Id$
  */
 public class BufferInsertRequest extends BufferIORequest
 {

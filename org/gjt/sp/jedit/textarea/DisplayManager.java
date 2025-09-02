@@ -34,7 +34,7 @@ import org.gjt.sp.util.Log;
  * 
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: DisplayManager.java 25337 2020-05-16 07:11:05Z kpouer $
+ * @version $Id$
  */
 public class DisplayManager
 {

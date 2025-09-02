@@ -36,7 +36,7 @@ import org.gjt.sp.jedit.textarea.Selection;
  * called through, implements such protection.
  *
  * @author Slava Pestov
- * @version $Id: UndoManager.java 25196 2020-04-11 17:08:33Z kpouer $
+ * @version $Id$
  * @since jEdit 4.0pre1
  */
 public class UndoManager

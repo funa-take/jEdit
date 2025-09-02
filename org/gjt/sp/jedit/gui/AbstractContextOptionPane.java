@@ -38,7 +38,7 @@ import org.gjt.sp.util.StandardUtilities;
  *
  * @author Slava Pestov
  * @author Marcelo Vanzin
- * @version $Id: AbstractContextOptionPane.java 25314 2020-05-04 22:20:12Z kpouer $
+ * @version $Id$
  * @since jEdit 4.3pre13
  */
 public abstract class AbstractContextOptionPane extends AbstractOptionPane

@@ -63,7 +63,7 @@ import org.gjt.sp.util.*;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: SearchAndReplace.java 24989 2020-03-10 07:55:36Z kpouer $
+ * @version $Id$
  */
 public class SearchAndReplace
 {

@@ -40,7 +40,7 @@ import org.gjt.sp.util.SegmentCharSequence;
  * or font style for painting that token.
  *
  * @author Slava Pestov, mike dillon
- * @version $Id: TokenMarker.java 25295 2020-04-26 13:17:03Z kpouer $
+ * @version $Id$
  *
  * @see org.gjt.sp.jedit.syntax.Token
  * @see org.gjt.sp.jedit.syntax.TokenHandler

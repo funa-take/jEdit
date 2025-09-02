@@ -36,7 +36,7 @@ import java.io.IOException;
 
 /**
  * @author Matthieu Casanova
- * @version $Id: ListDirectoryBrowserTask.java 19692 2011-07-22 15:27:56Z kpouer $
+ * @version $Id$
  */
 class RenameBrowserTask extends AbstractBrowserTask
 {

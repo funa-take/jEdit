@@ -83,7 +83,7 @@ import static java.lang.Integer.parseInt;
 /**
  * The main class of the jEdit text editor.
  * @author Slava Pestov
- * @version $Id: jEdit.java 25355 2020-09-03 02:48:21Z vampire0 $
+ * @version $Id$
  */
 public class jEdit
 {

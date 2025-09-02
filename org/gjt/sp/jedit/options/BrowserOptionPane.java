@@ -32,7 +32,7 @@ import org.gjt.sp.jedit.*;
 //{{{ BrowserOptionPane class
 /**
  * @author Slava Pestov
- * @version $Id: BrowserOptionPane.java 24425 2016-06-22 19:29:40Z daleanson $
+ * @version $Id$
  */
 public class BrowserOptionPane extends AbstractOptionPane
 {

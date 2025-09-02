@@ -51,7 +51,7 @@ import org.gjt.sp.util.Log;
 /**
  * A buffer I/O request.
  * @author Slava Pestov
- * @version $Id: BufferIORequest.java 24414 2016-06-19 11:07:43Z kerik-sf $
+ * @version $Id$
  */
 public abstract class BufferIORequest extends IoTask
 {

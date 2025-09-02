@@ -28,7 +28,7 @@ import javax.annotation.Nonnull;
  * "linked list" approach.
  *
  * @author Marcelo Vanzin
- * @version $Id: BufferSegment.java 25191 2020-04-11 17:00:39Z kpouer $
+ * @version $Id$
  * @since jEdit 4.3pre15
  */
 class BufferSegment implements CharSequence

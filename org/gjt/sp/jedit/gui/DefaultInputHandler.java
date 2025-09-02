@@ -35,7 +35,7 @@ import javax.annotation.Nonnull;
 /** The default input handler maps sequences of keystrokes into actions and inserts key typed events into the text area.
  *
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @version $Id$
  */
 public class DefaultInputHandler extends InputHandler
 {

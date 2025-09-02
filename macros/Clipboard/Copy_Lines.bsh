@@ -5,7 +5,7 @@
 *
 * Copyright (C) 2003 Ollie Rutherfurd <oliver@jedit.org>
 *
-* $Id: Copy_Lines.bsh 22664 2013-01-09 13:16:00Z kpouer $
+* $Id$
 */
 
 copyLines()

@@ -58,7 +58,7 @@ import org.gjt.sp.util.TaskManager;
  * </ul>
  *
  * @author Slava Pestov
- * @version $Id: BeanShell.java 25350 2020-07-02 06:54:09Z kpouer $
+ * @version $Id$
  */
 public class BeanShell
 {

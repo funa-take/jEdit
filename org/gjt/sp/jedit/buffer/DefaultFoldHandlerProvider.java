@@ -29,7 +29,7 @@ import java.util.HashMap;
 
 /**
  * @author Matthieu Casanova
- * @version $Id: Buffer.java 8190 2006-12-07 07:58:34Z kpouer $
+ * @version $Id$
  */
 public class DefaultFoldHandlerProvider implements FoldHandlerProvider
 {

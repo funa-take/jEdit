@@ -142,7 +142,7 @@ import javax.annotation.Nonnull;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: ActionSet.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @version $Id$
  * @since jEdit 4.0pre1
  */
 public class ActionSet extends JEditActionSet<EditAction> implements Comparable

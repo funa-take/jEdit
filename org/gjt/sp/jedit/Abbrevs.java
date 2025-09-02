@@ -33,7 +33,7 @@ import org.gjt.sp.util.Log;
 /**
  * Abbreviation manager.
  * @author Slava Pestov
- * @version $Id: Abbrevs.java 24211 2015-12-10 03:33:28Z daleanson $
+ * @version $Id$
  */
 public class Abbrevs
 {

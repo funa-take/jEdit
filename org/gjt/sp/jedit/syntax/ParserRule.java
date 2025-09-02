@@ -32,7 +32,7 @@ import java.util.regex.PatternSyntaxException;
 /**
  * A parser rule.
  * @author mike dillon, Slava Pestov
- * @version $Id: ParserRule.java 25244 2020-04-15 15:14:49Z kpouer $
+ * @version $Id$
  */
 public class ParserRule
 {

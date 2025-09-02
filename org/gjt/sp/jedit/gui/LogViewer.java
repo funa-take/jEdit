@@ -38,7 +38,7 @@ import org.gjt.sp.util.swing.event.UniqueActionDocumentListener;
 //}}}
 
 /** Activity Log Viewer
- * @version $Id: LogViewer.java 25210 2020-04-12 14:49:37Z kpouer $
+ * @version $Id$
  */
 public class LogViewer extends JPanel implements DefaultFocusComponent
 {

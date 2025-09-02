@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Buffer_to_HyperSearch_Results.bsh 5228 2005-07-13 03:24:43Z copy_paste $
+ * $Id$
  */
 
 import javax.swing.tree.DefaultMutableTreeNode;

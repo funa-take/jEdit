@@ -44,7 +44,7 @@ import org.gjt.sp.util.ThreadUtilities;
 /**
  * VFS browser tree view.
  * @author Slava Pestov
- * @version $Id: BrowserView.java 25190 2020-04-11 16:58:12Z kpouer $
+ * @version $Id$
  */
 @SuppressWarnings({"unchecked"})	// TODO: need to check on ParentDirectoryList and make it generic
 class BrowserView extends JPanel

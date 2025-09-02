@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 /**
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: ServiceListHandler.java 25152 2020-04-08 19:31:56Z kpouer $
+ * @version $Id$
  */
 class ServiceListHandler extends DefaultHandler
 {

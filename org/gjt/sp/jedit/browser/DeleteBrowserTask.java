@@ -33,7 +33,7 @@ import java.io.IOException;
 
 /**
  * @author Matthieu CAsanova
- * @version $Id: BrowserIORequest.java 12504 2008-04-22 23:12:43Z ezust $
+ * @version $Id$
  */
 class DeleteBrowserTask extends AbstractBrowserTask
 {

@@ -33,7 +33,7 @@ import org.gjt.sp.jedit.TextUtilities;
  * for matching XML tags.
  *
  * @author Slava Pestov
- * @version $Id: StructureMatcher.java 25255 2020-04-15 22:19:42Z kpouer $
+ * @version $Id$
  * @since jEdit 4.2pre3
  */
 public interface StructureMatcher

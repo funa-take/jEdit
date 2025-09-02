@@ -80,7 +80,7 @@ import org.gjt.sp.util.ThreadUtilities;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: EditBus.java 24044 2015-09-03 13:34:54Z daleanson $
+ * @version $Id$
  *
  * @since jEdit 2.2pre6
  */

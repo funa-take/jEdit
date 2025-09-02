@@ -37,7 +37,7 @@ import javax.swing.text.Segment;
  * Deep indent rule.
  *
  * @author Matthieu Casanova
- * @version $Id: DeepIndentRule.java 25222 2020-04-12 16:07:38Z kpouer $
+ * @version $Id$
  */
 public class DeepIndentRule implements IndentRule
 {

@@ -35,7 +35,7 @@ import org.gjt.sp.jedit.manager.BufferManager;
  * The Save and Backup option panel.
  *
  * @author Slava Pestov
- * @author $Id: SaveBackupOptionPane.java 25239 2020-04-14 20:00:17Z kpouer $
+ * @author $Id$
  */
 public class SaveBackupOptionPane extends AbstractOptionPane
 {

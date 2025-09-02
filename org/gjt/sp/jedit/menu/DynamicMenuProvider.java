@@ -32,7 +32,7 @@ import javax.swing.JMenu;
  *
  * @since jEdit 4.2pre2
  * @author Slava Pestov
- * @version $Id: DynamicMenuProvider.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 public interface DynamicMenuProvider
 {

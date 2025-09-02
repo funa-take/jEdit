@@ -41,7 +41,7 @@ import static org.gjt.sp.jedit.gui.DockableWindowManager.TOP;
 
 /** A panel that holds dockable windows.
  *
- * @version $Id: DockablePanel.java 25313 2020-05-04 22:18:59Z kpouer $
+ * @version $Id$
  */
 class DockablePanel extends JPanel
 {

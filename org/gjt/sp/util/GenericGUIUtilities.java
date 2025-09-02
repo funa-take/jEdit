@@ -53,7 +53,7 @@ import org.gjt.sp.jedit.textarea.TextAreaMouseHandler;
 *
 * @author Slava Pestov
 * @author Eric Le Lay
-* @version $Id: GenericGUIUtilities.java 25107 2020-03-31 22:37:06Z kpouer $
+* @version $Id$
 */
 public class GenericGUIUtilities
 {

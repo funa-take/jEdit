@@ -39,7 +39,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Status bar editor.
  * @author Matthieu Casanova
- * @version $Id: StatusBarOptionPane.java 24428 2016-06-23 02:49:29Z daleanson $
+ * @version $Id$
  */
 public class StatusBarOptionPane extends AbstractOptionPane
 {

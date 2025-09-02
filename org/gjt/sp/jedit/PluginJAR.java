@@ -147,7 +147,7 @@ import static org.gjt.sp.jedit.EditBus.EBHandler;
  * @see ServiceManager
  *
  * @author Slava Pestov
- * @version $Id: PluginJAR.java 25239 2020-04-14 20:00:17Z kpouer $
+ * @version $Id$
  * @since jEdit 4.2pre1
  */
 public class PluginJAR

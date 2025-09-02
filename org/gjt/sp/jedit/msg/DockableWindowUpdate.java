@@ -31,7 +31,7 @@ import java.util.Objects;
 /**
  * Message sent when dockable window state changes.
  * @author Slava Pestov
- * @version $Id: DockableWindowUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @version $Id$
  *
  * @since jEdit 4.2pre1
  */

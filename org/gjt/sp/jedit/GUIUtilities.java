@@ -96,7 +96,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * </ul>
  *
  * @author Slava Pestov
- * @version $Id: GUIUtilities.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @version $Id$
  */
 public class GUIUtilities
 {
@@ -2107,7 +2107,7 @@ public class GUIUtilities
 	 * For non-Frame's use {@link GUIUtilities#saveGeometry(Window,String)}
 	 *
 	 * @author Björn Kautler
-	 * @version $Id: GUIUtilities.java 25221 2020-04-12 16:00:17Z kpouer $
+	 * @version $Id$
 	 * @since jEdit 4.3pre6
 	 * @see GUIUtilities#saveGeometry(Window,Container,String)
 	 */

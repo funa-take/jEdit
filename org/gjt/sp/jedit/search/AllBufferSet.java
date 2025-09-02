@@ -37,7 +37,7 @@ import static org.gjt.sp.util.StandardUtilities.EMPTY_STRING_ARRAY;
 /**
  * A file set for searching all open buffers in a view.
  * @author Slava Pestov
- * @version $Id: AllBufferSet.java 25108 2020-03-31 22:41:49Z kpouer $
+ * @version $Id$
  */
 public class AllBufferSet extends BufferListSet
 {

@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Message sent when an edit pane-related change occurs. 
  * @author Slava Pestov
- * @version $Id: EditPaneUpdate.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @version $Id$
  *
  * @since jEdit 2.5pre1
  */

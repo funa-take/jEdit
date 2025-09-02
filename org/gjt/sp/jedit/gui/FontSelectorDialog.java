@@ -39,7 +39,7 @@ import org.gjt.sp.util.Log;
  * A dialog for choosing fonts.
  *
  * @author Slava Pestov
- * @version $Id: FontSelectorDialog.java 24428 2016-06-23 02:49:29Z daleanson $
+ * @version $Id$
  * @since jEdit 4.4pre1
  */
 

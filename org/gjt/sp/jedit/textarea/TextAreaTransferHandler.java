@@ -45,7 +45,7 @@ import java.util.List;
 
 /**
  * @author Slava Pestov
- * @version $Id: TextAreaTransferHandler.java 22943 2013-04-22 11:44:40Z thomasmey $
+ * @version $Id$
  */
 public class TextAreaTransferHandler extends TransferHandler
 {

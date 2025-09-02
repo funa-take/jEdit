@@ -40,7 +40,7 @@ import org.gjt.sp.util.Log;
  *
  * @author Slava Pestov
  * @author Matthieu Casanova
- * @version $Id: BeanShellAction.java 10803 2007-10-04 20:45:31Z kpouer $
+ * @version $Id$
  */
 public class JEditBeanShellAction extends JEditAbstractEditAction<TextArea>
 {

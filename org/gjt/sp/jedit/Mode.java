@@ -44,7 +44,7 @@ import org.gjt.sp.util.StandardUtilities;
  * One instance of this class is created for each supported edit mode.
  *
  * @author Slava Pestov
- * @version $Id: Mode.java 24428 2016-06-23 02:49:29Z daleanson $
+ * @version $Id$
  */
 public class Mode
 {

@@ -38,7 +38,7 @@ import org.gjt.sp.util.Log;
  * of the position are implemented separately.
  *
  * @author Slava Pestov
- * @version $Id: PositionManager.java 25195 2020-04-11 17:07:09Z kpouer $
+ * @version $Id$
  * @since jEdit 4.2pre3
  */
 class PositionManager

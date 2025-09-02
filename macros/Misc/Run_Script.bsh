@@ -21,7 +21,7 @@
  * along with the jEdit program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Id: Run_Script.bsh 22582 2012-12-17 16:51:11Z kpouer $
+ * $Id$
  */
 
 // Localization

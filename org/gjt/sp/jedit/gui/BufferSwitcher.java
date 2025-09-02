@@ -44,7 +44,7 @@ import org.gjt.sp.util.ThreadUtilities;
 //}}}
 
 /** BufferSwitcher class
-   @version $Id: BufferSwitcher.java 25334 2020-05-10 09:51:15Z kpouer $
+   @version $Id$
 */
 public class BufferSwitcher extends JComboBox<Buffer>
 {

@@ -33,7 +33,7 @@ import org.gjt.sp.util.Log;
 
 /**
  * @author Slava Pestov
- * @version $Id: TextAreaDropHandler.java 25324 2020-05-09 08:30:33Z kpouer $
+ * @version $Id$
  */
 class TextAreaDropHandler extends DropTargetAdapter
 {

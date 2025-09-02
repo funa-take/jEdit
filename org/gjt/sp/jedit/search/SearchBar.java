@@ -37,7 +37,7 @@ import org.gjt.sp.util.SyntaxUtilities;
 
 /**
  * Incremental search tool bar.
- * @version $Id: SearchBar.java 25207 2020-04-12 14:36:56Z kpouer $
+ * @version $Id$
  */
 public class SearchBar extends JToolBar
 {

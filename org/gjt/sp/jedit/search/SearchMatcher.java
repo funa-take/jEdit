@@ -27,7 +27,7 @@ import org.gjt.sp.jedit.TextUtilities;
 /**
  * An abstract class for matching strings.
  * @author Slava Pestov
- * @version $Id: SearchMatcher.java 25301 2020-05-01 16:38:04Z kpouer $
+ * @version $Id$
  */
 public abstract class SearchMatcher
 {

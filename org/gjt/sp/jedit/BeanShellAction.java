@@ -39,7 +39,7 @@ import org.gjt.sp.util.Log;
  * @see ActionSet
  *
  * @author Slava Pestov
- * @version $Id: BeanShellAction.java 25106 2020-03-31 22:35:31Z kpouer $
+ * @version $Id$
  */
 public class BeanShellAction extends EditAction
 {

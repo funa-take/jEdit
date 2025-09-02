@@ -42,7 +42,7 @@ import org.gjt.sp.util.StandardUtilities;
  * </ul>
  *
  * @author Slava Pestov
- * @version $Id: TextUtilities.java 25308 2020-05-03 22:08:41Z kpouer $
+ * @version $Id$
  */
 public class TextUtilities
 {

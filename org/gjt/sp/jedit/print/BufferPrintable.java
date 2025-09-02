@@ -41,7 +41,7 @@ import org.gjt.sp.util.*;
 
 @Deprecated
 /**
- * @version $Id: BufferPrintable.java 24918 2019-08-13 14:18:47Z vampire0 $
+ * @version $Id$
  * @deprecated
  * Replaced by BufferPrinter1_7. All the workarounds for java 1.3 and 1.4 don't
  * matter any more since jEdit requires java 11 at minimum.

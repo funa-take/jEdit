@@ -23,7 +23,7 @@ package org.gjt.sp.jedit.textarea;
  * A scroll listener will be notified when the text area is scrolled, either
  * horizontally or vertically.
  * @author Slava Pestov
- * @version $Id: ScrollListener.java 15570 2009-06-25 00:43:57Z ezust $
+ * @version $Id$
  * @since jEdit 3.2pre2
  */
 public interface ScrollListener extends java.util.EventListener

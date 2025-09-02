@@ -56,7 +56,7 @@ import org.gjt.sp.util.Log;
  * complicated stuff can be done too.
  *
  * @author Slava Pestov
- * @version $Id: EditServer.java 25137 2020-04-06 15:24:02Z kpouer $
+ * @version $Id$
  */
 public class EditServer extends Thread
 {

@@ -27,7 +27,7 @@ import java.lang.reflect.Field;
  * A linked list of syntax tokens.
  *
  * @author Slava Pestov
- * @version $Id: Token.java 25244 2020-04-15 15:14:49Z kpouer $
+ * @version $Id$
  */
 public class Token
 {

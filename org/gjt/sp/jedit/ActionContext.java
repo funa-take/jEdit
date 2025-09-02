@@ -33,7 +33,7 @@ package org.gjt.sp.jedit;
  *
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: ActionContext.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 public abstract class ActionContext extends JEditActionContext<EditAction, ActionSet>
 {

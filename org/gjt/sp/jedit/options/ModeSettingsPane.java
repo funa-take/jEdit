@@ -37,7 +37,7 @@ import org.gjt.sp.util.StandardUtilities;
 /**
  * Option pane to change the settings of an edit mode.
  * @author Slava Pestov
- * @version $Id: ModeSettingsPane.java 24012 2015-08-12 08:48:07Z kpouer $
+ * @version $Id$
  */
 public class ModeSettingsPane extends AbstractOptionPane
 {

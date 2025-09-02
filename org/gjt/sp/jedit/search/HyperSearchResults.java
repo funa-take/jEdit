@@ -50,7 +50,7 @@ import org.gjt.sp.util.TaskManager;
 /**
  * HyperSearch results window.
  * @author Slava Pestov
- * @version $Id: HyperSearchResults.java 25045 2020-03-27 23:28:48Z kpouer $
+ * @version $Id$
  */
 public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 {

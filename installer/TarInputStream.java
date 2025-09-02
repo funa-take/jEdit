@@ -24,7 +24,7 @@ import java.io.*;
  * the archive, and the read each entry as a normal input stream
  * using read().
  *
- * @version $Revision: 12504 $
+ * @version $Revision$
  * @author Timothy Gerard Endres,
  *  <a href="mailto:time@gjt.org">time@trustice.com</a>.
  * @see TarBuffer

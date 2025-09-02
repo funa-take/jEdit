@@ -27,7 +27,7 @@ package org.gjt.sp.jedit.search;
 
 /**
  * Implements literal search using the Boyer-Moore algorithm.
- * @version $Id: BoyerMooreSearchMatcher.java 25302 2020-05-02 16:53:25Z kpouer $
+ * @version $Id$
  */
 public class BoyerMooreSearchMatcher extends SearchMatcher
 {

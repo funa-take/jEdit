@@ -44,7 +44,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Plugin list downloaded from server.
  * @since jEdit 3.2pre2
- * @version $Id: PluginList.java 25274 2020-04-19 16:30:10Z kpouer $
+ * @version $Id$
  */
 class PluginList extends Task
 {

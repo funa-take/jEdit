@@ -36,7 +36,7 @@ import org.gjt.sp.util.GenericGUIUtilities;
 /** Text field with an arrow-key + drop-down accessable history.
  *
  * @author Slava Pestov
- * @version $Id: HistoryTextField.java 25051 2020-03-28 17:27:53Z kpouer $
+ * @version $Id$
  */
 public class HistoryTextField extends JTextField
 {

@@ -67,7 +67,7 @@ import java.util.regex.Pattern;
  * </ul>
  *
  * @author Slava Pestov
- * @version $Id: JEditBuffer.java 25279 2020-04-20 22:08:37Z kpouer $
+ * @version $Id$
  *
  * @since jEdit 4.3pre3
  */

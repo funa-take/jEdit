@@ -229,7 +229,7 @@
 			<END>}</END>
 		</SPAN_REGEXP>
 
-		<!-- for the common usage of the cvs keyword $Id: java.xml 24893 2019-01-17 20:10:18Z daleanson $ -->
+		<!-- for the common usage of the cvs keyword $Id$ -->
 		<SPAN_REGEXP TYPE="LABEL" HASH_CHAR="@version" NO_WORD_BREAK="FALSE" DELEGATE="JAVADOC_PARAM">
 			<BEGIN>@version\s+\$</BEGIN>
 			<END>$</END>

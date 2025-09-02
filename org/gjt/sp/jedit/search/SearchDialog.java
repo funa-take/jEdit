@@ -44,7 +44,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Search and replace dialog.
  * @author Slava Pestov
- * @version $Id: SearchDialog.java 25081 2020-03-29 22:43:29Z kpouer $
+ * @version $Id$
  */
 public class SearchDialog extends EnhancedDialog
 {

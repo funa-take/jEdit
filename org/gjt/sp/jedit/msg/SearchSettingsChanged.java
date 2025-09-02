@@ -25,7 +25,7 @@ import org.gjt.sp.jedit.EBMessage;
 /**
  * Message sent when search and replace settings change.
  * @author Slava Pestov
- * @version $Id: SearchSettingsChanged.java 12504 2008-04-22 23:12:43Z ezust $
+ * @version $Id$
  *
  * @since jEdit 2.3pre1
  */

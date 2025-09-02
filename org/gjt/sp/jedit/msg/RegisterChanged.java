@@ -26,7 +26,7 @@ import org.gjt.sp.jedit.Registers;
 /**
  * Message sent when a register is updated.
  * @author Nicholas O'Leary
- * @version $Id: RegisterChanged.java 25325 2020-05-09 08:34:40Z kpouer $
+ * @version $Id$
  *
  * @since jEdit 4.3pre1
  */

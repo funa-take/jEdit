@@ -37,7 +37,7 @@ import org.gjt.sp.util.GenericGUIUtilities;
  * You can get and set the currently selected color using
  * {@link #getSelectedColor()} and {@link #setSelectedColor(Color)}.
  * @author Slava Pestov
- * @version $Id: ColorWellButton.java 24411 2016-06-19 11:02:53Z kerik-sf $
+ * @version $Id$
  */
 public class ColorWellButton extends JButton
 {

@@ -38,7 +38,7 @@ import org.gjt.sp.util.SyntaxUtilities;
 /** A TextField that accepts only numeric values. The numeric values may be 
  * either integer or float values.
  * @author Matthieu Casanova
- * @version $Id: KeyEventWorkaround.java 12889 2008-06-23 20:14:00Z kpouer $
+ * @version $Id$
  * @since jEdit 4.3pre15
  */
 public class NumericTextField extends JTextField implements ComboBoxEditor

@@ -28,7 +28,7 @@ package org.gjt.sp.jedit;
  * @see ActionSet
  *
  * @author S. Pestov, M. Casanova, K. Satoda
- * @version $Id: EditAction.java 11177 2007-12-01 09:50:50Z k_satoda $
+ * @version $Id$
  * @since 4.3pre13
  */
 public abstract class JEditAbstractEditAction<E>

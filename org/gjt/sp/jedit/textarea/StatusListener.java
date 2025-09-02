@@ -23,7 +23,7 @@ package org.gjt.sp.jedit.textarea;
 /**
  * Fired when the text area needs to display a status message.
  * @author Slava Pestov
- * @version $Id: StatusListener.java 15577 2009-06-25 05:55:16Z ezust $
+ * @version $Id$
  * @since jEdit 4.3pre2
  */
 public interface StatusListener extends java.util.EventListener

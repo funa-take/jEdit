@@ -94,7 +94,7 @@ import org.gjt.sp.util.SyntaxUtilities;
  * @author Slava Pestov
  * @author John Gellene (API documentation)
    @author Matthieu Casanova
- * @version $Id: StandaloneTextArea.java 25104 2020-03-31 22:25:46Z kpouer $
+ * @version $Id$
  */
 public class StandaloneTextArea extends TextArea
 {

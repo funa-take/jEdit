@@ -43,7 +43,7 @@ import org.gjt.sp.util.StandardUtilities;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: Selection.java 25283 2020-04-22 08:37:19Z kpouer $
+ * @version $Id$
  * @since jEdit 3.2pre1
  */
 public abstract class Selection implements Cloneable

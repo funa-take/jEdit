@@ -70,7 +70,7 @@ import org.gjt.sp.util.ThreadUtilities;
  *
  * @author Slava Pestov
  * @author kpouer (rafactoring into standalone text area)
- * @version $Id: TextArea.java 25322 2020-05-08 17:26:24Z kpouer $
+ * @version $Id$
  */
 public abstract class TextArea extends JPanel
 {

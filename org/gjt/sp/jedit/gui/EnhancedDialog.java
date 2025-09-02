@@ -33,7 +33,7 @@ import java.awt.*;
  * Enter is pressed) and cancel() (called when Escape is pressed, or window
  * is closed).
  * @author Slava Pestov
- * @version $Id: EnhancedDialog.java 25058 2020-03-28 19:33:14Z kpouer $
+ * @version $Id$
  */
 public abstract class EnhancedDialog extends JDialog
 {

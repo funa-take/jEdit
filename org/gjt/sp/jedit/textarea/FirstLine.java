@@ -29,7 +29,7 @@ import org.gjt.sp.util.Log;
  * This Anchor is the first visible line of the textarea.
  *
  * @author Slava Pestov
- * @version $Id: FirstLine.java 25197 2020-04-11 17:14:27Z kpouer $
+ * @version $Id$
  */
 class FirstLine extends Anchor
 {

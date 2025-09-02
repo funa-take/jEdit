@@ -39,7 +39,7 @@ import java.util.*;
  *
  * @author Matthieu Casanova
  * @since jEdit 4.3pre15
- * @version $Id: jEdit.java 25120 2020-04-03 14:58:39Z kpouer $
+ * @version $Id$
  */
 public class BufferSetManager
 {

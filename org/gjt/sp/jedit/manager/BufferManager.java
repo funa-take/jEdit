@@ -33,7 +33,7 @@ import java.util.function.Consumer;
  *
  * @author Matthieu Casanova
  * @since jEdit 5.6pre1
- * @version $Id: jEdit.java 25120 2020-04-03 14:58:39Z kpouer $
+ * @version $Id$
  */
 public interface BufferManager
 {

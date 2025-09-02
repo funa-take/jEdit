@@ -29,7 +29,7 @@ import org.gjt.sp.util.Log;
 //}}}
 
 /** The splash screen displayed on startup.
- * @version $Id: SplashScreen.java 24830 2018-02-22 01:21:35Z vampire0 $
+ * @version $Id$
  */
 public class SplashScreen extends JComponent
 {

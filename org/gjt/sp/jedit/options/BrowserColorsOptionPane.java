@@ -42,7 +42,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Browser color editor.
  * @author Slava Pestov
- * @version $Id: BrowserColorsOptionPane.java 24411 2016-06-19 11:02:53Z kerik-sf $
+ * @version $Id$
  */
 public class BrowserColorsOptionPane extends AbstractOptionPane
 {

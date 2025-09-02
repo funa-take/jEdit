@@ -42,7 +42,7 @@ import static org.gjt.sp.jedit.io.FileVFS.recursiveDelete;
 //}}}
 
 /**
- * @author $Id: Roster.java 25221 2020-04-12 16:00:17Z kpouer $
+ * @author $Id$
  */
 class Roster
 {

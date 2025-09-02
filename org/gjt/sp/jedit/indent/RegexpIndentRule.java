@@ -35,7 +35,7 @@ import org.gjt.sp.jedit.syntax.TokenMarker;
 
 /**
  * @author Slava Pestov
- * @version $Id: RegexpIndentRule.java 25222 2020-04-12 16:07:38Z kpouer $
+ * @version $Id$
  */
 public class RegexpIndentRule implements IndentRule
 {

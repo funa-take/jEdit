@@ -34,7 +34,7 @@ import org.gjt.sp.jedit.*;
  * The options pane for handling large files.
  *
  * @author kpouer
- * now a separate pane split off from $Id: EditingOptionPane.java 23381 2013-12-09 12:43:14Z kpouer $
+ * now a separate pane split off from $Id$
  */
 public class LargeFilesOptionPane extends AbstractOptionPane
 {

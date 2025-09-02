@@ -38,7 +38,7 @@ import org.gjt.sp.util.*;
 /**
  * HyperSearch results window.
  * @author Slava Pestov
- * @version $Id: HyperSearchRequest.java 23224 2013-09-30 20:51:42Z shlomy $
+ * @version $Id$
  */
 class HyperSearchRequest extends Task
 {

@@ -30,7 +30,7 @@ import org.gjt.sp.jedit.syntax.TokenMarker;
 
 /**
  * @author Slava Pestov
- * @version $Id: BracketIndentRule.java 25222 2020-04-12 16:07:38Z kpouer $
+ * @version $Id$
  */
 public abstract class BracketIndentRule implements IndentRule
 {

@@ -29,7 +29,7 @@ import org.gjt.sp.jedit.TextUtilities;
 
 /**
  * @author Slava Pestov
- * @version $Id: OpenBracketIndentRule.java 25222 2020-04-12 16:07:38Z kpouer $
+ * @version $Id$
  */
 public class OpenBracketIndentRule extends BracketIndentRule
 {

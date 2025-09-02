@@ -31,7 +31,7 @@ import org.gjt.sp.util.Log;
 
 /**
  * @author Slava Pestov
- * @version $Id: Autosave.java 25239 2020-04-14 20:00:17Z kpouer $
+ * @version $Id$
  */
 class Autosave implements ActionListener
 {

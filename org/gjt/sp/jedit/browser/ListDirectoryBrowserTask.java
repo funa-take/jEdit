@@ -35,7 +35,7 @@ import java.io.IOException;
 
 /**
  * @author Matthieu Casanova
- * @version $Id: ListDirectoryBrowserTask.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 class ListDirectoryBrowserTask extends AbstractBrowserTask
 {

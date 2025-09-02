@@ -51,7 +51,7 @@ import org.gjt.sp.util.ThreadUtilities;
 
 /**
  * @author Slava Pestov
- * @version $Id: VFSDirectoryEntryTable.java 25189 2020-04-11 16:57:06Z kpouer $
+ * @version $Id$
  * @since jEdit 4.2pre1
  */
 public class VFSDirectoryEntryTable extends JTable

@@ -26,7 +26,7 @@ package org.gjt.sp.jedit.textarea;
  * It can be catched and an error dialog can be displayed.
  *
  * @author Matthieu Casanova
- * @version $Id: TextAreaException.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 public class TextAreaException extends Exception
 {

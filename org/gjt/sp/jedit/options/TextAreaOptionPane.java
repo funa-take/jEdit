@@ -41,7 +41,7 @@ import org.gjt.sp.jedit.gui.RolloverButton;
 
 /**
  * @author Slava Pestov
- * @version $Id: TextAreaOptionPane.java 24775 2017-11-04 01:43:57Z ezust $
+ * @version $Id$
  */
 public class TextAreaOptionPane extends AbstractOptionPane
 {

@@ -34,7 +34,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Set options for undo here.
  * @author Dale Anson
- * @version $Id: UndoPane.java 24012 2015-08-12 08:48:07Z kpouer $
+ * @version $Id$
  */
 public class UndoPane extends AbstractOptionPane
 {

@@ -56,7 +56,7 @@ import org.gjt.sp.util.StandardUtilities;
  * {@link #waitForRequests()}.
  *
  * @author Slava Pestov
- * @version $Id: VFSManager.java 25330 2020-05-09 14:21:52Z kpouer $
+ * @version $Id$
  */
 public class VFSManager
 {

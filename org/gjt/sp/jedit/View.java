@@ -132,7 +132,7 @@ import org.gjt.sp.util.StandardUtilities;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: View.java 25349 2020-06-10 12:07:06Z makarius $
+ * @version $Id$
  */
 public class View extends JFrame implements InputHandlerProvider
 {

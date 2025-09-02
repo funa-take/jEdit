@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
  * the methods in the {@link GUIUtilities} class instead.
  *
  * @author Slava Pestov
- * @version $Id: Macros.java 25328 2020-05-09 10:17:16Z kpouer $
+ * @version $Id$
  */
 public class Macros
 {

@@ -49,7 +49,7 @@ import java.util.List;
 /**
  * Key binding editor.
  * @author Slava Pestov
- * @version $Id: ShortcutsOptionPane.java 25210 2020-04-12 14:49:37Z kpouer $
+ * @version $Id$
  */
 @SuppressWarnings("serial")
 public class ShortcutsOptionPane extends AbstractOptionPane

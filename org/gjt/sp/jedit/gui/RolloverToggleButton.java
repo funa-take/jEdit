@@ -41,7 +41,7 @@ import javax.swing.border.*;
  *
  * Note: You should not call <code>setBorder()</code> on your buttons,
  * as they probably won't work properly.
- * @version $Id: RolloverButton.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 public class RolloverToggleButton extends JToggleButton
 {

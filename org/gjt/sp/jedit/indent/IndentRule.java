@@ -27,7 +27,7 @@ import org.gjt.sp.jedit.buffer.JEditBuffer;
 
 /** Abstract Indentation Rule 
  * @author Slava Pestov
- * @version $Id: IndentRule.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 public interface IndentRule
 {

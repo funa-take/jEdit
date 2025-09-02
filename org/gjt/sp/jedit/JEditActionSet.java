@@ -140,7 +140,7 @@ import org.gjt.sp.util.XMLUtilities;
  *
  * @author Slava Pestov
  * @author John Gellene (API documentation)
- * @version $Id: ActionSet.java 9529 2007-05-12 15:06:52Z ezust $
+ * @version $Id$
  * @since jEdit 4.3pre13
  */
 public abstract class JEditActionSet<E extends JEditAbstractEditAction> implements InputHandlerProvider

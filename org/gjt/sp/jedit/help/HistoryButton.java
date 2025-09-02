@@ -33,7 +33,7 @@ import javax.swing.*;
 /**
  * History Button
  * @author Nicholas O'Leary
- * @version $Id: HistoryButton.java 25243 2020-04-15 14:51:21Z kpouer $
+ * @version $Id$
  */
 public class HistoryButton extends JPanel implements ActionListener
 {

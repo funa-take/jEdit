@@ -43,7 +43,7 @@ import static java.util.stream.Collectors.joining;
  * Syntax utilities that depends on JDK only and syntax package.
  *
  * @author Matthieu Casanova
- * @version $Id: StandardUtilities.java 9871 2007-06-28 16:33:20Z Vampire0 $
+ * @version $Id$
  * @since 4.3pre13
  */
 public class SyntaxUtilities

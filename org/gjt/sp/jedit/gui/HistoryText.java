@@ -33,7 +33,7 @@ import org.gjt.sp.util.GenericGUIUtilities;
 /**
  * Controller (manager of models) for HistoryTextArea.
  * @author Slava Pestov
- * @version $Id: HistoryText.java 24411 2016-06-19 11:02:53Z kerik-sf $
+ * @version $Id$
  */
 public class HistoryText
 {

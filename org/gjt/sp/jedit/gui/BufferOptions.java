@@ -34,7 +34,7 @@ import org.gjt.sp.jedit.*;
 /**
  * Buffer-specific options dialog.
  * @author Slava Pestov
- * @version $Id: BufferOptions.java 25313 2020-05-04 22:18:59Z kpouer $
+ * @version $Id$
  */
 public class BufferOptions extends EnhancedDialog
 {

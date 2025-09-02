@@ -40,7 +40,7 @@ import javax.annotation.Nonnull;
  * favorite and clicking 'delete' in the browser just deletes the
  * favorite, and not the directory itself.
  * @author Slava Pestov
- * @version $Id: FavoritesVFS.java 25331 2020-05-09 14:24:20Z kpouer $
+ * @version $Id$
  */
 public class FavoritesVFS extends VFS
 {

@@ -31,7 +31,7 @@ import org.gjt.sp.util.Log;
  * @see org.gjt.sp.jedit.EBMessage
  *
  * @author Slava Pestov
- * @version $Id: EBPlugin.java 12504 2008-04-22 23:12:43Z ezust $
+ * @version $Id$
  */
 public abstract class EBPlugin extends EditPlugin implements EBComponent
 {

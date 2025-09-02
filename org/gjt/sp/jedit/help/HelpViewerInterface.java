@@ -8,7 +8,7 @@ import java.beans.PropertyChangeListener;
  * Currently used by @ref infoviewer.InfoViewerPlugin and @ref HelpViewer 
  * 
  * @since Jedit 4.2pre5
- * @version $Id: HelpViewerInterface.java 25243 2020-04-15 14:51:21Z kpouer $
+ * @version $Id$
  */
 public interface HelpViewerInterface 
 {

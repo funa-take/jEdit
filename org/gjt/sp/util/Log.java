@@ -57,7 +57,7 @@ import static java.text.DateFormat.MEDIUM;
  * to the log, see {@link #init}.
  *
  * @author Slava Pestov
- * @version $Id: Log.java 25123 2020-04-04 22:40:51Z kpouer $
+ * @version $Id$
  */
 public class Log
 {

@@ -34,7 +34,7 @@ import java.io.IOException;
 /**
  * The concrete RegisterSaver for jEdit.
  * @author Matthieu Casanova
- * @version $Id: FoldHandler.java 5568 2006-07-10 20:52:23Z kpouer $
+ * @version $Id$
  */
 class JEditRegisterSaver implements RegisterSaver
 {

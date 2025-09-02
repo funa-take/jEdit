@@ -33,7 +33,7 @@ import org.gjt.sp.util.StandardUtilities;
 /**
  * Recursive directory search.
  * @author Slava Pestov
- * @version $Id: DirectoryListSet.java 22454 2012-11-10 11:15:08Z thomasmey $
+ * @version $Id$
  */
 public class DirectoryListSet extends BufferListSet
 {

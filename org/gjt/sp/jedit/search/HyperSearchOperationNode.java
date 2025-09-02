@@ -41,7 +41,7 @@ import javax.swing.tree.TreePath;
  * Top result node of a HyperSearch request.
  *
  * @author Slava Pestov
- * @version $Id: HyperSearchOperationNode.java 24421 2016-06-19 15:33:49Z kerik-sf $
+ * @version $Id$
  */
 public class HyperSearchOperationNode
 {

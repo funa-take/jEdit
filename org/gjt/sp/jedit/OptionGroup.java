@@ -33,7 +33,7 @@ import java.util.*;
  * option pane instances.
  *
  * @author Mike Dillon
- * @version $Id: OptionGroup.java 21831 2012-06-18 22:54:17Z ezust $
+ * @version $Id$
  */
 public class OptionGroup
 {

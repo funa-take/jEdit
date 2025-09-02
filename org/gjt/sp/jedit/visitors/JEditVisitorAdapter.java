@@ -30,7 +30,7 @@ import org.gjt.sp.jedit.textarea.JEditTextArea;
 /** Default implementation of a jEditVisitor.  
  *
  * @author Matthieu Casanova
- * @version $Id: GUIUtilities.java 11797 2008-02-15 00:07:23Z Vampire0 $
+ * @version $Id$
  * @since jEdit 4.3pre13
  */
 public class JEditVisitorAdapter implements JEditVisitor

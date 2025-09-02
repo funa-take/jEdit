@@ -41,7 +41,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /** Manages persistence of open buffers and views across jEdit sessions.
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: PerspectiveManager.java 25239 2020-04-14 20:00:17Z kpouer $
+ * @version $Id$
  */
 public class PerspectiveManager
 {

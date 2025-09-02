@@ -27,7 +27,7 @@ package org.gjt.sp.jedit;
  * development) and debugging routines.
  * @since jEdit 4.2pre1
  * @author Slava Pestov
- * @version $Id: Debug.java 23981 2015-08-10 14:56:24Z daleanson $
+ * @version $Id$
  */
 public class Debug
 {

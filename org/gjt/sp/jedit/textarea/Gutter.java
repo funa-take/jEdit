@@ -50,7 +50,7 @@ import org.gjt.sp.util.Log;
  * @see TextArea
  *
  * @author Mike Dillon and Slava Pestov
- * @version $Id: Gutter.java 25033 2020-03-25 23:22:26Z kpouer $
+ * @version $Id$
  */
 public class Gutter extends JComponent implements SwingConstants
 {

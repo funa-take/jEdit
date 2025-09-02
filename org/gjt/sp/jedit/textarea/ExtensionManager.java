@@ -30,7 +30,7 @@ import org.gjt.sp.util.Log;
  * Manage the extensions for the gutter and the textarea.
  *
  * @author Slava Pestov
- * @version $Id: ExtensionManager.java 23221 2013-09-29 20:03:32Z shlomy $
+ * @version $Id$
  */
 class ExtensionManager
 {

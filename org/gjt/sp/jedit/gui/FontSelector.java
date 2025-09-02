@@ -41,7 +41,7 @@ import org.gjt.sp.util.Log;
 /**
  * A font chooser widget.
  * @author Slava Pestov
- * @version $Id: FontSelector.java 24411 2016-06-19 11:02:53Z kerik-sf $
+ * @version $Id$
  */
 public class FontSelector extends JButton
 {

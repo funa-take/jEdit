@@ -55,7 +55,7 @@ import org.gjt.sp.util.Log;
  * @see TextArea
  *
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java 25251 2020-04-15 22:07:47Z kpouer $
+ * @version $Id$
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {

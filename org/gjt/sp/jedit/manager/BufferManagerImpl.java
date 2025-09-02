@@ -45,7 +45,7 @@ import static java.lang.Integer.parseInt;
  *
  * @author Matthieu Casanova
  * @since 5.6pre1
- * @version $Id: jEdit.java 25120 2020-04-03 14:58:39Z kpouer $
+ * @version $Id$
  */
 public class BufferManagerImpl implements BufferManager
 {

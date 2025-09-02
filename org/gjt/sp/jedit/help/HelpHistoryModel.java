@@ -29,7 +29,7 @@ import java.util.ArrayList;
 /**
  * History model used by the help browser 
  * @author Nicholas O'Leary
- * @version $Id: HelpHistoryModel.java 25300 2020-05-01 08:16:32Z kpouer $
+ * @version $Id$
  */
 public class HelpHistoryModel
 {

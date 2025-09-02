@@ -32,7 +32,7 @@ import javax.swing.text.Segment;
  * called through, implements such protection.
  *
  * @author Slava Pestov
- * @version $Id: ContentManager.java 21885 2012-06-27 14:06:58Z k_satoda $
+ * @version $Id$
  * @since jEdit 4.0pre1
  */
 class ContentManager

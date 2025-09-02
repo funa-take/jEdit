@@ -25,7 +25,7 @@ package org.gjt.sp.jedit.textarea;
 /**
  * A base point for physical line/screen line conversion.
  * @author Slava Pestov
- * @version $Id: Anchor.java 25336 2020-05-16 07:07:28Z kpouer $
+ * @version $Id$
  */
 abstract class Anchor
 {

@@ -38,7 +38,7 @@ import org.gjt.sp.util.Log;
  * warts in the AWT key event API.
  *
  * @author Slava Pestov
- * @version $Id: KeyEventTranslator.java 24859 2018-04-10 23:06:33Z daleanson $
+ * @version $Id$
  */
 public class KeyEventTranslator
 {

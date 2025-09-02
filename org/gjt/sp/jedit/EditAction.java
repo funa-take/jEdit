@@ -37,7 +37,7 @@ import java.awt.event.ActionListener;
  * @see ActionSet
  *
  * @author Slava Pestov
- * @version $Id: EditAction.java 24750 2017-10-12 09:46:15Z ezust $
+ * @version $Id$
  */
 public abstract class EditAction extends JEditAbstractEditAction<View>
 {
