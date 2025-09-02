@@ -38,9 +38,9 @@ common.clearAll=すべてクリア
 common.selectAll=すべて選択
 common.selectNone=選択解除
 
-lineSep.unix=Unix (\\n)
-lineSep.windows=DOS/Windows (\\r\\n)
-lineSep.mac=MacOS (\\r)
+lineSep.LF=Unix/MacOS (\\n)
+lineSep.CRLF=DOS/Windows (\\r\\n)
+lineSep.CR=Classic MacOS (\\r)
 #}}}
 
 #{{{ Miscellaneous
@@ -538,7 +538,9 @@ view.status.io=I/O: {0} 件の操作が進行中
 view.status.linesep-changed=改行文字を設定 {0}
 view.status.linesep-tooltip=改行文字 (クリックで変更)
 view.status.memory-tooltip=Java ヒープメモリ: {0}Kb/{1}Kb
-view.status.mode-tooltip=編集モード/フォールドモード/エンコーディング
+view.status.mode-tooltip=編集モード
+view.status.fold-tooltip=フォールドモード
+view.status.encoding-tooltip=エンコーディング
 view.status.multi-changed=マルチ選択モード {0,choice,0#オフ|1#オン}
 view.status.multi-tooltip=マルチ選択モード (クリックで変更)
 view.status.narrow=すべてのテキストを表示するには、"すべてのフォールドを開く"を実行
@@ -1631,7 +1633,6 @@ options.toolbar.reset.dialog.message=本当にツールバーをインストー�
 #{{{ View pane
 options.view.label=ビュー
 options.view.viewLayout=ビューレイアウト
-options.view.floatableToolbars=フロート可能なツールバー
 options.view.alternateDockingLayout=別のドッキングウィンドウ配置
 options.view.alternateToolBarLayout=別のツールバー配置
 options.view.showFullPath=タイトルバーにバッファのフルパスを表示

@@ -1,155 +1,147 @@
-jEdit 5.6 version history
-       (changes since jEdit 5.5.0)
+jEdit 5.7 version history
+       (changes since jEdit 5.6.0)
 :encoding=UTF-8:
 
-{{{ Version 5.6.0
+{{{ Version 5.7.0
 
-Thanks to Björn "Vampire" Kautler, Matthieu Casanova, Hrotkó Gábor,
-Alan Ezust, Makarius, and Dale Anson for contributing to this release.
+Thanks to Björn Kautler, Matthieu Casanova, Dale Anson, and Eric Le Lay
+for contributing to this release.
 
 {{{ Bug Fixes
 
-- Fix MiscUtilities.isBackup() method when there is no suffix and prefix set
-  (patch #4088 - Makarius)
+- Support arm64 Java installations in the macOS launcher (#4123 - Björn Kautler)
 
-- Do not loose the screen line count of lines that were not modified
-  when inserting multiple lines (minor optimization)
-  (#4091 - Matthieu Casanova)
+- Do not forward the --verbose parameter in the macOS launcher to jEdit
+  during investigating startup problems (Björn Kautler)
 
-- Fixed a NPE when trying to choose a non existing icon when adding a
-  toolbar item (#3770 - Matthieu Casanova)
+- Show Temurin download link in macOS launcher if no compatible Java version
+  was found instead of java.com and oracle.com where Java 8 is promoted
+  (Björn Kautler)
 
-- When launching jEdit if a file named like the untitled buffer from
-  perspective exists, then load it (#4087 - Matthieu Casanova)
+- Support Java installations with paths that are not following the old naming
+  conventions regarding their version in the macOS launcher (Björn Kautler)
 
-- Do not only highlight the first match in hypersearch results
-  (#4083 - Matthieu Casanova)
+- Bundle the new MacOS 1.5 plugin instead of the old MacOSX 1.3 plugin
+  to become compatible with newer Java versions (Björn Kautler)
 
-- Re-add missing help viewer back and forward icons (Björn "Vampire" Kautler)
+- Fix NullPointerException during saving autosave settings if no previous
+  autosave directory was set (Björn Kautler)
 
-- Fix wrong behavior of input method framework support that returned wrong
-  locations for offsets and wrong offsets for locations
-  (#4082 - Björn "Vampire" Kautler)
+- BeanShell snippets and macros now work consistently and not suddenly change
+  behaviour anymore just because some BeanShell snippet defined a class.
+  This now disables reflective access to otherwise inaccessible fields through
+  simple syntax though, that used to work after a snippet with a class
+  definition was loaded. (#4118 - Björn Kautler)
 
-- Upgrade OS X launcher stub to be compatible with newer Java versions
-  (#4077 - Björn "Vampire" Kautler)
+- Fix the installation of plugins trying to use invalid file names
+  (Björn Kautler)
 
-- Fix Untitled Issue with -background command line option
-  (Patch #617 - Hrotkó Gábor)
+- VFSManager.canReadFile() was returning true only for directories
+  (#4102 - Matthieu Casanova)
 
-- Handle case where user has not set either a backup prefix or suffix
-  (#4069 - Dale Anson)
+- Allow user to choose filename when printing to pdf
+  (partial fix for #4115 - Dale Anson)
 
-- Fix odd default colors for style editor (#4055 - Dale Anson)
+- Key handling in the Errors dialog uses current keymap (#4128 - Eric Le Lay)
 
-- Fix NullPointerException in Preview Javadoc macro (#2412 - Dale Anson)
+- Delete at the end of the line does not delete newline on java20, java21
+  (#4125 - Eric Le Lay)
 
-- Fix dockable buttons not wrapping correctly (#2626 - Dale Anson)
-
-- Fix electric scroll not working with page up/down (#2719 - Dale Anson)
-
-- Correct location of context menu popup (#4073 - Dale Anson)
-
-- Fix file browser splitter buttons not working (#4081 - Dale Anson)
+- Freeze when deleting a directory and some children (race condition)
+  (#4132 - Eric Le Lay)
 
 }}}
 {{{ Miscellaneous
 
-- Important improvement to Font substitution for documents that contains
-  characters that are not supported by the default font (Matthieu Casanova)
+- Improve logging of startup errors in the macOS launcher with --verbose option
+  (Björn Kautler)
 
-- Major performance improvement at displaying big files by changing the
-  call to Font.layoutGlyphVector()  (Matthieu Casanova)
+- Update launch4j to version 3.50 and also search in PATH environment
+  variable for a Java runtime from the EXE launcher (Björn Kautler)
 
-- Made a larger plugin download dialog, patch submitted in bug #4050
-  (Kalle Helminen)
+- Update macOS app bundler to version 1.3.0 (Björn Kautler)
 
-- Store rules in an array instead of a Map avoiding computations
-  (Matthieu Casanova)
+- Status bar design updated with the ability to add widgets to the left
+  and the right of the bar (Matthieu Casanova)
 
-- Store the glyph width in the GlyphCache to make token marking faster
-  (Matthieu Casanova)
-
-- New EditPaneManager, with convenient methods to get and iterate over
-  EditPanes, get it by calling jEdit.getEditPaneManager() (Matthieu Casanova)
-
-- New BufferManager, all you need to get loaded buffers from jEdit
-  get it by calling jEdit.getBufferManager() (Matthieu Casanova)
-
-- New ViewManager, all you need to get loaded existing views
-  get it by calling jEdit.getViewManager() (Matthieu Casanova)
-
-- Added new method JEditBuffer.hasProperty() (Matthieu Casanova)
-
-- Apply UI language changes immediately without the need to restart.
-  (Björn "Vampire" Kautler)
-
-- The tray icon on Linux systems now by default tries to detect the proper
-  background color and also lets the user either select a fixed color for
-  the background or select some arbitrary rectangle as background for the
-  tray icon, making the icon much less ugly on dark themes.
-  (Björn "Vampire" Kautler)
-
-- The Windows EXE launcher now considers JAVA_HOME environment variable if no
-  matching Java is found in the registry (Björn "Vampire" Kautler)
-
-- The Windows installer now uses modern and resizable style and allows
-  installation without administrator privileges (Björn "Vampire" Kautler)
-
-- Chinese Taiwan localization from David Day (Patch #620 - Dale Anson)
-
-- Fix all deprecation warnings produced when compiling with Java 9 (Dale Anson)
-
-- Adjust Appearance option pane to allow setting "primary" and "secondary" fonts
-  for all look and feels (Dale Anson)
-
-- Improve Regular Expressions documentation (Björn "Vampire" Kautler)
+- Make building possible when using Java 15+ (Björn Kautler)
 
 }}}
 {{{ API Changes
 
-- StringList.join() method is now deprecated as String.join()
-  is now provided since Java 8 (Matthieu Casanova)
-
-- TextUtilities.join() method is now deprecated as String.join()
-  is now provided since Java 8 (Matthieu Casanova)
-
-- Change BoyerMooreSearchMatcher to make it thread safe (Matthieu Casanova)
-
-- New methods IOUtilities.toString(InputStream) (Matthieu Casanova)
-
-- New method IOUtilities.toByteArray(InputStream) (Matthieu Casanova)
-
-- New UniqueActionDocumentListener class, a DocumentListener that does the same
-  action for every event (Matthieu Casanova)
-
-- New AbstractWidget class (Matthieu Casanova)
-
-- GUIUtilities.showVFSFileDialog() methods now never returns null
+- Added new methods in SegmentBuffer for append and insert text
   (Matthieu Casanova)
 
-- New Method VFSManager.canReadFile(path) (Matthieu Casanova)
+- New service org.jedit.util.CleanerService replacing use of finalize()
+  (Matthieu Casanova)
 
-- New method IntegerArray.isEmpty() (Matthieu Casanova)
+- New methods JEditBuffer.getWordWrap() and JeditBuffer.setWordWrap()
+  (Matthieu Casanova)
+
+- New method DialogChooser.openChooserWindow() showing a chooser dialog
+  (Matthieu Casanova)
+
+- New method DialogChooser.openListChooserWindow() showing a chooser dialog list
+  (Matthieu Casanova)
+
+- New method Buffer.setLineSeparator() (Matthieu Casanova)
+
+- New method Buffer.reloadWithEncoding() (Matthieu Casanova)
+
+- New method StatusBar.updateEvent() (Matthieu Casanova)
+
+- New method BufferSet.contains() (Matthieu Casanova)
+
+- Deprecated methods removed
+    StandardUtilities.objectsEqual()
+    TextArea.showPopupMenu()
+    Mode.acceptFilename()
+    OperatingSystem.isDOSDerived()
+    OperatingSystem.hasJava17()
+    MiscUtilities.getFileNameNoExtension()
+    GUIUtilities.prettifyMenuLabel()
+    GUIUtilities.setAutoMnemonic()
+    GUIUtilities.parseColor()
+    GUIUtilities.parseStyle()
+    GUIUtilities.adjustForScreenBounds()
+    GUIUtilities.requestFocus()
+    GUIUtilities.isPopupTrigger()
+    GUIUtilities.isMiddleButton()
+    GUIUtilities.isRightButton()
+    GUIUtilities.getScreenBounds()
+    GUIUtilities.showPopupMenu()
+    GUIUtilities.showPopupMenu()
+    GUIUtilities.isAncestorOf()
+    GUIUtilities.getParentDialog()
+    GUIUtilities.setEnabledRecursively()
+    GUIUtilities.setButtonContentMargin()
+    GUIUtilities.makeSameSize()
+    GUIUtilities.defaultTableCellSize()
+    GUIUtilities.defaultColumnWidth()
+    GUIUtilities.defaultRowHeight()
+    Buffer.getFile()
+    VFSManager.runInAWTThread()
+    VFSManager.runInWorkThread() (Matthieu Casanova)
 
 }}}
 {{{ Editing
 
-- Add SIPp edit mode (Matthieu Casanova)
+- Never mark empty untitled buffers dirty, independent of settings
+  (Björn Kautler)
 
-- Add Well Known Text (WKT) edit mode (Matthieu Casanova)
+- Never mark buffers dirty if contents are unchanged is now also properly
+  supported for untitled buffers (Björn Kautler)
 
-- Update RPM Spec mode (bug #3880 Matthieu Casanova)
+- New edit mode for Dockerfile (Matthieu Casanova)
 
-- Added openSIPS mode (Matthieu Casanova)
+- New edit mode for QDoc (Dale Anson)
 
-- Update Java mode to support Java 10 "var" type. (Dale Anson)
+- Status bar encoding widget allow to choose between updating the encoding
+  or reloading with a new encoding (Matthieu Casanova)
 
-- Add PlantUML mode (Andreas Studer / Dale Anson)
+- Updated java mode for new keywords introduced up to Java 17. (Dale Anson)
 
-- Add HL7 mode (Thiemo Kellner / Dale Anson)
-
-- Update drawj2d mode (patch #622 A. Vontobel / Matthieu Casanova)
+- Add match index to beanshell replace context (#554 - Eric Le Lay)
 
 }}}
 

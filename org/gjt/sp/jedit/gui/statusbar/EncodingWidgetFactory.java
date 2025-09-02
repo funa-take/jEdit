@@ -25,19 +25,25 @@
 package org.gjt.sp.jedit.gui.statusbar;
 
 //{{{ Imports
-import java.awt.event.MouseAdapter;
+import java.awt.*;
 import java.awt.event.MouseEvent;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import org.gjt.sp.jedit.Buffer;
-import org.gjt.sp.jedit.View;
+import java.util.Arrays;
+
+import org.gjt.sp.jedit.*;
+import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.gui.BufferOptions;
-import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.jedit.gui.DialogChooser;
+import org.gjt.sp.jedit.msg.BufferUpdate;
+
+import javax.swing.*;
+
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static org.gjt.sp.util.StandardUtilities.castUnchecked;
 //}}}
 
 /**
  * @author Matthieu Casanova
- * @since jEdit 4.3pre14 
+ * @since jEdit 4.3pre14
  */
 public class EncodingWidgetFactory implements StatusWidgetFactory
 {
@@ -45,43 +51,68 @@ public class EncodingWidgetFactory implements StatusWidgetFactory
 	@Override
 	public Widget getWidget(View view)
 	{
-		Widget mode = new EncodingWidget(view);
-		return mode;
+		return new EncodingWidget(view);
 	} //}}}
 
 	//{{{ EncodingWidget class
-	private static class EncodingWidget implements Widget
+	private static class EncodingWidget extends AbstractLabelWidget
 	{
-		private final JLabel encoding;
-		private final View view;
-		public EncodingWidget(final View view) 
+		EncodingWidget(View view)
 		{
-			encoding = new ToolTipLabel();
-			this.view = view;
-			encoding.setToolTipText(jEdit.getProperty("view.status.mode-tooltip"));
-			encoding.addMouseListener(new MouseAdapter() 
-						  {
-							  @Override
-							  public void mouseClicked(MouseEvent evt)
-							  {
-								  if(evt.getClickCount() == 2)
-									  new BufferOptions(view,view.getBuffer());
-							  }
-						  });
+			super(view);
+			label.setToolTipText(jEdit.getProperty("view.status.encoding-tooltip"));
 		}
-		
+
 		@Override
-		public JComponent getComponent()
+		protected void singleClick(MouseEvent e)
 		{
-			return encoding;
+			String[] encodings = MiscUtilities.getEncodings(true);
+			Arrays.sort(encodings, CASE_INSENSITIVE_ORDER);
+			Buffer buffer = view.getBuffer();
+			String currentEncoding = buffer.getStringProperty(JEditBuffer.ENCODING);
+			DialogChooser.openListChooserWindow(label,
+				currentEncoding,
+				listSelectionEvent -> EventQueue.invokeLater(() ->
+				{
+					JList<String> list = castUnchecked(listSelectionEvent.getSource());
+					String selectedValue = list.getSelectedValue();
+					int selectedOption = DialogChooser.openChooserWindow(view,
+						jEdit.getProperty("buffer.encoding.reload", new String[]{selectedValue}),
+						jEdit.getProperty("buffer.encoding.change", new String[]{selectedValue}));
+					switch (selectedOption)
+					{
+						case 0:
+							buffer.reloadWithEncoding(view, selectedValue);
+							break;
+						case 1:
+							buffer.setStringProperty(JEditBuffer.ENCODING, selectedValue);
+							buffer.setDirty(true);
+							buffer.setBooleanProperty(Buffer.ENCODING_AUTODETECT, false);
+							EditBus.send(new BufferUpdate(buffer, null, BufferUpdate.PROPERTIES_CHANGED));
+							break;
+					}
+				}),
+				encodings);
 		}
-		
+
+		@Override
+		protected void rightClick(MouseEvent e)
+		{
+			new BufferOptions(view, view.getBuffer());
+		}
+
 		@Override
 		public void update()
 		{
 			Buffer buffer = view.getBuffer();
 			if (buffer.isLoaded())
-				encoding.setText(buffer.getStringProperty("encoding"));
+				label.setText(buffer.getStringProperty("encoding"));
+		}
+
+		@Override
+		public boolean test(StatusBarEventType statusBarEventType)
+		{
+			return statusBarEventType == StatusBarEventType.Buffer;
 		}
 	} //}}}
 }

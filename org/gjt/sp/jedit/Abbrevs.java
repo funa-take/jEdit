@@ -24,6 +24,7 @@ package org.gjt.sp.jedit;
 
 //{{{ Imports
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.gjt.sp.jedit.gui.AddAbbrevDialog;
 import org.gjt.sp.jedit.textarea.*;
@@ -37,8 +38,6 @@ import org.gjt.sp.util.Log;
  */
 public class Abbrevs
 {
-	public static final String ENCODING = "UTF8";
-
 	//{{{ getExpandOnInput() method
 	/**
 	 * @return if abbreviations should be expanded after the
@@ -87,7 +86,7 @@ public class Abbrevs
 		int caret = textArea.getCaretPosition();
 
 		String lineText = buffer.getLineText(line);
-		if(lineText.length() == 0)
+		if(lineText.isEmpty())
 		{
 			if(add)
 				javax.swing.UIManager.getLookAndFeel().provideErrorFeedback(null); 
@@ -181,8 +180,7 @@ public class Abbrevs
 				view.getStatus().setMessageAndClear(
 					jEdit.getProperty(
 					"view.status.incomplete-abbrev",
-					new Integer[] { Integer.valueOf(m_pp.size()),
-					Integer.valueOf(expand.posParamCount) }));
+					new Integer[] {m_pp.size(), expand.posParamCount}));
 			}
 
 			return true;
@@ -268,12 +266,7 @@ public class Abbrevs
 		if(!loaded)
 			load();
 
-		Hashtable<String,String> modeAbbrevs = modes.get(mode);
-		if(modeAbbrevs == null)
-		{
-			modeAbbrevs = new Hashtable<String,String>();
-			modes.put(mode,modeAbbrevs);
-		}
+		Map<String, String> modeAbbrevs = modes.computeIfAbsent(mode, k -> new Hashtable<>());
 		modeAbbrevs.put(abbrev,expansion);
 		abbrevsChanged = true;
 	} //}}}
@@ -286,31 +279,29 @@ public class Abbrevs
 		String settings = jEdit.getSettingsDirectory();
 		if(abbrevsChanged && settings != null)
 		{
-			File file1 = new File(MiscUtilities.constructPath(settings,"#abbrevs#save#"));
-			File file2 = new File(MiscUtilities.constructPath(settings,"abbrevs"));
-			if(file2.exists() && file2.lastModified() != abbrevsModTime)
+			File tempFile = new File(MiscUtilities.constructPath(settings,"#abbrevs#save#"));
+			File targetFile = new File(MiscUtilities.constructPath(settings,"abbrevs"));
+			if(targetFile.exists() && targetFile.lastModified() != abbrevsModTime)
 			{
-				Log.log(Log.WARNING,Abbrevs.class,file2 + " changed on disk;"
+				Log.log(Log.WARNING,Abbrevs.class,targetFile + " changed on disk;"
 					+ " will not save abbrevs");
 			}
 			else
 			{
-				jEdit.backupSettingsFile(file2);
+				jEdit.backupSettingsFile(targetFile);
 
 				try
 				{
-					saveAbbrevs(new OutputStreamWriter(
-						new FileOutputStream(file1),
-						ENCODING));
-					file2.delete();
-					file1.renameTo(file2);
+					saveAbbrevs(tempFile);
+					targetFile.delete();
+					tempFile.renameTo(targetFile);
 				}
 				catch(Exception e)
 				{
-					Log.log(Log.ERROR,Abbrevs.class,"Error while saving " + file1);
+					Log.log(Log.ERROR,Abbrevs.class,"Error while saving " + tempFile);
 					Log.log(Log.ERROR,Abbrevs.class,e);
 				}
-				abbrevsModTime = file2.lastModified();
+				abbrevsModTime = targetFile.lastModified();
 			}
 		}
 	} //}}}
@@ -326,7 +317,7 @@ public class Abbrevs
 	private static Hashtable<String,Hashtable<String,String>> modes;
 	
 	/**  Vector of Positional Parameters */
-	private static Vector<String> m_pp = new Vector<String>();
+	private static Vector<String> m_pp = new Vector<>();
 	//}}}
 
 	private Abbrevs() {}
@@ -339,8 +330,8 @@ public class Abbrevs
 	//{{{ load() method
 	private static void load()
 	{
-		globalAbbrevs = new Hashtable<String,String>();
-		modes = new Hashtable<String,Hashtable<String,String>>();
+		globalAbbrevs = new Hashtable<>();
+		modes = new Hashtable<>();
 
 		String settings = jEdit.getSettingsDirectory();
 		if(settings != null)
@@ -351,7 +342,7 @@ public class Abbrevs
 			try
 			{
 				loadAbbrevs(new InputStreamReader(
-					new FileInputStream(file),ENCODING));
+					new FileInputStream(file), StandardCharsets.UTF_8));
 				loaded = true;
 			}
 			catch(FileNotFoundException fnf)
@@ -371,7 +362,7 @@ public class Abbrevs
 			{
 				loadAbbrevs(new InputStreamReader(Abbrevs.class
 					.getResourceAsStream("default.abbrevs"),
-					ENCODING));
+					StandardCharsets.UTF_8));
 			}
 			catch(Exception e)
 			{
@@ -406,7 +397,7 @@ public class Abbrevs
 
 		// try mode-specific abbrevs first
 		String expand = null;
-		Hashtable<String,String> modeAbbrevs = modes.get(mode);
+		Map<String,String> modeAbbrevs = modes.get(mode);
 		if(modeAbbrevs != null)
 			expand = modeAbbrevs.get(abbrev);
 
@@ -420,20 +411,18 @@ public class Abbrevs
 	} //}}}
 
 	//{{{ loadAbbrevs() method
-	private static void loadAbbrevs(Reader _in) throws Exception
+	private static void loadAbbrevs(Reader _in) throws IOException
 	{
-		BufferedReader in = new BufferedReader(_in);
-
-		try
+		try (BufferedReader in = new BufferedReader(_in))
 		{
-			Hashtable<String,String> currentAbbrevs = globalAbbrevs;
+			Map<String, String> currentAbbrevs = globalAbbrevs;
 
 			String line;
 			while((line = in.readLine()) != null)
 			{
 				int index = line.indexOf('|');
 
-				if(line.length() == 0)
+				if(line.isEmpty())
 					continue;
 				else if(line.startsWith("[") && index == -1)
 				{
@@ -443,12 +432,7 @@ public class Abbrevs
 					{
 						String mode = line.substring(1,
 							line.length() - 1);
-						currentAbbrevs = modes.get(mode);
-						if(currentAbbrevs == null)
-						{
-							currentAbbrevs = new Hashtable<String,String>();
-							modes.put(mode,currentAbbrevs);
-						}
+						currentAbbrevs = modes.computeIfAbsent(mode, k -> new Hashtable<>());
 					}
 				}
 				else if(index != -1)
@@ -458,16 +442,13 @@ public class Abbrevs
 				}
 			}
 		}
-		finally
-		{
-			in.close();
-		}
 	} //}}}
 
-	//{{{ saveAbbrevs() method
-	private static void saveAbbrevs(Writer _out) throws Exception
+	//{{{ saveAbbrevs() methods
+	private static void saveAbbrevs(File file) throws IOException
 	{
-		BufferedWriter out = new BufferedWriter(_out);
+		try (BufferedWriter out = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8)))
+		{
 		String lineSep = System.getProperty("line.separator");
 
 		// write global abbrevs
@@ -477,34 +458,26 @@ public class Abbrevs
 		saveAbbrevs(out,globalAbbrevs);
 
 		// write mode abbrevs
-		Enumeration<String> keys = modes.keys();
-		Enumeration<Hashtable<String,String>> values = modes.elements();
-		while(keys.hasMoreElements())
+			for (Map.Entry<String, Hashtable<String, String>> entry : modes.entrySet())
 		{
 			out.write('[');
-			out.write(keys.nextElement());
+				out.write(entry.getKey());
 			out.write(']');
 			out.write(lineSep);
-			saveAbbrevs(out,values.nextElement());
+				saveAbbrevs(out,entry.getValue());
+			}
+		}
 		}
 
-		out.close();
-	} //}}}
-
-	//{{{ saveAbbrevs() method
-	private static void saveAbbrevs(Writer out, Hashtable<String,String> abbrevs)
-		throws Exception
+	private static void saveAbbrevs(Writer out, Map<String,String> abbrevs) throws IOException
 	{
 		String lineSep = System.getProperty("line.separator");
 
-		Enumeration<String> keys = abbrevs.keys();
-		Enumeration<String> values = abbrevs.elements();
-		while(keys.hasMoreElements())
+		for (Map.Entry<String, String> entry : abbrevs.entrySet())
 		{
-			String abbrev = keys.nextElement();
-			out.write(abbrev);
+			out.write(entry.getKey());
 			out.write('|');
-			out.write(values.nextElement());
+			out.write(entry.getValue());
 			out.write(lineSep);
 		}
 	} //}}}

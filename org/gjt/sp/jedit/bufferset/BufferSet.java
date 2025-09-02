@@ -182,8 +182,8 @@ public class BufferSet
 	{
 		if (buffers.isEmpty())
 			return null;
-		if (buffers.size() < 2)
-			return buffers.get(buffers.size()-1);
+		if (buffers.size() == 1)
+			return buffers.get(0);
 		if (index >= buffers.size() - 1)
 			return buffers.get(0);
 		return buffers.get(index + 1);
@@ -193,6 +193,18 @@ public class BufferSet
 	public int indexOf(Buffer buffer)
 	{
 		return buffers.indexOf(buffer);
+	} //}}}
+
+	//{{{ contains() method
+	/**
+	 * Check if the BufferSet contains the given buffer
+	 * @param buffer the buffer to search
+	 * @return true if it contains this buffer
+	 * @since jEdit 5.7pre1
+	 */
+	public boolean contains(Buffer buffer)
+	{
+		return buffers.contains(buffer);
 	} //}}}
 
 	//{{{ size() method

@@ -155,6 +155,9 @@
 
 <MODE NAME="django"		FILE="django.xml"/>
 
+<MODE NAME="dockerfile"		FILE="dockerfile.xml"
+        FILE_NAME_GLOB="Dockerfile" />
+
 <MODE NAME="dot"		FILE="dot.xml"
         FILE_NAME_GLOB="*.dot" />
 
@@ -238,7 +241,7 @@
 <!-- Used by Andre Kaplan's Hex plugin -->
 <MODE NAME="hex"		FILE="hex.xml" />
 
-<MODE NAME="hl7v2" FILE="hl7v2.xml" 
+<MODE NAME="hl7v2" FILE="hl7v2.xml"
         FILE_NAME_GLOB="*.{hl7,hl7v2,hl7-2}" FIRST_LINE_GLOB="MSH*"/>
 
 <MODE NAME="hlsl"		FILE="hlsl.xml"
@@ -445,7 +448,7 @@
 
 <MODE NAME="plaintex"		FILE="plaintex.xml" />
 
-<MODE NAME="plantuml" FILE="plantuml.xml" 
+<MODE NAME="plantuml" FILE="plantuml.xml"
         FILE_NAME_GLOB="*.{plant,plantuml,pu,puml}"/>
 
 <MODE NAME="PostgreSQL" FILE="pg-sql.xml"
@@ -510,6 +513,10 @@
 <MODE NAME="python"		FILE="python.xml"
         FILE_NAME_GLOB="*.{py,pyw,sc,jy}"
         FIRST_LINE_GLOB="#!*/*python*" />
+
+<MODE NAME="qdoc"   FILE="qdoc.xml"
+        FILE_NAME_GLOB="*.{qdoc,qdocinc}"
+        FIRST_LINE_GLOB="/*!" />
 
 <MODE NAME="rebol"		FILE="rebol.xml"
         FILE_NAME_GLOB="*.r" />

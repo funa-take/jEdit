@@ -56,6 +56,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.jedit.util.SystemManager;
 import org.xml.sax.SAXParseException;
 
 import org.gjt.sp.jedit.bufferio.BufferIORequest;
@@ -104,7 +105,7 @@ public class jEdit
 	public static String getBuild()
 	{
 		// (major).(minor).(<99 = preX, 99 = "final").(bug fix)
-		return "05.06.99.00";
+		return "05.07.99.00";
 	} //}}}
 
 	//{{{ main() method
@@ -147,7 +148,7 @@ public class jEdit
 				System.getProperty("user.home"), "Library/jEdit" );
 		else if (OperatingSystem.isWindows())
 		{
-			String appData = System.getenv("APPDATA");
+			String appData = systemManager.getenv("APPDATA");
 			if (appData != null)
 				settingsDirectory = MiscUtilities.constructPath(
 					appData, "jEdit");
@@ -2100,7 +2101,7 @@ public class jEdit
 				{
 					BufferSet bufferSet = view.getEditPane().getBufferSet();
 					// no need to check every bufferSet since it's view scope
-					if (bufferSet.indexOf(buffer) != -1)
+					if (bufferSet.contains(buffer))
 					{
 						viewOwner++;
 						if (viewOwner > 1)
@@ -3245,6 +3246,7 @@ public class jEdit
 	private static BufferManagerImpl bufferManager = new BufferManagerImpl();
 	private static ViewManagerImpl viewManager = new ViewManagerImpl();
 	private static EditPaneManager editPaneManager = new EditPaneManagerImpl(viewManager);
+	public static SystemManager systemManager = new SystemManager();
 
 	private static final Object editBusOrderingLock	= new Object();
 
@@ -3523,13 +3525,19 @@ public class jEdit
 	} //}}}
 
 	//{{{ getResourceAsUTF8Text() method
-	private static Reader getResourceAsUTF8Text(String name)
+	static Optional<Reader> getResourceAsUTF8Text(String name)
 		throws IOException
 	{
 		InputStream bytes = jEdit.class.getResourceAsStream(name);
 		if (bytes == null)
 		{
-			return null;
+			// remove first /
+			var relativePath = name.substring(1);
+			var path = Path.of(relativePath);
+			if (Files.exists(path))
+				bytes = Files.newInputStream(path);
+			else
+				return Optional.empty();
 		}
 		Reader text = null;
 		try
@@ -3545,7 +3553,7 @@ public class jEdit
 				bytes.close();
 			}
 		}
-		return text;
+		return Optional.of(text);
 	} //}}}
 
 	//{{{ initSystemProperties() method
@@ -3556,24 +3564,13 @@ public class jEdit
 	{
 		try
 		{
-			propMgr.loadSystemProps(getResourceAsUTF8Text(
-				"/org/gjt/sp/jedit/jedit.props"));
-			propMgr.loadSystemProps(getResourceAsUTF8Text(
-				"/org/gjt/sp/jedit/jedit_gui.props"));
-			propMgr.loadSystemProps(getResourceAsUTF8Text(
-				"/org/jedit/localization/jedit_en.props"));
+			propMgr.loadSystemProps("/org/gjt/sp/jedit/jedit.props");
+			propMgr.loadSystemProps("/org/gjt/sp/jedit/jedit_gui.props");
+			propMgr.loadSystemProps("/org/jedit/localization/jedit_en.props");
 		}
 		catch(Exception e)
 		{
-			Log.log(Log.ERROR,jEdit.class,
-				"Error while loading system properties!");
-			Log.log(Log.ERROR,jEdit.class,
-				"One of the following property files could not be loaded:\n"
-				+ "- jedit.props\n"
-				+ "- jedit_gui.props\n"
-				+ "- jedit_en.props\n"
-				+ "jedit.jar is probably corrupt.");
-			Log.log(Log.ERROR,jEdit.class,e);
+			Log.log(Log.ERROR, jEdit.class, "Unable to launch jEdit, jEdit.jar is probably corrupted " + e.getMessage());
 			System.exit(1);
 		}
 	} //}}}
@@ -3710,11 +3707,9 @@ public class jEdit
 			// no need to load english as localization property as it always loaded as default language
 			return;
 		}
-		Reader langResource = null;
 		try
 		{
-			langResource = getResourceAsUTF8Text("/org/jedit/localization/jedit_" + language + ".props");
-			propMgr.loadLocalizationProps(langResource);
+			propMgr.loadLocalizationProps("/org/jedit/localization/jedit_" + language + ".props");
 		}
 		catch (IOException e)
 		{
@@ -3723,10 +3718,6 @@ public class jEdit
 				// if it is the default locale, it is not an error
 				Log.log(Log.ERROR, jEdit.class, "Unable to load language", e);
 			}
-		}
-		finally
-		{
-			IOUtilities.closeQuietly((Closeable)langResource);
 		}
 	} //}}}
 

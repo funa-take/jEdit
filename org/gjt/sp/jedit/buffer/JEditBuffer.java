@@ -24,9 +24,7 @@
 package org.gjt.sp.jedit.buffer;
 
 //{{{ Imports
-import org.gjt.sp.jedit.Debug;
-import org.gjt.sp.jedit.Mode;
-import org.gjt.sp.jedit.TextUtilities;
+import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.indent.IndentAction;
 import org.gjt.sp.jedit.indent.IndentRule;
 import org.gjt.sp.jedit.syntax.*;
@@ -46,6 +44,9 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
+
+import static org.gjt.sp.jedit.LargeFileMode.ask;
+import static org.gjt.sp.jedit.buffer.WordWrap.none;
 //}}}
 
 /**
@@ -83,9 +84,18 @@ public class JEditBuffer
 	 * @since jEdit 3.2pre4
 	 */
 	public static final String ENCODING = "encoding";
+	/**
+	 * Wrap mode, the value must be one of {@link org.gjt.sp.jedit.buffer.WordWrap}
+	 * @since jEdit 5.7pre1
+	 */
+	public static final String WRAP = "wrap";
+	/**
+	 * This property contains the large file mode option for this buffer.
+	 * @since jEdit 5.7pre1
+	 */
+	public static final String LARGE_MODE_FILE = "largefilemode";
 
 	//{{{ JEditBuffer constructors
-
 	{
 		bufferListeners = new Vector<>();
 		lock = new ReentrantReadWriteLock();
@@ -124,7 +134,7 @@ public class JEditBuffer
 	 */
 	public JEditBuffer()
 	{
-		properties.put("wrap",new PropValue("none",false));
+		setWordWrap(none);
 		properties.put("folding",new PropValue("none",false));
 		tokenMarker = new TokenMarker();
 		tokenMarker.addRuleSet(new ParserRuleSet("text","MAIN"));
@@ -162,6 +172,18 @@ public class JEditBuffer
 	public void setLoading(boolean loading)
 	{
 		this.loading = loading;
+	} //}}}
+
+	//{{{ isElasticTabstopsOn() method
+	public boolean isElasticTabstopsOn()
+	{
+		return elasticTabstopsOn;
+	} //}}}
+
+	//{{{ setElasticTabstopsOn() method
+	public void setElasticTabstopsOn(boolean elasticTabstopsOn)
+	{
+		this.elasticTabstopsOn = elasticTabstopsOn;
 	} //}}}
 
 	//{{{ isPerformingIO() method
@@ -1547,6 +1569,18 @@ loop:		for(int i = 0; i < seg.count; i++)
 		}
 	} //}}}
 
+	//{{{ isClosed() method
+	public boolean isClosed()
+	{
+		return closed;
+	} //}}}
+
+	//{{{ close() method
+	public void close()
+	{
+		closed = true;
+	} //}}}
+
 	//{{{ hasProperty() method
 	/**
 	 * @return true if the buffer local property exists.
@@ -1778,6 +1812,66 @@ loop:		for(int i = 0; i < seg.count; i++)
 		}
 	} //}}}
 
+	//{{{ getWordWrap() method
+	/**
+	 * Returns the current word wrap mode
+	 *
+	 * @return the current word wrap mode
+	 * @since jEdit 5.7pre1
+	 */
+	public WordWrap getWordWrap()
+	{
+		return WordWrap.valueOf(getStringProperty(WRAP));
+	} //}}}
+
+	//{{{ setWordWrap() method
+	/**
+	 * set word wrap
+	 *
+	 * @param wordWrap the new word wrap
+	 * @since jEdit 5.7pre1
+	 */
+	public void setWordWrap(WordWrap wordWrap)
+	{
+		setProperty(WRAP, wordWrap.name());
+	} //}}}
+
+
+	/**
+	 * Returns the LargeFileMode option
+	 *
+	 * @return the option value, never null (if invalid or null {@link LargeFileMode#ask} is returned
+	 * @since jEdit 5.7pre1
+	 */
+	public LargeFileMode getLargeFileMode()
+	{
+		String largeFileMode = getStringProperty(LARGE_MODE_FILE);
+		if (largeFileMode == null)
+			return ask;
+		try
+		{
+			return LargeFileMode.valueOf(largeFileMode);
+		}
+		catch (IllegalArgumentException e)
+		{
+			return ask;
+		}
+	}
+
+	/**
+	 * Set the large file mode option
+	 *
+	 * @param largeFileMode the large file mode
+	 * @since jEdit 5.7pre1
+	 */
+	public void setLargeFileMode(LargeFileMode largeFileMode)
+	{
+		if (largeFileMode == null)
+			unsetProperty(LARGE_MODE_FILE);
+		else
+			setProperty(LARGE_MODE_FILE, largeFileMode.name());
+	}
+
 	//{{{ getRuleSetAtOffset() method
 	/**
 	 * @return the syntax highlighting ruleset at the specified offset.
@@ -1824,16 +1918,8 @@ loop:		for(int i = 0; i < seg.count; i++)
 	{
 		ParserRuleSet rules = getRuleSetAtOffset(offset);
 
-		Object value = null;
-
 		Map<String, String> rulesetProps = rules.getProperties();
-		if(rulesetProps != null)
-			value = rulesetProps.get(name);
-
-		if(value == null)
-			return null;
-		else
-			return String.valueOf(value);
+		return rulesetProps != null ? rulesetProps.get(name) : null;
 	} //}}}
 
 	//{{{ getMode() method
@@ -2763,6 +2849,7 @@ loop:		for(int i = 0; i < seg.count; i++)
 
 	//{{{ Private members
 	private final List<Listener> bufferListeners;
+	private boolean closed;
 	private final ReentrantReadWriteLock lock;
 	private final ContentManager contentMgr;
 	private final LineManager lineMgr;

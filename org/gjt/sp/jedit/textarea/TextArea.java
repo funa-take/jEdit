@@ -41,13 +41,9 @@ import javax.swing.plaf.LayerUI;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 
-import org.gjt.sp.jedit.Debug;
-import org.gjt.sp.jedit.IPropertyManager;
-import org.gjt.sp.jedit.JEditActionContext;
-import org.gjt.sp.jedit.JEditActionSet;
-import org.gjt.sp.jedit.JEditBeanShellAction;
-import org.gjt.sp.jedit.TextUtilities;
+import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.buffer.WordWrap;
 import org.gjt.sp.jedit.input.AbstractInputHandler;
 import org.gjt.sp.jedit.input.DefaultInputHandlerProvider;
 import org.gjt.sp.jedit.input.InputHandlerProvider;
@@ -59,6 +55,9 @@ import org.gjt.sp.util.GenericGUIUtilities;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.StandardUtilities;
 import org.gjt.sp.util.ThreadUtilities;
+
+import static org.gjt.sp.jedit.buffer.WordWrap.hard;
+import static org.gjt.sp.jedit.buffer.WordWrap.soft;
 //}}}
 
 /** Abstract TextArea component.
@@ -96,7 +95,7 @@ public abstract class TextArea extends JPanel
 		caretEvent = new MutableCaretEvent();
 		blink = true;
 		offsetXY = new Point();
-		structureMatchers = new LinkedList<StructureMatcher>();
+		structureMatchers = new LinkedList<>();
 		structureMatchers.add(new StructureMatcher.BracketMatcher());
 		//}}}
 
@@ -368,7 +367,7 @@ public abstract class TextArea extends JPanel
 	 *  view.getTextArea().getBuffer().
 	 *
 	 */
-	public final JEditBuffer getBuffer()
+	public JEditBuffer getBuffer()
 	{
 		return buffer;
 	} //}}}
@@ -396,7 +395,12 @@ public abstract class TextArea extends JPanel
 				//setFirstLine(0);
 
 				if(!this.buffer.isLoading())
-					selectNone();
+				{
+					if (this.buffer.isClosed())
+						selectionManager.clearSelection();
+					else
+						selectNone();
+				}
 				caretLine = caret = caretScreenLine = 0;
 				match = null;
 
@@ -753,7 +757,8 @@ public abstract class TextArea extends JPanel
 		if(visibleLines <= 1)
 		{
 			if(Debug.SCROLL_TO_DEBUG)
-			Log.log(Log.DEBUG,this,"visibleLines <= 0");
+				Log.log(Log.DEBUG,this,"visibleLines <= 0");
+
 			// Fix the case when the line is wrapped
 			// it was not possible to see the second (or next)
 			// subregion of a line
@@ -1255,7 +1260,7 @@ public abstract class TextArea extends JPanel
 	 * Returns the line containing the specified offset.
 	 * @param offset The offset
 	 */
-	public final int getLineOfOffset(int offset)
+	public int getLineOfOffset(int offset)
 	{
 		return buffer.getLineOfOffset(offset);
 	} //}}}
@@ -1754,7 +1759,6 @@ forward_scan:	do
 	 */
 	public void selectNone()
 	{
-		invalidateSelectedLines();
 		setSelection((Selection)null);
 	} //}}}
 
@@ -4558,7 +4562,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		if(buffer.isLoading())
 			return;
 		buffer.indentUsingElasticTabstops();
-		buffer.elasticTabstopsOn = true;
+		buffer.setElasticTabstopsOn(true);
 	} //}}}
 
 	//{{{ shiftIndentLeft() method
@@ -4860,7 +4864,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		if(buffer.getBooleanProperty("elasticTabstops"))
 		{
 			//call this only if it was previously off
-			if(!buffer.elasticTabstopsOn)
+			if(!buffer.isElasticTabstopsOn())
 			{
 				turnOnElasticTabstops();
 			}
@@ -4871,7 +4875,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		}
 		else
 		{
-			buffer.elasticTabstopsOn = false;
+			buffer.setElasticTabstopsOn(false);
 		}
 
 		int _tabSize = buffer.getTabSize();
@@ -4886,16 +4890,16 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 			painter.getFontRenderContext()).getWidth() / charWidthSample.length();
 		charWidth = (int)Math.round(charWidthDouble);
 
-		String oldWrap = wrap;
-		wrap = buffer.getStringProperty("wrap");
-		hardWrap = "hard".equals(wrap);
-		String largeFileMode = buffer.getStringProperty("largefilemode");
-		softWrap = "soft".equals(wrap) && !"limited".equals(largeFileMode) && !"nohighlight".equals(largeFileMode);
+		WordWrap oldWrap = wrap;
+		wrap = buffer.getWordWrap();
+		hardWrap = wrap == hard;
+		LargeFileMode largeFileMode = buffer.getLargeFileMode();
+		softWrap = wrap == soft && !largeFileMode.isLongBufferMode();
 		boolean oldWrapToWidth = wrapToWidth;
 		int oldWrapMargin = wrapMargin;
 		setMaxLineLength(buffer.getIntegerProperty("maxLineLen", 0));
 
-		boolean wrapSettingsChanged = !(wrap.equals(oldWrap)
+		boolean wrapSettingsChanged = !(oldWrap == wrap
 			&& oldWrapToWidth == wrapToWidth
 			&& oldWrapMargin == wrapMargin);
 
@@ -4960,7 +4964,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 
 	int maxHorizontalScrollWidth;
 
-	String wrap;
+	WordWrap wrap;
 	boolean hardWrap;
 	boolean softWrap;
 	boolean wrapToWidth;
@@ -5066,7 +5070,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 			{
 				// cannot use selectNone() because the finishCaretUpdate method will reopen the fold
 				invalidateSelectedLines();
-				selectionManager.setSelection((Selection) null);
+				selectionManager.clearSelection();
 			}
 			moveCaretPosition(buffer.getLineStartOffset(line)
 				+ chunkCache.xToSubregionOffset(line,0,x,true));
@@ -6284,37 +6288,11 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		}
 	} //}}}
 
-	//{{{ showPopupMenu() method - copied from GUIUtilities
-	/**
-	 * Shows the specified popup menu, ensuring it is displayed within
-	 * the bounds of the screen.
-	 * @param popup The popup menu
-	 * @param comp The component to show it for
-	 * @param x The x co-ordinate
-	 * @param y The y co-ordinate
-	 * @param point If true, then the popup originates from a single point;
-	 * otherwise it will originate from the component itself. This affects
-	 * positioning in the case where the popup does not fit onscreen.
-	 *
-	 * FIXME: move parts of GUIUtilities compatible with standalone TextArea in a separate
-	 * class, to prevent such copies
-	 *
-	 * @since jEdit 4.1pre1
-	 * @deprecated use {@link GenericGUIUtilities#showPopupMenu(JPopupMenu, Component, int, int, boolean)}
-	 */
-	@Deprecated
-	public static void showPopupMenu(JPopupMenu popup, Component comp,
-		int x, int y, boolean point)
-	{
-		GenericGUIUtilities.showPopupMenu(popup, comp, x, y, point);
-
-	} //}}}
-
 	//{{{ Character boundary staffs
 	//{{{ LineCharacterBreaker class
 	// Shared context among some operations which are aware of
 	// characters above BMP and combining character sequence.
-	private static class LineCharacterBreaker
+	public static class LineCharacterBreaker
 	{
 		private final BreakIterator charBreaker;
 		private final int index0Offset;
@@ -6323,7 +6301,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		{
 			final int line = textArea.getLineOfOffset(offset);
 			charBreaker = BreakIterator.getCharacterInstance();
-			charBreaker.setText(new CharIterator(textArea.buffer.getLineSegment(line)));
+			charBreaker.setText(new CharIterator(textArea.getBuffer().getLineSegment(line)));
 			index0Offset = textArea.getLineStartOffset(line);
 		}
 
@@ -6336,10 +6314,12 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		{
 			int following = charBreaker.following(offset -
 					index0Offset);
-			if (following == BreakIterator.DONE)
+			if (following == BreakIterator.DONE || (Runtime.version().feature() >= 20 && following == offset - index0Offset))
 			{
-				// This means a end of line. Then it is
-				// safe to assume 1 code unit is a character.
+				// When offset is before a line break,
+				// pre java20 BreakIterator.DONE is returned by RuleBasedBreakIterator
+				// after java20, offset - index0Offset is returned by GraphemeBreakIterator.
+				// In either case it is safe to assume 1 code unit is a character.
 				// This may return an offset beyond the
 				// length of buffer. But it is a callers
 				// responsibility.

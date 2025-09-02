@@ -21,17 +21,19 @@
 
 package org.gjt.sp.jedit;
 
+import org.jedit.util.SystemManager;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -167,54 +169,59 @@ public class MiscUtilitiesTest
 	@Test
 	public void expandVariablesEnvWindowsAsWindows() throws Exception
 	{
-		Map<String, String> env = System.getenv();
-		Map.Entry<String, String> firstEntry = env.entrySet().iterator().next();
-		String key = firstEntry.getKey();
-		String value = firstEntry.getValue();
+		jEdit.systemManager = Mockito.mock(SystemManager.class);
+		var captor = ArgumentCaptor.forClass(String.class);
+		var value = "c:\\home\\jEdit";
+		Mockito.when(jEdit.systemManager.getenv(captor.capture())).thenReturn(value);
 		updateOS(WINDOWS_NT);
-		assertEquals(value, MiscUtilities.expandVariables("%" + key + '%'));
+		var key = "jEdit_TEST";
+		assertEquals(value, MiscUtilities.expandVariables('%' + key + '%'));
+		assertEquals(captor.getValue(), key);
 	}
-
 	@Test
 	public void expandVariablesEnvWindowsAsUnix() throws Exception
 	{
-		Map<String, String> env = System.getenv();
-		Map.Entry<String, String> firstEntry = env.entrySet().iterator().next();
-		String key = firstEntry.getKey();
-		String value = firstEntry.getValue();
+		jEdit.systemManager = Mockito.mock(SystemManager.class);
+		var captor = ArgumentCaptor.forClass(String.class);
+		var value = "c:\\home\\jEdit";
+		Mockito.when(jEdit.systemManager.getenv(captor.capture())).thenReturn(value);
 		updateOS(UNIX);
-		assertEquals(value, MiscUtilities.expandVariables("%" + key + '%'));
+		var key = "jEdit_TEST";
+		assertEquals(value, MiscUtilities.expandVariables('%' + key + '%'));
+		assertEquals(captor.getValue(), key);
 	}
 
 	@Test
 	public void expandVariablesEnvUnix() throws Exception
 	{
-		Map<String, String> env = System.getenv();
-		Map.Entry<String, String> firstEntry = env.entrySet().iterator().next();
-		String key = firstEntry.getKey();
-		String value = firstEntry.getValue();
+		jEdit.systemManager = Mockito.mock(SystemManager.class);
+		var captor = ArgumentCaptor.forClass(String.class);
+		var value = "c:\\home\\jEdit";
+		Mockito.when(jEdit.systemManager.getenv(captor.capture())).thenReturn(value);
 		updateOS(UNIX);
-		assertEquals(value, MiscUtilities.expandVariables("$" + key));
+		var key = "jEdit_TEST";
+		assertEquals(value, MiscUtilities.expandVariables('$' + key));
+		assertEquals(captor.getValue(), key);
 	}
 
 	@Test
 	public void expandVariablesEnvUnix2() throws Exception
 	{
-		Map<String, String> env = System.getenv();
-		Map.Entry<String, String> firstEntry = env.entrySet().iterator().next();
-		String key = firstEntry.getKey();
-		String value = firstEntry.getValue();
+		jEdit.systemManager = Mockito.mock(SystemManager.class);
+		var captor = ArgumentCaptor.forClass(String.class);
+		var value = "c:\\home\\jEdit";
+		Mockito.when(jEdit.systemManager.getenv(captor.capture())).thenReturn(value);
 		updateOS(UNIX);
+		var key = "jEdit_TEST";
 		assertEquals(value, MiscUtilities.expandVariables("${" + key + '}'));
 	}
 
 	@Test
 	public void expandVariablesEnvUnixNoMatch() throws Exception
 	{
-		Map<String, String> env = System.getenv();
-		Map.Entry<String, String> firstEntry = env.entrySet().iterator().next();
-		String key = firstEntry.getKey();
 		updateOS(UNIX);
+		// it is wanted that the } is missing here
+		var key = "jEdit_TEST";
 		assertEquals("${" + key, MiscUtilities.expandVariables("${" + key));
 	}
 
@@ -563,7 +570,6 @@ public class MiscUtilitiesTest
 	public void getBaseName()
 	{
 		assertEquals("aaa", MiscUtilities.getBaseName("c:\\yoyo/ta.ta/aaa"));
-		assertEquals("aaa", MiscUtilities.getFileNameNoExtension("c:\\yoyo/ta.ta/aaa"));
 	}
 
 	@Test

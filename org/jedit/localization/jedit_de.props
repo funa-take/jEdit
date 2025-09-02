@@ -75,9 +75,9 @@ common.selectNone=Nichts wählen
 common.loading=Lade...
 common.reset=Zurücksetzen
 
-lineSep.unix=Unix (\\n)
-lineSep.windows=DOS/Windows (\\r\\n)
-lineSep.mac=MacOS (\\r)
+lineSep.LF=Unix/MacOS (\\n)
+lineSep.CRLF=DOS/Windows (\\r\\n)
+lineSep.CR=Classic MacOS (\\r)
 #}}}
 
 #{{{ Miscellaneous
@@ -583,7 +583,9 @@ view.status.io=I/O: {0} Operationen in Arbeit
 view.status.linesep-changed=Zeilenende-Zeichen gesetzt auf "{0}"
 view.status.linesep-tooltip=Zeilenende-Zeichen (zum Ändern klicken)
 view.status.memory-tooltip=Java Heap-Speicher: {0}Kb/{1}Kb
-view.status.mode-tooltip=Bearbeitungsmodus, Faltmodus,  Zeichenkodierung
+view.status.mode-tooltip=Bearbeitungsmodus
+view.status.fold-tooltip=Faltmodus
+view.status.encoding-tooltip=Zeichenkodierung
 view.status.multi-changed=Mehrfachauswahl-Modus ist "{0,choice,0#Aus|1#Ein}"
 view.status.multi-tooltip=Mehrfachauswahl-Modus (zum Ändern klicken)
 view.status.narrow=Menüpunkt "Alle Zeilen anzeigen" wählen, um den gesamten Text wieder sichtbar zu machen
@@ -830,6 +832,8 @@ largeBufferDialog.message=Die Datei ist sehr groß und jEdit könnte wegen der S
 largeBufferDialog.fullSyntax=Vollständige Syntaxhervorhebung
 largeBufferDialog.contextInsensitive=Kontext-unabhängige Syntaxhervorhebung
 largeBufferDialog.defaultMode=Keine Syntaxhervorhebung (Bearbeitungsmodus 'text')
+buffer.encoding.reload=Erneut Laden mit {0}
+buffer.encoding.change=Ändern nach {0}
 #}}}
 
 #{{{ I/O error dialog box
@@ -850,6 +854,7 @@ ioerror.encoding-error=Die Datei konnte nicht korrekt (ohne eventuellen Datenver
 ioerror.write-encoding-error=Fehler beim Kodieren des Zeichens\n\
   {3} in Spalte {2} der Zeile {1} mit der Zeichenkodierung "{0}".
 ioerror.read-error=Laden nicht möglich: {0}
+ioerror.file-too-big=Laden nicht möglich, Datei ist zu groß (maximal 2GB)
 ioerror.write-error=Speichern nicht möglich: {0}
 ioerror.unsupported-encoding-error={0} Zeichensatz wird durch die aktive JVM nicht unterstützt
 ioerror.open-directory=Öffnen eines Verzeichnisses als Datei nicht möglich.
@@ -1904,7 +1909,6 @@ options.toolbar.reset.dialog.message=Soll die Symbolleiste wirklich auf die Stan
 #{{{ View pane
 options.view.label=Ansicht
 options.view.viewLayout=Ansichtslayout
-options.view.floatableToolbars=Frei positionierbare Symbolleisten
 options.view.alternateDockingLayout=Alternatives Dock-Layout
 options.view.alternateToolBarLayout=Alternatives Symbolleisten-Layout
 options.view.abbreviatePaths=Pfade mit Namen von Umgebungsvariablen abkürzen, wenn möglich

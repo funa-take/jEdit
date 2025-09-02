@@ -43,10 +43,20 @@ class PropertyManager
 	} //}}}
 
 	//{{{ loadSystemProps() method
-	void loadSystemProps(Reader in)
-		throws IOException
+	void loadSystemProps(String path) throws IOException
 	{
-		loadProps(system,in);
+		var resourceOptional = jEdit.getResourceAsUTF8Text(path);
+		if (resourceOptional.isPresent())
+		{
+			try (var in = resourceOptional.get())
+			{
+				loadProps(system, in);
+			}
+		}
+		else
+		{
+			throw new IOException("Resource not found: " + path);
+		}
 	} //}}}
 
 	//{{{ loadSiteProps() method
@@ -57,13 +67,20 @@ class PropertyManager
 	} //}}}
 
 	//{{{ loadLocalizationProps() method
-	void loadLocalizationProps(Reader in)
-		throws IOException
+	void loadLocalizationProps(String path) throws IOException
 	{
-		if (in == null)
-			localization.clear();
+		var resourceOptional = jEdit.getResourceAsUTF8Text(path);
+		if (resourceOptional.isPresent())
+		{
+			try (var in = resourceOptional.get())
+			{
+				loadProps(localization, in);
+			}
+		}
 		else
-			loadProps(localization,in);
+		{
+			localization.clear();
+		}
 	} //}}}
 
 	//{{{ loadUserProps() method
@@ -159,7 +176,7 @@ class PropertyManager
 		 */
 		if(value == null)
 		{
-			if(prop == null || prop.length() == 0)
+			if(prop == null || prop.isEmpty())
 				user.remove(name);
 			else
 				user.setProperty(name,"");
@@ -197,10 +214,10 @@ class PropertyManager
 
 	//{{{ Private members
 	private final Properties system = new Properties();
-	private final List<Properties> plugins = new LinkedList<Properties>();
+	private final List<Properties> plugins = new LinkedList<>();
 	private final Properties site = new Properties();
 	private final Properties localization = new Properties();
-	private final List<Properties> pluginLocalizations = new LinkedList<Properties>();
+	private final List<Properties> pluginLocalizations = new LinkedList<>();
 	private final Properties user = new Properties();
 
 	//{{{ getDefaultProperty() method

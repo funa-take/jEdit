@@ -38,9 +38,9 @@ common.clearAll=全部清除
 common.selectAll=全部選取
 common.selectNone=全部清除
 
-lineSep.unix=Unix (\\n)
-lineSep.windows=DOS/Windows (\\r\\n)
-lineSep.mac=MacOS (\\r)
+lineSep.LF=Unix/MacOS (\\n)
+lineSep.CRLF=DOS/Windows (\\r\\n)
+lineSep.LF=MacOS (\\r)
 #}}}
 
 #{{{ Miscellaneous
@@ -539,7 +539,9 @@ view.status.io=I/O: {0} 操作在進行中
 view.status.linesep-changed=行分隔符設定為 {0}
 view.status.linesep-tooltip=行分隔符 (點擊以改變)
 view.status.memory-tooltip=Java 堆內存: {0}Kb/{1}Kb
-view.status.mode-tooltip=當前編輯模式，摺疊模式，以及編碼
+view.status.mode-tooltip=當前編輯模式
+view.status.fold-tooltip=摺疊模式
+view.status.encoding-tooltip=以及編碼
 view.status.multi-changed=多項選擇模式 {0,choice,0#off|1#on}
 view.status.multi-tooltip=多項選擇模式 (點擊以改變)
 view.status.narrow=調用"展開所有摺疊"已使所有編輯可見
@@ -1794,7 +1796,6 @@ options.toolbar.reset.dialog.message=您確定要重置工具欄到安裝預設?
 #{{{ View pane
 options.view.label=視窗
 options.view.viewLayout=查看佈局
-options.view.floatableToolbars=流通工具欄
 options.view.alternateDockingLayout=備用停靠視窗位置
 options.view.alternateToolBarLayout=備用工具欄的位置
 options.view.abbreviatePaths=可能時，使用環境變數縮寫路徑

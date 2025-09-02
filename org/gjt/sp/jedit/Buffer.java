@@ -37,6 +37,7 @@ import org.gjt.sp.jedit.browser.VFSBrowser;
 import org.gjt.sp.jedit.buffer.BufferUndoListener;
 import org.gjt.sp.jedit.buffer.FoldHandler;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.buffer.WordWrap;
 import org.gjt.sp.jedit.bufferio.BufferAutosaveRequest;
 import org.gjt.sp.jedit.bufferio.BufferIORequest;
 import org.gjt.sp.jedit.bufferio.MarkersSaveRequest;
@@ -59,6 +60,14 @@ import org.gjt.sp.util.IntegerArray;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.StandardUtilities;
 import org.gjt.sp.util.ThreadUtilities;
+
+import static org.gjt.sp.jedit.LargeFileMode.ask;
+import static org.gjt.sp.jedit.LargeFileMode.limited;
+import static org.gjt.sp.jedit.LargeFileMode.full;
+import static org.gjt.sp.jedit.LargeFileMode.nohighlight;
+import static org.gjt.sp.jedit.buffer.WordWrap.hard;
+import static org.gjt.sp.jedit.buffer.WordWrap.none;
+import static org.gjt.sp.jedit.buffer.WordWrap.soft;
 //}}}
 
 /**
@@ -136,6 +145,8 @@ public class Buffer extends JEditBuffer
 	 * @since jEdit 4.0pre4
 	 */
 	public static final String GZIPPED = "gzipped";
+
+	private static final byte[] DUMMY_HASH = new byte[0];
 	//}}}
 
 	//{{{ Input/output methods
@@ -162,6 +173,21 @@ public class Buffer extends JEditBuffer
 		}
 		view.visit(new SaveCaretInfoVisitor());
 		load(view,true);
+	} //}}}
+
+	//{{{ reload() method
+	/**
+	 * Reloads the buffer from disk with a new encoding,
+	 * asking for confirmation if the buffer has unsaved changes.
+	 * @param view The view
+	 * @param encoding the new encoding
+	 * @since jEdit 5.7pre1
+	 */
+	public void reloadWithEncoding(View view, String encoding)
+	{
+		setBooleanProperty(Buffer.ENCODING_AUTODETECT,false);
+		setStringProperty(JEditBuffer.ENCODING, encoding);
+		reload(view);
 	} //}}}
 
 	//{{{ load() method
@@ -870,6 +896,7 @@ public class Buffer extends JEditBuffer
 	 * {@link org.gjt.sp.jedit.jEdit#closeBuffer(View,Buffer)}.
 	 * This method is thread-safe.
 	 */
+	@Override
 	public boolean isClosed()
 	{
 		return getFlag(CLOSED);
@@ -947,8 +974,9 @@ public class Buffer extends JEditBuffer
 		boolean old_d = isDirty();
 		if (d && getLength() == initialLength)
 		{
-			// for untitled, do not check if the content existed before
-			if (jEdit.getBooleanProperty("useMD5forDirtyCalculation") && !isUntitled())
+			if (isUntitled())
+				d = false;
+			else if (jEdit.getBooleanProperty("useMD5forDirtyCalculation"))
 				d = !Arrays.equals(calculateHash(), md5hash);
 		}
 		super.setDirty(d);
@@ -1072,8 +1100,8 @@ public class Buffer extends JEditBuffer
 	{
 		super.propertiesChanged();
 		longLineLimit = jEdit.getIntegerProperty("longLineLimit", 4000);
-		String largefilemode = getStringProperty("largefilemode");
-		longBufferMode = "limited".equals(largefilemode) || "nohighlight".equals(largefilemode);
+		LargeFileMode largefilemode = getLargeFileMode();
+		longBufferMode = largefilemode.isLongBufferMode();
 		if (!autoreloadOverridden)
 		{
 			setAutoReloadDialog(jEdit.getBooleanProperty("autoReloadDialog"));
@@ -1125,23 +1153,23 @@ public class Buffer extends JEditBuffer
 	 */
 	public void toggleWordWrap(View view)
 	{
-		String wrap = getStringProperty("wrap");
-		if(wrap.equals("none"))
+		WordWrap wrap = getWordWrap();
+		if(wrap == none)
 		{
-			String largeFileMode = getStringProperty("largefilemode");
-			if ("limited".equals(largeFileMode) || "nohighlight".equals(largeFileMode))
-				wrap = "hard";
+			LargeFileMode largeFileMode = getLargeFileMode();
+			if (largeFileMode.isLongBufferMode())
+				wrap = hard;
 			else
-				wrap = "soft";
+				wrap = soft;
 		}
-		else if(wrap.equals("soft"))
-			wrap = "hard";
-		else if(wrap.equals("hard"))
-			wrap = "none";
+		else if(wrap == soft)
+			wrap = hard;
+		else if(wrap == hard)
+			wrap = none;
 		view.getStatus().setMessageAndClear(jEdit.getProperty(
 			"view.status.wrap-changed",new String[] {
-			wrap }));
-		setProperty("wrap",wrap);
+				wrap.name() }));
+		setWordWrap(wrap);
 		propertiesChanged();
 	} //}}}
 
@@ -1197,6 +1225,17 @@ public class Buffer extends JEditBuffer
 		view.getStatus().setMessageAndClear(jEdit.getProperty(
 			"view.status.linesep-changed",new String[] {
 			jEdit.getProperty("lineSep." + status) }));
+		setLineSeparator(lineSep);
+	} //}}}
+
+	//{{{ getContextSensitiveProperty() method
+
+	/**
+	 * Set the line separator value
+	 * @param lineSep the line separator value (should be \r, \n or \r\n)
+	 */
+	public void setLineSeparator(String lineSep)
+	{
 		setProperty(LINESEP, lineSep);
 		setDirty(true);
 		propertiesChanged();
@@ -1214,18 +1253,16 @@ public class Buffer extends JEditBuffer
 	@Override
 	public String getContextSensitiveProperty(int offset, String name)
 	{
-		Object value = super.getContextSensitiveProperty(offset,name);
+		String parentValue = super.getContextSensitiveProperty(offset,name);
+		if (parentValue != null)
+			return parentValue;
+
+		ParserRuleSet rules = getRuleSetAtOffset(offset);
+
+		Object value = jEdit.getMode(rules.getModeName()).getProperty(name);
 
 		if(value == null)
-		{
-			ParserRuleSet rules = getRuleSetAtOffset(offset);
-
-			value = jEdit.getMode(rules.getModeName())
-				.getProperty(name);
-
-			if(value == null)
-				value = mode.getProperty(name);
-		}
+			value = mode.getProperty(name);
 
 		if(value == null)
 			return null;
@@ -1265,9 +1302,9 @@ public class Buffer extends JEditBuffer
 			{
 				mode.loadIfNecessary();
 				boolean contextInsensitive = mode.getBooleanProperty("contextInsensitive");
-				String largeFileMode = jEdit.getProperty("largefilemode", "ask");
+				LargeFileMode largeFileMode = LargeFileMode.valueOf(jEdit.getProperty(LARGE_MODE_FILE, ask.name()));
 
-				if ("ask".equals(largeFileMode))
+				if (largeFileMode == ask)
 				{
 					if (!contextInsensitive)
 					{
@@ -1289,34 +1326,34 @@ public class Buffer extends JEditBuffer
 						switch (i)
 						{
 							case 0:
-								setProperty("largefilemode", "full");
+								setLargeFileMode(full);
 								setMode(mode);
 								return;
 							case 1:
-								setProperty("largefilemode", "limited");
+								setLargeFileMode(limited);
 								setMode(mode, true);
 								return;
 							case 2:
-								setProperty("largefilemode", "nohighlight");
+								setLargeFileMode(nohighlight);
 								mode =  getDefaultMode();
 								setMode(mode);
 								return;
 						}
 					}
 				}
-				else if ("full".equals(largeFileMode))
+				else if (largeFileMode == full)
 				{
-					setProperty("largefilemode", "full");
+					setLargeFileMode(full);
 					setMode(mode);
 				}
-				else if ("limited".equals(largeFileMode))
+				else if (largeFileMode == limited)
 				{
-					setProperty("largefilemode", "limited");
+					setLargeFileMode(limited);
 					setMode(mode, true);
 				}
-				else if ("nohighlight".equals(largeFileMode))
+				else if (largeFileMode == nohighlight)
 				{
-					setProperty("largefilemode", "nohighlight");
+					setLargeFileMode(nohighlight);
 					mode =  getDefaultMode();
 					setMode(mode);
 				}
@@ -1338,22 +1375,6 @@ public class Buffer extends JEditBuffer
 			defaultMode = jEdit.getMode("text");
 		return defaultMode;
 	}
-
-	//}}}
-
-	//{{{ Deprecated methods
-
-	//{{{ getFile() method
-	/**
-	 * @deprecated Do not call this method, use {@link #getPath()}
-	 * instead.
-	 * @return the file
-	 */
-	@Deprecated
-	public File getFile()
-	{
-		return file;
-	} //}}}
 
 	//}}}
 
@@ -1783,6 +1804,7 @@ public class Buffer extends JEditBuffer
 	} //}}}
 
 	//{{{ close() method
+	@Override
 	public void close()
 	{
 		close(false);
@@ -1796,6 +1818,7 @@ public class Buffer extends JEditBuffer
 	 */
 	void close(boolean doNotSave)
 	{
+		super.close();
 		setFlag(CLOSED,true);
                 boolean autosaveUntitled = jEdit.getBooleanProperty("autosaveUntitled");
 
@@ -2183,9 +2206,8 @@ public class Buffer extends JEditBuffer
 	/** @return an MD5 hash of the contents of the buffer */
 	private byte[] calculateHash()
 	{
-		final byte[] dummy = new byte[1];
 		if (!jEdit.getBooleanProperty("useMD5forDirtyCalculation"))
-			return dummy;
+			return DUMMY_HASH;
 		return StandardUtilities.md5(getSegment(0, getLength()));
 	}
 
@@ -2194,8 +2216,15 @@ public class Buffer extends JEditBuffer
 	 */
 	private void updateHash()
 	{
-		initialLength = getLength();
-		md5hash = calculateHash();
+		if (isUntitled())
+		{
+			initialLength = 0;
+		}
+		else
+		{
+			initialLength = getLength();
+			md5hash = calculateHash();
+		}
 	}
 
 	//{{{ finishLoading() method
@@ -2263,7 +2292,7 @@ public class Buffer extends JEditBuffer
 				jEdit.getEditPaneManager().forEach(editPane ->
 					{
 						BufferSet bufferSet = editPane.getBufferSet();
-						if (bufferSet.indexOf(this) != -1)
+						if (bufferSet.contains(this))
 						{
 							bufferSet.sort();
 						}

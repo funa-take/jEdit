@@ -25,7 +25,6 @@
 package org.gjt.sp.util;
 
 //{{{ Imports
-import javax.annotation.Nullable;
 import javax.swing.text.Segment;
 
 import java.security.MessageDigest;
@@ -499,29 +498,6 @@ loop:		for(int i = 0; i < str.length(); i++)
 		}
 	} //}}}
 
-	//{{{ objectsEqual() method
-	/**
-	 * Returns if two strings are equal. This correctly handles null pointers,
-	 * as opposed to calling <code>o1.equals(o2)</code>.
-	 * @since jEdit 4.3pre6
-	 * @deprecated use {java.util.Objects#equals(Object, Object}
-	 */
-	@Deprecated
-	public static boolean objectsEqual(@Nullable Object o1, @Nullable Object o2)
-	{
-		if(o1 == null)
-		{
-			if(o2 == null)
-				return true;
-			else
-				return false;
-		}
-		else if(o2 == null)
-			return false;
-		else
-			return o1.equals(o2);
-	} //}}}
-
 	//{{{ globToRE() method
 	/**
 	 * Converts a Unix-style glob to a regular expression.<p>
@@ -778,4 +754,18 @@ loop:		for(int i = 0; i < str.length(); i++)
 		}
 	}
 	// }}}
+
+	//{{{ castUnchecked() method
+	/**
+	 * Casts the given argument to the needed return type.
+	 *
+	 * @param castee The object to be casted unchecked
+	 * @throws ClassCastException if the cast does not succeed
+	 * @since jEdit 5.7
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T castUnchecked(Object castee)
+	{
+		return (T) castee;
+	} //}}}
 }

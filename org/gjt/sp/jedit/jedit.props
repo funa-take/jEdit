@@ -417,11 +417,11 @@ view.docking.alternateLayout=false
 view.toolbar.alternateLayout=true
 
 #{{{ Status bar
+view.status.highlight=#eeeeee
 view.status.foreground=black
 view.status.background=white
 view.status.visible=true
 view.status.plainview.visible=false
-view.status.show-caret-status=true
 view.status.memory.foreground=#cccccc
 view.status.memory.background=#666699a
 #}}}

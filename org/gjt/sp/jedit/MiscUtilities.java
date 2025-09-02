@@ -140,9 +140,12 @@ public class MiscUtilities
 		if (m.find())
 		{
 			String varName = m.group(2);
-			String expansion = System.getenv(varName);
+			String expansion = jEdit.systemManager.getenv(varName);
 			if (expansion != null)
+			{
+				expansion = Matcher.quoteReplacement(expansion);
 				return m.replaceFirst(expansion);
+			}
 		}
 		return unixPath;
 	}
@@ -179,7 +182,7 @@ public class MiscUtilities
 				return arg;
 		}
 		String varName = m.group(2);
-		String expansion = System.getenv(varName);
+		String expansion = jEdit.systemManager.getenv(varName);
 		if (expansion == null) {
 			if (varName.equalsIgnoreCase("jedit_settings") && jEdit.getSettingsDirectory() != null) {
 				expansion = jEdit.getSettingsDirectory();
@@ -519,16 +522,6 @@ public class MiscUtilities
 			return name;
 		else
 			return name.substring(0,index);
-	}
-	/**
-	  @return the same thing as getBaseName()
-	  @deprecated use getBaseName() instead.
-	  @since jEdit 4.0
-	*/
-	@Deprecated
-	public static String getFileNameNoExtension(String path)
-	{
-		return getBaseName(path);
 	} //}}}
 
 	//{{{ getParentOfPath() method
@@ -1093,7 +1086,6 @@ public class MiscUtilities
 		}
 		return false;
 	} //}}}
-
 
 	//{{{ autodetect() method
 	/**

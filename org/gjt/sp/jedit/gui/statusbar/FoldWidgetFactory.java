@@ -25,20 +25,26 @@
 package org.gjt.sp.jedit.gui.statusbar;
 
 //{{{ Imports
-import java.awt.event.MouseAdapter;
+import java.awt.*;
 import java.awt.event.MouseEvent;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
+
 import org.gjt.sp.jedit.Buffer;
+import org.gjt.sp.jedit.EditBus;
 import org.gjt.sp.jedit.View;
+import org.gjt.sp.jedit.buffer.FoldHandler;
 import org.gjt.sp.jedit.gui.BufferOptions;
+import org.gjt.sp.jedit.gui.DialogChooser;
 import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.jedit.msg.BufferUpdate;
+
+import javax.swing.*;
+
+import static org.gjt.sp.util.StandardUtilities.castUnchecked;
 //}}}
 
 /**
- *
  * @author Matthieu Casanova
- * @since jEdit 4.3pre14 
+ * @since jEdit 4.3pre14
  */
 public class FoldWidgetFactory implements StatusWidgetFactory
 {
@@ -46,44 +52,55 @@ public class FoldWidgetFactory implements StatusWidgetFactory
 	@Override
 	public Widget getWidget(View view)
 	{
-		Widget fold = new FoldWidget(view);
-		return fold;
+		return new FoldWidget(view);
 	} //}}}
 
 	//{{{ FoldWidget class
-	private static class FoldWidget implements Widget
+	private static class FoldWidget extends AbstractLabelWidget
 	{
-		private final JLabel fold;
-		private final View view;
+		FoldWidget(View view)
+		{
+			super(view);
+			label.setToolTipText(jEdit.getProperty("view.status.fold-tooltip"));
+		}
 
-		FoldWidget(final View view)
-		{
-			fold = new ToolTipLabel();
-			this.view = view;
-			fold.setToolTipText(jEdit.getProperty("view.status.mode-tooltip"));
-			fold.addMouseListener(new MouseAdapter() 
-					      {
-						      @Override
-						      public void mouseClicked(MouseEvent evt)
-						      {
-							      if(evt.getClickCount() == 2)
-								      new BufferOptions(view,view.getBuffer());
-						      }
-					      });
-		}
-		
 		@Override
-		public JComponent getComponent()
+		protected void singleClick(MouseEvent e)
 		{
-			return fold;
+			Buffer buffer = view.getBuffer();
+			String currentFoldingMode = buffer.getStringProperty("folding");
+			DialogChooser.openListChooserWindow(label,
+				currentFoldingMode,
+				listSelectionEvent -> EventQueue.invokeLater(() ->
+				{
+					JList<String> list = castUnchecked(listSelectionEvent.getSource());
+					String selectedValue = list.getSelectedValue();
+					buffer.setStringProperty("folding", selectedValue);
+					buffer.propertiesChanged();
+					EditBus.send(new BufferUpdate(buffer,null,BufferUpdate.PROPERTIES_CHANGED));
+
+				}),
+				FoldHandler.getFoldModes());
 		}
-		
+
+		@Override
+		protected void rightClick(MouseEvent e)
+		{
+			new BufferOptions(view, view.getBuffer());
+		}
+
 		@Override
 		public void update()
 		{
 			Buffer buffer = view.getBuffer();
 			if (buffer.isLoaded())
-				fold.setText((String)view.getBuffer().getProperty("folding"));
+				label.setText("Fold: " + view.getBuffer().getProperty("folding"));
+		}
+
+		@Override
+		public boolean test(StatusBarEventType statusBarEventType)
+		{
+			return statusBarEventType == StatusBarEventType.Buffer;
 		}
 	} //}}}
 }

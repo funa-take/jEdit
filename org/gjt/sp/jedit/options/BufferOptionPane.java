@@ -27,29 +27,30 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
+import javax.swing.*;
 
 import org.gjt.sp.jedit.AbstractOptionPane;
 import org.gjt.sp.jedit.Buffer;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.MiscUtilities;
 import org.gjt.sp.jedit.Mode;
+import org.gjt.sp.jedit.buffer.WordWrap;
+import org.gjt.sp.jedit.gui.LineSepListCellRenderer;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.buffer.FoldHandler;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.util.StandardUtilities;
-
+import org.jedit.misc.LineSepType;
 
 public class BufferOptionPane extends AbstractOptionPane
 {
 	private JComboBox<String> encoding;
-	private JComboBox<String> lineSeparator;
+	private JComboBox<LineSepType> lineSeparator;
 	private JCheckBox gzipped;
 	private Mode[] modes;
 	private JComboBox<Mode> mode;
 	private JComboBox<String> folding;
-	private JComboBox<String> wrap;
+	private JComboBox<WordWrap> wrap;
 	private JComboBox<String> maxLineLen;
 	private JComboBox<String> tabSize;
 	private JComboBox<String> indentSize;
@@ -79,27 +80,22 @@ public class BufferOptionPane extends AbstractOptionPane
 		addSeparator("buffer-options.loading-saving");
 
 		//{{{ Line separator
-		String[] lineSeps = { jEdit.getProperty("lineSep.unix"),
-			jEdit.getProperty("lineSep.windows"),
-			jEdit.getProperty("lineSep.mac") };
-		lineSeparator = new JComboBox<String>(lineSeps);
+		lineSeparator = new JComboBox<>(LineSepType.values());
+		lineSeparator.setRenderer(new LineSepListCellRenderer());
 		String lineSep = buffer.getStringProperty(JEditBuffer.LINESEP);
 		if(lineSep == null)
 			lineSep = System.getProperty("line.separator");
-		if("\n".equals(lineSep))
-			lineSeparator.setSelectedIndex(0);
-		else if("\r\n".equals(lineSep))
-			lineSeparator.setSelectedIndex(1);
-		else if("\r".equals(lineSep))
-			lineSeparator.setSelectedIndex(2);
+
+		LineSepType currentLineSepType = LineSepType.fromSeparator(lineSep);
+		lineSeparator.setSelectedItem(currentLineSepType);
 		addComponent(jEdit.getProperty("buffer-options.lineSeparator"),
 			lineSeparator);
 		//}}}
 
 		//{{{ Encoding
 		String[] encodings = MiscUtilities.getEncodings(true);
-		Arrays.sort(encodings,new StandardUtilities.StringCompare<String>(true));
-		encoding = new JComboBox<String>(encodings);
+		Arrays.sort(encodings,new StandardUtilities.StringCompare<>(true));
+		encoding = new JComboBox<>(encodings);
 		encoding.setEditable(true);
 		encoding.setSelectedItem(buffer.getStringProperty(JEditBuffer.ENCODING));
 		addComponent(jEdit.getProperty("buffer-options.encoding"),
@@ -121,7 +117,7 @@ public class BufferOptionPane extends AbstractOptionPane
 			jEdit.getProperty("options.general.checkModStatus.reload"),
 			jEdit.getProperty("options.general.checkModStatus.silentReload")
 		};
-		checkModStatus = new JComboBox<String>(modCheckOptions);
+		checkModStatus = new JComboBox<>(modCheckOptions);
 		if(buffer.getAutoReload())
 		{
 			if(buffer.getAutoReloadDialog())
@@ -147,18 +143,17 @@ public class BufferOptionPane extends AbstractOptionPane
 
 		//{{{ Edit mode
 		modes = jEdit.getModes();
-		Arrays.sort(modes,new StandardUtilities.StringCompare<Mode>(true));
-		mode = new JComboBox<Mode>(modes);
+		Arrays.sort(modes,new StandardUtilities.StringCompare<>(true));
+		mode = new JComboBox<>(modes);
 		mode.setSelectedItem(buffer.getMode());
-		ActionHandler actionListener = new ActionHandler();
-		mode.addActionListener(actionListener);
+		mode.addActionListener(new ActionHandler());
 		addComponent(jEdit.getProperty("buffer-options.mode"),mode);
 		//}}}
 
 		//{{{ Fold mode
 		String[] foldModes = FoldHandler.getFoldModes();
 
-		folding = new JComboBox<String>(foldModes);
+		folding = new JComboBox<>(foldModes);
 		folding.setSelectedItem(buffer.getStringProperty("folding"));
 		addComponent(jEdit.getProperty("options.editing.folding"),
 			folding);
@@ -166,20 +161,14 @@ public class BufferOptionPane extends AbstractOptionPane
 
 		//{{{ Automatic indentation
 		String[] indentModes = {"none", "simple", "full"};
-		autoIndent = new JComboBox<String>(indentModes);
+		autoIndent = new JComboBox<>(indentModes);
 		autoIndent.setSelectedItem(buffer.getStringProperty("autoIndent"));
 		addComponent(jEdit.getProperty("options.editing.autoIndent"), autoIndent);
 		//}}}
 
 		//{{{ Wrap mode
-		String[] wrapModes = {
-			"none",
-			"soft",
-			"hard"
-		};
-
-		wrap = new JComboBox<String>(wrapModes);
-		wrap.setSelectedItem(buffer.getStringProperty("wrap"));
+		wrap = new JComboBox<>(WordWrap.values());
+		wrap.setSelectedItem(buffer.getWordWrap());
 		addComponent(jEdit.getProperty("options.editing.wrap"),
 			wrap);
 		//}}}
@@ -187,7 +176,7 @@ public class BufferOptionPane extends AbstractOptionPane
 		//{{{ Max line length
 		String[] lineLengths = { "0", "72", "76", "80" };
 
-		maxLineLen = new JComboBox<String>(lineLengths);
+		maxLineLen = new JComboBox<>(lineLengths);
 		maxLineLen.setEditable(true);
 		maxLineLen.setSelectedItem(buffer.getStringProperty("maxLineLen"));
 		addComponent(jEdit.getProperty("options.editing.maxLineLen"),
@@ -196,14 +185,14 @@ public class BufferOptionPane extends AbstractOptionPane
 
 		//{{{ Tab size
 		String[] tabSizes = { "2", "4", "8" };
-		tabSize = new JComboBox<String>(tabSizes);
+		tabSize = new JComboBox<>(tabSizes);
 		tabSize.setEditable(true);
 		tabSize.setSelectedItem(buffer.getStringProperty("tabSize"));
 		addComponent(jEdit.getProperty("options.editing.tabSize"),tabSize);
 		//}}}
 
 		//{{{ Indent size
-		indentSize = new JComboBox<String>(tabSizes);
+		indentSize = new JComboBox<>(tabSizes);
 		indentSize.setEditable(true);
 		indentSize.setSelectedItem(buffer.getStringProperty("indentSize"));
 		addComponent(jEdit.getProperty("options.editing.indentSize"),
@@ -236,24 +225,18 @@ public class BufferOptionPane extends AbstractOptionPane
 	@Override
 	protected void _save()
 	{
-		int index = lineSeparator.getSelectedIndex();
-		String lineSep;
-		if(index == 0)
-			lineSep = "\n";
-		else if(index == 1)
-			lineSep = "\r\n";
-		else if(index == 2)
-			lineSep = "\r";
-		else
-			throw new InternalError();
+		LineSepType newLineSep = (LineSepType) lineSeparator.getSelectedItem();
 
-		String oldLineSep = buffer.getStringProperty(JEditBuffer.LINESEP);
-		if(oldLineSep == null)
-			oldLineSep = System.getProperty("line.separator");
-		if(!oldLineSep.equals(lineSep))
+		if (newLineSep != null)
 		{
-			buffer.setStringProperty(JEditBuffer.LINESEP, lineSep);
-			buffer.setDirty(true);
+			String oldLineSep = buffer.getStringProperty(JEditBuffer.LINESEP);
+			if(oldLineSep == null)
+				oldLineSep = System.getProperty("line.separator");
+			if(!oldLineSep.equals(newLineSep.getSeparator()))
+			{
+				buffer.setStringProperty(JEditBuffer.LINESEP, newLineSep.getSeparator());
+				buffer.setDirty(true);
+			}
 		}
 
 		String encoding = (String)this.encoding.getSelectedItem();
@@ -278,7 +261,9 @@ public class BufferOptionPane extends AbstractOptionPane
 
 		buffer.setStringProperty("folding",(String)folding.getSelectedItem());
 
-		buffer.setStringProperty("wrap",(String)wrap.getSelectedItem());
+		WordWrap selectedWordWrap = (WordWrap) wrap.getSelectedItem();
+		if (selectedWordWrap != null)
+			buffer.setWordWrap(selectedWordWrap);
 
 		try
 		{
@@ -313,7 +298,7 @@ public class BufferOptionPane extends AbstractOptionPane
 
 		buffer.setBooleanProperty("locked", locked.isSelected()); // requires propertiesChanged() call afterwards
 
-		index = mode.getSelectedIndex();
+		int index = mode.getSelectedIndex();
 		buffer.setMode(modes[index]); // NOTE: setMode() makes implicit call of propertiesChanged()
 		switch(checkModStatus.getSelectedIndex())
 		{
@@ -340,6 +325,7 @@ public class BufferOptionPane extends AbstractOptionPane
 	private class ActionHandler implements ActionListener
 	{
 		//{{{ actionPerformed() method
+		@Override
 		public void actionPerformed(ActionEvent evt)
 		{
 			Object source = evt.getSource();
@@ -348,8 +334,7 @@ public class BufferOptionPane extends AbstractOptionPane
 				Mode _mode = (Mode)mode.getSelectedItem();
 				folding.setSelectedItem(_mode.getProperty(
 					"folding"));
-				wrap.setSelectedItem(_mode.getProperty(
-					"wrap"));
+				wrap.setSelectedItem(WordWrap.valueOf((String) _mode.getProperty(JEditBuffer.WRAP)));
 				maxLineLen.setSelectedItem(_mode.getProperty(
 					"maxLineLen"));
 				tabSize.setSelectedItem(_mode.getProperty(
@@ -363,5 +348,4 @@ public class BufferOptionPane extends AbstractOptionPane
 			}
 		} //}}}
 	} //}}}
-
 }

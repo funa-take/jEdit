@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
@@ -96,7 +97,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 		closeBox.setMargin(new Insets(0,0,0,0));
 		GenericGUIUtilities.setButtonContentMargin(closeBox, closeBox.getMargin());
 
-		closeBox.addActionListener(new ActionHandler());
+		closeBox.addActionListener(e -> show((DockableWindowManagerImpl.Entry)null));
 
 		menuBtn = new JButton(GUIUtilities.loadIcon(jEdit.getProperty("dropdown-arrow.icon")));
 		menuBtn.setRequestFocusEnabled(false);
@@ -114,8 +115,8 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 		buttonGroup.add(nullButton = new JToggleButton());
 		//}}}
 
-		dockables = new ArrayList<DockableWindowManagerImpl.Entry>();
-		buttons = new ArrayList<AbstractButton>();
+		dockables = new ArrayList<>();
+		buttons = new ArrayList<>();
 		dockablePanel = new DockablePanel(this);
 
 		this.dimension = dimension;
@@ -311,12 +312,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 		}
 		else
 		{
-			if (current != null)
-			{
-
-				Object reason = DockableWindowUpdate.DEACTIVATED;
-				EditBus.send(new DockableWindowUpdate(wm, reason, current.factory.name));
-			}
+			EditBus.send(new DockableWindowUpdate(wm, DockableWindowUpdate.DEACTIVATED, current.factory.name));
 			current = null;
 			nullButton.setSelected(true);
 			// removing last component, so remove border
@@ -446,6 +442,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 	private JPopupMenu popup;
 
 	// remember the most recent dockable
+	@Nullable
 	private String mostRecent;
 	//}}}
 
@@ -467,7 +464,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 	} //}}}
 
 	//{{{ ActionHandler class
-	class ActionHandler implements ActionListener
+	private class ActionHandler implements ActionListener
 	{
 		@Override
 		public void actionPerformed(ActionEvent evt)
@@ -475,15 +472,10 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 			if(popup != null && popup.isVisible())
 				popup.setVisible(false);
 
-			if(evt.getSource() == closeBox)
+			if(wm.isDockableWindowVisible(evt.getActionCommand()))
 				show((DockableWindowManagerImpl.Entry)null);
 			else
-			{
-				if(wm.isDockableWindowVisible(evt.getActionCommand()))
-					show((DockableWindowManagerImpl.Entry)null);
-				else
-					wm.showDockableWindow(evt.getActionCommand());
-			}
+				wm.showDockableWindow(evt.getActionCommand());
 		}
 	} //}}}
 
@@ -538,13 +530,14 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 	} //}}}
 
 	//{{{ DockBorder class
-	static class DockBorder implements Border
+	private static class DockBorder implements Border
 	{
-		String position;
-		Insets insets;
-		Color color1;
-		Color color2;
-		Color color3;
+		private final String position;
+		private final Insets insets;
+
+		private Color color1;
+		private Color color2;
+		private Color color3;
 
 		//{{{ DockBorder constructor
 		DockBorder(String position)
@@ -774,7 +767,7 @@ public class PanelWindowContainer implements DockableWindowContainer, DockingAre
 	} //}}}
 
 	//{{{ ButtonLayout class
-	class ButtonLayout implements LayoutManager
+	private class ButtonLayout implements LayoutManager
 	{
 		//{{{ addLayoutComponent() method
 		@Override

@@ -110,44 +110,12 @@
 	<target name="init-ivy"
 		depends="init,download-ivy"
 		unless="ivy.done">
-		<script language="javascript">
-			<![CDATA[
-				try {
-					var dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance()
-					dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-					var document = dbf.newDocumentBuilder().parse('http://plugins.jedit.org/export/mirror_list.php')
-					var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath()
-					var mirrors = xpath.evaluate('/MIRRORS/MIRROR/@ID', document, javax.xml.xpath.XPathConstants.NODESET)
-					var artifactPatterns = ''
-					for (i = 0; i < mirrors.getLength(); i++) {
-						artifactPatterns += '<artifact pattern="jar:http://'
-								    + mirrors.item(i).getTextContent()
-								    + '.dl.sourceforge.net/project/jedit-plugins/[artifact]/[revision]/[artifact]-[revision]-bin.zip!/[artifact].jar" />\n'
-					}
-					project.setUserProperty('jedit.plugins.artifact.patterns', artifactPatterns)
-				} catch(e) {
-					self.log('Error while retrieving mirror list, if plugins are not in Ivy cache, they will not be resolvable: ' + e, e, project.MSG_WARN)
-				}
-			]]>
-		</script>
-
-		<copy todir="${build.dir}"
-		      encoding="UTF-8"
-		      overwrite="true">
-			<fileset file="ivysettings.xml"/>
-			<filterset>
-				<filter token="jedit.plugins.artifact.patterns"
-					value="${jedit.plugins.artifact.patterns}"/>
-			</filterset>
-		</copy>
-
 		<property name="ivy.retrieve.pattern"
 			  value="${lib.dir}/[conf]/[artifact](-[classifier]).[ext]"/>
 		<taskdef resource="org/apache/ivy/ant/antlib.xml"
 			 classpath="${ivy.jar.file}"
 			 loaderref="ivy.loader"
 			 uri="antlib:org.apache.ivy.ant"/>
-		<ivy:settings file="${build.dir}/ivysettings.xml"/>
 	</target>
 
 	<target name="retrieve"
@@ -252,7 +220,7 @@
 	</target>
 
 	<target name="compile"
-		depends="init">
+		depends="init,retrieve">
 		<mkdir dir="${classes.dir}/core"/>
 		<depend srcDir="${basedir}"
 			destDir="${classes.dir}/core"
@@ -340,6 +308,7 @@
 				<include name="org/gjt/sp/jedit/buffer/LineManager.java"/>
 				<include name="org/gjt/sp/jedit/buffer/PositionManager.java"/>
 				<include name="org/gjt/sp/jedit/buffer/UndoManager.java"/>
+				<include name="org/gjt/sp/jedit/buffer/WordWrap.java"/>
 
 				<include name="org/gjt/sp/jedit/bufferio/IoTask.java"/>
 
@@ -416,6 +385,7 @@
 				<include name="org/gjt/sp/jedit/JEditActionSet.java"/>
 				<include name="org/gjt/sp/jedit/JEditActionContext.java"/>
 				<include name="org/gjt/sp/jedit/JEditBeanShellAction.java"/>
+				<include name="org/gjt/sp/jedit/LargeFileMode.java"/>
 				<include name="org/gjt/sp/jedit/Mode.java"/>
 				<include name="org/gjt/sp/jedit/OperatingSystem.java"/>
 				<include name="org/gjt/sp/jedit/RegistersListener.java"/>
@@ -440,13 +410,15 @@
 				<include name="org/gjt/sp/util/ThreadUtilities.java"/>
 				<include name="org/gjt/sp/util/SyntaxUtilities.java"/>
 				<include name="org/gjt/sp/util/XMLUtilities.java"/>
+
+				<include name="org/jedit/util/CleanerService.java"/>
 			</fileset>
 		</copy>
 
 	</target>
 
 	<target name="compile-textArea"
-		depends="init,prepare-textArea">
+		depends="init,retrieve,prepare-textArea">
 		<mkdir dir="${textAreaPackage}/build"/>
 		<javac srcdir="${textAreaPackage}/src"
 		       destdir="${textAreaPackage}/build"
@@ -590,14 +562,14 @@
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-win32.jar"
 				       dest="${build.dir}/launch4j"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.12-workdir-win32/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.50-workdir-win32/"/>
 				</copy>
 			</contrib:case>
 			<contrib:case value="unix-x64">
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-linux64.jar"
 				       dest="${build.dir}/launch4j/"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.12-workdir-linux64/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.50-workdir-linux64/"/>
 				</copy>
 				<chmod dir="${lib.dir}/launch4j/bin"
 				       perm="+x"
@@ -607,7 +579,7 @@
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-linux.jar"
 				       dest="${build.dir}/launch4j/"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.12-workdir-linux/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.50-workdir-linux/"/>
 				</copy>
 				<chmod dir="${lib.dir}/launch4j/bin"
 				       perm="+x"
@@ -617,7 +589,7 @@
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-mac.jar"
 				       dest="${build.dir}/launch4j/"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.12-workdir-mac/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.50-workdir-mac/"/>
 				</copy>
 				<chmod dir="${lib.dir}/launch4j/bin"
 				       perm="+x"
@@ -855,6 +827,7 @@
 					 packagenames="org.*"
 					 doclet="doclet.GenerateTocXML"
 					 docletpath="${classes.dir}/javadoc"
+					 additionalparam="-Xmaxwarns 2000"
 					 version="true"
 					 use="true"
 					 author="true"
@@ -1257,6 +1230,13 @@
 					name="jEdit TEXT Document"
 					role="Editor"/>
 		</appbundler:create>
+		<!-- part of work-around for https://github.com/TheInfiniteKind/appbundler/pull/88 -->
+		<copy file="package-files/osx/jedit"
+		      todir="${dist.dir}/classes/mac/jEdit.app/Contents/MacOS/"
+		      overwrite="true"/>
+		<!-- part of work-around for https://github.com/TheInfiniteKind/appbundler/pull/88 -->
+		<chmod file="${dist.dir}/classes/mac/jEdit.app/Contents/MacOS/jedit"
+		       perm="+x"/>
 		<copy todir="${dist.dir}/classes/mac/jEdit.app/Contents/Java/"
 		      overwrite="true">
 			<fileset dir="${dist.dir}"
@@ -1268,6 +1248,11 @@
 					     properties/**
 					     startup/**"/>
 		</copy>
+		<replace file="${dist.dir}/classes/mac/jEdit.app/Contents/Info.plist"
+			 encoding="UTF-8"
+			 token="&lt;key&gt;IgnorePSN&lt;/key&gt;"
+			 value="&lt;key&gt;IgnoreVerbose&lt;/key&gt;&lt;true/&gt;&lt;key&gt;IgnorePSN&lt;/key&gt;"
+			 failonnoreplacements="true"/>
 		<copy todir="${dist.dir}/classes/mac/"
 		      overwrite="true">
 			<fileset dir="package-files/osx/"

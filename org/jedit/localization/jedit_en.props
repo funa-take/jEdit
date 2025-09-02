@@ -40,9 +40,9 @@ common.selectNone=Select None
 common.loading=Loading...
 common.reset=Reset
 
-lineSep.unix=Unix (\\n)
-lineSep.windows=DOS/Windows (\\r\\n)
-lineSep.mac=MacOS (\\r)
+lineSep.LF=Unix/MacOS (\\n)
+lineSep.CRLF=DOS/Windows (\\r\\n)
+lineSep.CR=Classic MacOS (\\r)
 #}}}
 
 #{{{ Miscellaneous
@@ -548,7 +548,9 @@ view.status.io=I/O: {0} operations in progress
 view.status.linesep-changed=Line separator set to {0}
 view.status.linesep-tooltip=Line separator (click to change)
 view.status.memory-tooltip=Java heap memory: {0}Kb/{1}Kb
-view.status.mode-tooltip=Current edit mode, fold mode, and encoding
+view.status.mode-tooltip=Current edit mode
+view.status.fold-tooltip=Current fold mode
+view.status.encoding-tooltip=Current encoding
 view.status.multi-changed=Multiple selection mode is {0,choice,0#off|1#on}
 view.status.multi-tooltip=Multiple selection mode (click to change)
 view.status.narrow=Invoke "Expand All Folds" to make all text visible again
@@ -801,6 +803,8 @@ largeBufferDialog.message=The buffer is very large and jEdit may become unrespon
 largeBufferDialog.fullSyntax=Full syntax highlight
 largeBufferDialog.contextInsensitive=Context insensitive syntax highlight
 largeBufferDialog.defaultMode=Text edit mode
+buffer.encoding.reload=Reload using {0}
+buffer.encoding.change=Change to {0}
 #}}}
 
 #{{{ I/O error dialog box
@@ -821,6 +825,7 @@ ioerror.encoding-error=The file could not be loaded correctly (some data might b
 ioerror.write-encoding-error=Failed to encode the character\n\
 	{3} at column {2} in line {1} with the encoding "{0}".
 ioerror.read-error=Cannot load: {0}
+ioerror.file-too-big=Cannot load, file is too big (2GB limit)
 ioerror.write-error=Cannot save: {0}
 ioerror.unsupported-encoding-error={0} charset is not supported by your JVM
 ioerror.open-directory=Cannot open directory as a buffer.
@@ -1883,7 +1888,6 @@ options.toolbar.reset.dialog.message=Are you sure you want to reset the toolbar 
 #{{{ View pane
 options.view.label=View
 options.view.viewLayout=View layout
-options.view.floatableToolbars=Floatable Toolbars
 options.view.alternateDockingLayout=Alternate docked window placement
 options.view.alternateToolBarLayout=Alternate tool bar placement
 options.view.abbreviatePaths=Abbreviate paths with environment variables when possible

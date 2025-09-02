@@ -3,7 +3,7 @@
  * :tabSize=4:indentSize=4:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2008 Matthieu Casanova
+ * Copyright (C) 2008-2021 Matthieu Casanova
  * Portions Copyright (C) 2001, 2004 Slava Pestov
  * Portions copyright (C) 2001 Mike Dillon
  *
@@ -24,18 +24,21 @@
 
 package org.gjt.sp.jedit.gui.statusbar;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.event.MouseAdapter;
+//{{{ Imports
+import java.awt.*;
 import java.awt.event.MouseEvent;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import org.gjt.sp.jedit.Buffer;
 import org.gjt.sp.jedit.View;
-import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.gui.LineSepListCellRenderer;
+import org.gjt.sp.jedit.jEdit;
+import org.jedit.misc.LineSepType;
+
+import javax.swing.*;
+//}}}
 
 /**
  * @author Matthieu Casanova
@@ -47,73 +50,78 @@ public class LineSepWidgetFactory implements StatusWidgetFactory
 	@Override
 	public Widget getWidget(View view)
 	{
-		Widget lineSep = new LineSepWidget(view);
-		return lineSep;
+		return new LineSepWidget(view);
 	} //}}}
 	
 	//{{{ LineSepWidget class
-	private static class LineSepWidget implements Widget
+	private static class LineSepWidget extends AbstractLabelWidget
 	{
-		private final JLabel lineSep;
-		private final View view;
-		
 		//{{{ LineSepWidget constructor
-		LineSepWidget(final View view) 
+		LineSepWidget(View view)
 		{
-			lineSep = new ToolTipLabel();
-			lineSep.setHorizontalAlignment(SwingConstants.CENTER);
-			lineSep.setToolTipText(jEdit.getProperty("view.status.linesep-tooltip"));
-			this.view = view;
-			lineSep.addMouseListener(new MouseAdapter()
-						 {
-							 @Override
-							 public void mouseClicked(MouseEvent evt)
-							 {
-								 view.getBuffer().toggleLineSeparator(view);
-							 }
-						 });
+			super(view);
+			label.setToolTipText(jEdit.getProperty("view.status.linesep-tooltip"));
 		} //}}}
 
-		
-		//{{{ getComponent() method
 		@Override
-		public JComponent getComponent()
+		protected void singleClick(MouseEvent e)
 		{
-			return lineSep;
-		} //}}}
+			EventQueue.invokeLater(() ->
+			{
+				JList<LineSepType> lineSeparatorList = new JList<>(new LineSepType[] {LineSepType.LF, LineSepType.CRLF, LineSepType.CR});
+				lineSeparatorList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+				lineSeparatorList.setCellRenderer(new LineSepListCellRenderer());
+				Buffer buffer = view.getBuffer();
+				String property = buffer.getStringProperty(JEditBuffer.LINESEP);
+				LineSepType currentSeparator = LineSepType.fromSeparator(property);
+				lineSeparatorList.setSelectedValue(currentSeparator, true);
 
-		
+				lineSeparatorList.setBorder(BorderFactory.createEtchedBorder());
+				lineSeparatorList.setVisibleRowCount(3);
+				JDialog window = new JDialog(view);
+				window.setUndecorated(true);
+				window.addWindowListener(new WindowAdapter()
+				{
+					@Override
+					public void windowDeactivated(WindowEvent e)
+					{
+						window.dispose();
+					}
+				});
+				lineSeparatorList.addListSelectionListener(e1 ->
+				{
+					if (!e1.getValueIsAdjusting())
+					{
+						LineSepType selectedValue = lineSeparatorList.getSelectedValue();
+						if (selectedValue != null)
+							buffer.setLineSeparator(selectedValue.getSeparator());
+						window.dispose();
+					}
+				});
+				window.getContentPane().add(lineSeparatorList);
+				window.pack();
+				window.setLocationRelativeTo(label);
+				window.setLocation(window.getX(), window.getY() - 20);
+				window.setVisible(true);
+				EventQueue.invokeLater(lineSeparatorList::requestFocus);
+			});
+		}
+
 		//{{{ update() method
 		@Override
 		public void update()
 		{
 			Buffer buffer = view.getBuffer();
 			String lineSep = buffer.getStringProperty(JEditBuffer.LINESEP);
-			if("\n".equals(lineSep))
-				this.lineSep.setText("U");
-			else if("\r\n".equals(lineSep))
-				this.lineSep.setText("W");
-			else if("\r".equals(lineSep))
-				this.lineSep.setText("M");
+			LineSepType lineSepType = LineSepType.fromSeparator(lineSep);
+			label.setText(lineSepType.name());
 		} //}}}
 
-		
-	        //{{{ propertiesChanged() method
-	        @Override
-		public void propertiesChanged()
+		@Override
+		public boolean test(StatusBarEventType statusBarEventType)
 		{
-			// retarded GTK look and feel!
-			Font font = new JLabel().getFont();
-			//UIManager.getFont("Label.font");
-			FontMetrics fm = lineSep.getFontMetrics(font);
-			Dimension dim = new Dimension(Math.max(
-							       Math.max(fm.charWidth('U'),
-									fm.charWidth('W')),
-							       fm.charWidth('M')) + 1,
-				fm.getHeight());
-			lineSep.setPreferredSize(dim);
-			lineSep.setMaximumSize(dim);
-		} //}}}
+			return statusBarEventType == StatusBarEventType.Buffer;
+		}
 	} //}}}
 
 }

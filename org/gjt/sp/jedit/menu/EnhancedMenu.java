@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.msg.*;
 import org.gjt.sp.jedit.*;
+import org.jedit.util.CleanerService;
 //}}}
 
 public class EnhancedMenu extends JMenu implements MenuListener
@@ -86,12 +87,14 @@ public class EnhancedMenu extends JMenu implements MenuListener
 		providerCode = jEdit.getProperty(name + ".code");
 
 		ebStub = new EditBusStub(name);
-		ebStub.menuOutOfDate = true;
+		ebStub.setMenuOutOfDate(true);
 
 		addMenuListener(this);
 
 		if(providerCode != null)
 			EditBus.addToBus(ebStub);
+
+		CleanerService.instance.register(this, () -> EditBus.removeFromBus(ebStub));
 	} //}}}
 
 	//{{{ menuSelected() method
@@ -115,9 +118,7 @@ public class EnhancedMenu extends JMenu implements MenuListener
 
 		if(provider == null)
 		{
-			Object obj = BeanShell.eval(null,
-				BeanShell.getNameSpace(),
-				providerCode);
+			Object obj = BeanShell.eval(null, BeanShell.getNameSpace(), providerCode);
 			provider = (DynamicMenuProvider)obj;
 		}
 
@@ -128,9 +129,9 @@ public class EnhancedMenu extends JMenu implements MenuListener
 			return;
 		}
 
-		if(ebStub.menuOutOfDate || provider.updateEveryTime())
+		if(ebStub.isMenuOutOfDate() || provider.updateEveryTime())
 		{
-			ebStub.menuOutOfDate = false;
+			ebStub.setMenuOutOfDate(false);
 
 			while(getMenuComponentCount() != initialComponentCount)
 				remove(getMenuComponentCount() - 1);
@@ -148,27 +149,16 @@ public class EnhancedMenu extends JMenu implements MenuListener
 	protected DynamicMenuProvider provider;
 
 	protected EditBusStub ebStub;
-
-	//{{{ finalize() method
-	// TODO: 'finalize' is deprecated as of Java 9
-	@Override
-	@SuppressWarnings("deprecation")
-	protected void finalize()
-	{
-		if(ebStub != null)
-			EditBus.removeFromBus(ebStub);
-	} //}}}
-
 	//}}}
 
 	//{{{ EditBusStub class
 	/* EnhancedMenu has a reference to EditBusStub, but not the other
 	 * way around. So when the EnhancedMenu is being garbage collected
-	 * its finalize() method removes the EditBusStub from the edit bus. */
+	 * the Cleaner service removes the EditBusStub from the edit bus. */
 	public static class EditBusStub
 	{
-		String name;
-		boolean menuOutOfDate;
+		private final String name;
+		private boolean menuOutOfDate;
 
 		EditBusStub(String name)
 		{
@@ -189,6 +179,16 @@ public class EnhancedMenu extends JMenu implements MenuListener
 			// while this might be questionable, some
 			// menus depend on properties
 			menuOutOfDate = true;
+		}
+
+		public boolean isMenuOutOfDate()
+		{
+			return menuOutOfDate;
+		}
+
+		public void setMenuOutOfDate(boolean menuOutOfDate)
+		{
+			this.menuOutOfDate = menuOutOfDate;
 		}
 	} //}}}
 }

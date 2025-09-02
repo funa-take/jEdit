@@ -39,9 +39,9 @@ common.selectAll=Tout sélectionner
 common.selectNone=Ne rien sélectionner
 common.loading=Chargement...
 
-lineSep.unix=Unix (\\n)
-lineSep.windows=DOS/Windows (\\r\\n)
-lineSep.mac=MacOS (\\r)
+lineSep.LF=Unix/MacOS (\\n)
+lineSep.CRLF=DOS/Windows (\\r\\n)
+lineSep.CR=Classic MacOS (\\r)
 #}}}
 
 #{{{ Miscellaneous
@@ -539,7 +539,9 @@ view.status.io=I/O : {0} opérations en cours
 view.status.linesep-changed=Séparateur de ligne défini ainsi : {0}
 view.status.linesep-tooltip=Séparateur de ligne (clic pour modifier)
 view.status.memory-tooltip=Mémoire allouée é Java : {0}Ko/{1}Ko
-view.status.mode-tooltip=Mode d'édition, mode de repli et encodage courants
+view.status.mode-tooltip=Mode d'édition
+view.status.fold-tooltip=Mode de repli
+view.status.encoding-tooltip=Encodage courant
 view.status.multi-changed=Le mode de sélection multiple est {0,choice,0#désactivé|1#activé}
 view.status.multi-tooltip=Mode de sélection multiple (clic pour modifier)
 view.status.narrow=Sélectionner « Développer tous les replis » pour afficher à nouveau tout le texte
@@ -1355,18 +1357,6 @@ options.editing.elasticTabstops=Retrait via une tabulation « élastique »
 options.editing.elasticTabstops.tooltip=(Expérimental) - peut rendre jEdit instable.
 options.editing.deepIndent=Retrait augmenté
 options.editing.autoIndent=Retrait automatique
-options.editing.largefilemode.title=Mode de fichier volumineux
-options.editing.largefilemode=Que dois-je faire en cas de fichier volumineux :
-options.editing.largefilemode.option.ask=<html><b>Demander</b> que faire lors de l'ouverture d'un fichier volumineux</html>
-options.editing.largefilemode.option.full=<html><b>Conserver la coloration complète</b> : la coloration syntaxique de jEdit fonctionnera comme habituellement, jEdit \
-                                               	pourra devenir <b>très lent, ceci n'est pas recommandé</b></html>
-options.editing.largefilemode.option.limited=<html><b>Coloration syntaxique insensible au contexte</b> : dans ce cas jEdit procédera à \
-		une coloration rapide, mais le résultat ne sera peut-être pas parfait. Le<br/>\
-		tampon est coloré ligne par ligne sans prendre en compte le contexte \
-		de la ligne précédente. Il est possible que la syntaxe ne soit pas précise<br/>\
-		si vous avez des portions de code sur plusieurs lignes (commentaires sur plusieurs lignes, balises xml ...) \
-		Le retour à la ligne souple est également désactivé <b>(meilleur choix)</b></html>
-options.editing.largefilemode.option.nohighlight=Pas de coloration syntaxique, pas de retour à la ligne souple
 #}}}
 
 #{{{ Encodings pane
@@ -1407,6 +1397,24 @@ options.gutter.foldStyleNames.Triangle=Triangle
 options.gutter.foldStyleNames.Square=Carré
 options.gutter.foldStyleNames.Circle=Cercle
 #}}}
+
+#{{{ Large files pane
+options.large-files.label=Fichiers volumineux
+options.editing.largefilemode.title=Large file mode
+options.editing.largefilemode=Que dois-je faire en cas de fichier volumineux (> {0} caractères, ou longueur de ligne > {1}):
+options.editing.largefilemode.tooltip=<html>Values can be changed via jEdit properties: <tt>largeBufferSize</tt> and <tt>longLineLimit</tt></html>
+options.editing.largefilemode.option.ask=<html><b>Demander</b> que faire lors de l'ouverture d'un fichier volumineux</html>
+options.editing.largefilemode.option.full=<html><b>Conserver la coloration complète</b> : la coloration syntaxique de jEdit fonctionnera comme habituellement, jEdit \
+                                                    pourra devenir <b>très lent, ceci n'est pas recommandé</b></html>
+options.editing.largefilemode.option.limited=<html><b>Coloration syntaxique insensible au contexte</b> : dans ce cas jEdit procédera à \
+                                             		une coloration rapide, mais le résultat ne sera peut-être pas parfait. Le<br/>\
+                                             		tampon est coloré ligne par ligne sans prendre en compte le contexte \
+                                             		de la ligne précédente. Il est possible que la syntaxe ne soit pas précise<br/>\
+                                             		si vous avez des portions de code sur plusieurs lignes (commentaires sur plusieurs lignes, balises xml ...) \
+                                             		Le retour à la ligne souple est également désactivé <b>(meilleur choix)</b></html>
+options.editing.largefilemode.option.nohighlight=Pas de coloration syntaxique, pas de retour à la ligne souple
+#}}}
+
 
 #{{{ Mouse pane
 options.mouse.label=Souris

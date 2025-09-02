@@ -490,6 +490,22 @@ public abstract class VFS
 		if(session == null)
 			return false;
 
+		try
+		{
+			VFSFile vfsFile = _getFile(session, path, view);
+			if ((vfsFile != null) && (vfsFile.getLength() > Integer.MAX_VALUE))
+			{
+				VFSManager.error(view, path, "ioerror.file-too-big", null);
+				return false;
+			}
+		}
+		catch (IOException e)
+		{
+			// just log the exception here as it was only for the file size check
+			// maybe the actual loading succeeds
+			Log.log(Log.DEBUG, VFS.class, "Error during file size verification", e);
+		}
+
 		if((getCapabilities() & WRITE_CAP) == 0)
 			buffer.setReadOnly(true);
 
