@@ -822,7 +822,6 @@
 					<compilerarg line="${config.build.compilerarg}"/>
 				</javac>
 				<javadoc locale="en"
-					 additionalparam="-J-Duser.language=en "
 					 sourcepath="${basedir}"
 					 destdir="${classes.dir}/javadoc/api"
 					 packagenames="org.*"
