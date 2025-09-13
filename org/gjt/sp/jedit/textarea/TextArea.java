@@ -368,7 +368,7 @@ public abstract class TextArea extends JPanel
 	 *  view.getTextArea().getBuffer().
 	 *
 	 */
-	public final JEditBuffer getBuffer()
+	public JEditBuffer getBuffer()
 	{
 		return buffer;
 	} //}}}
@@ -1255,7 +1255,7 @@ public abstract class TextArea extends JPanel
 	 * Returns the line containing the specified offset.
 	 * @param offset The offset
 	 */
-	public final int getLineOfOffset(int offset)
+	public int getLineOfOffset(int offset)
 	{
 		return buffer.getLineOfOffset(offset);
 	} //}}}
@@ -6339,7 +6339,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 	//{{{ LineCharacterBreaker class
 	// Shared context among some operations which are aware of
 	// characters above BMP and combining character sequence.
-	private static class LineCharacterBreaker
+	public static class LineCharacterBreaker
 	{
 		private final BreakIterator charBreaker;
 		private final int index0Offset;
@@ -6348,7 +6348,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		{
 			final int line = textArea.getLineOfOffset(offset);
 			charBreaker = BreakIterator.getCharacterInstance();
-			charBreaker.setText(new CharIterator(textArea.buffer.getLineSegment(line)));
+			charBreaker.setText(new CharIterator(textArea.getBuffer().getLineSegment(line)));
 			index0Offset = textArea.getLineStartOffset(line);
 		}
 
@@ -6361,7 +6361,7 @@ loop:		for(int i = lineNo - 1; i >= 0; i--)
 		{
 			int following = charBreaker.following(offset -
 					index0Offset);
-			if (following == BreakIterator.DONE)
+            if (following == BreakIterator.DONE || (Runtime.version().feature() >= 20 && following == offset - index0Offset))
 			{
 				// This means a end of line. Then it is
 				// safe to assume 1 code unit is a character.
