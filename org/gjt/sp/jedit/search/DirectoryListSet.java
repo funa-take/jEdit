@@ -288,7 +288,15 @@ public class DirectoryListSet extends BufferListSet
 			}
 		}
 		
-		sb.append(" | grep -i -E \"").append(StandardUtilities.globToRE(glob)).append("$\" ");
+		// sb.append(" | grep -i -E \"").append(StandardUtilities.globToRE(glob)).append("$\" ");
+		String regex = StandardUtilities.globToRE(glob);
+		if (forMsys2) {
+			// Windows用：ダブルクォートで囲むだけ
+			sb.append(" | grep -i -P \"").append(regex).append("$\" ");
+		} else {
+			// Linux用：シングルクォートで囲むだけ
+			sb.append(" | grep -i -P '").append(regex).append("$' ");
+		}
 		
 		// if (forMsys2) {
 		// 	sb.append(" | sed -e 's/.*/\"\\\\0\"/g' ");
