@@ -584,8 +584,11 @@ public class TextAreaMouseHandler extends MouseInputAdapter
 	 */
 	public static boolean isPopupTrigger(MouseEvent evt)
 	{
-		return isRightButton(evt);
-	} //}}}
+		// return isRightButton(evt);
+		// ドラッグ中は getButton では正確に押下しているボタンを判定できないため、getModifiersExを使う
+		return isRightButton(evt.getModifiersEx());
+	}
+	//}}}
 
 	//{{{ isLeftButton() method
 	/**
@@ -610,13 +613,13 @@ public class TextAreaMouseHandler extends MouseInputAdapter
 	{
 		if (OperatingSystem.isMacOS())
 		{
-			if((modifiers & BUTTON1_MASK) == BUTTON1_MASK)
-				return (modifiers & ALT_MASK) == ALT_MASK;
+			if((modifiers & BUTTON1_DOWN_MASK) == BUTTON1_DOWN_MASK)
+				return (modifiers & ALT_DOWN_MASK) == ALT_DOWN_MASK;
 			else
-				return (modifiers & BUTTON2_MASK) == BUTTON2_MASK;
+				return (modifiers & BUTTON2_DOWN_MASK) == BUTTON2_DOWN_MASK;
 		}
 		else
-			return (modifiers & BUTTON2_MASK) == BUTTON2_MASK;
+			return (modifiers & BUTTON2_DOWN_MASK) == BUTTON2_DOWN_MASK;
 	}
 
 	/**
@@ -649,13 +652,13 @@ public class TextAreaMouseHandler extends MouseInputAdapter
 	{
 		if (OperatingSystem.isMacOS())
 		{
-			if((modifiers & BUTTON1_MASK) == BUTTON1_MASK)
-				return (modifiers & CTRL_MASK) == CTRL_MASK;
+			if((modifiers & BUTTON1_DOWN_MASK) == BUTTON1_DOWN_MASK)
+				return (modifiers & CTRL_DOWN_MASK) == CTRL_DOWN_MASK;
 			else
-				return (modifiers & BUTTON3_MASK) == BUTTON3_MASK;
+				return (modifiers & BUTTON3_DOWN_MASK) == BUTTON3_DOWN_MASK;
 		}
 		else
-			return (modifiers & BUTTON3_MASK) == BUTTON3_MASK;
+			return (modifiers & BUTTON3_DOWN_MASK) == BUTTON3_DOWN_MASK;
 	}
 
 	/**
