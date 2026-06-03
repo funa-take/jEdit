@@ -3,7 +3,7 @@
 	 xmlns:mod="antlib:de.masters_of_disaster.ant.tasks"
 	 xmlns:contrib="antlib:net.sf.antcontrib"
 	 xmlns:launch4j="antlib:net.sf.launch4j.ant"
-	 xmlns:jarbundler="antlib:com.ultramixer.jarbundler"
+	 xmlns:appbundler="antlib:com.oracle.appbundler"
 	 xmlns:fop="antlib:org.apache.fop.tools.anttasks"
 	 xmlns:ivy="antlib:org.apache.ivy.ant">
 	<description>
@@ -15,12 +15,7 @@
 
 	<!-- Target Java Versions -->
 	<property name="target.java.version"
-		  value="1.8"/>
-	<property name="mac.target.java.version"
-		  value="1.8+"/>
-	<!-- based on http://packages.slackverse.org/?v=1&p=92 -->
-	<property name="slackware.target.java.version"
-		  value="1_8_0"/>
+		  value="11"/>
 
 	<!-- Various Paths -->
 	<property name="config.lib.dir"
@@ -68,17 +63,17 @@
 		unless="init.done">
 		<echo message="Buildfile for ${ant.project.name} (${ant.file})"
 		      level="info"/>
-		<fail message="Ant 1.9.0 or newer is needed for jEdit to build, please install it and rerun (found Ant version: '${ant.version}')">
+		<fail message="Ant 1.9.10 or newer is needed for jEdit to build, please install it and rerun (found Ant version: '${ant.version}')">
 			<condition>
 				<not>
-					<antversion atleast="1.9.0"/>
+					<antversion atleast="1.9.10"/>
 				</not>
 			</condition>
 		</fail>
-		<fail message="Java 1.8 is needed for jEdit to build, please install it and rerun (found Java version: '${ant.java.version}')">
+		<fail message="Java 11 or newer is needed for jEdit to build, please install it and rerun (found Java version: '${ant.java.version}')">
 			<condition>
 				<not>
-					<equals arg1="1.8" arg2="${ant.java.version}"/>
+					<javaversion atleast="11"/>
 				</not>
 			</condition>
 		</fail>
@@ -107,7 +102,7 @@
 		depends="init,check-ivy"
 		unless="ivy.jar.present">
 		<mkdir dir="${ivy.jar.dir}"/>
-		<get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${config.ivy.version}/ivy-${config.ivy.version}.jar"
+		<get src="https://repo.maven.apache.org/maven2/org/apache/ivy/ivy/${config.ivy.version}/ivy-${config.ivy.version}.jar"
 		     dest="${ivy.jar.file}"
 		     usetimestamp="true"/>
 	</target>
@@ -115,44 +110,12 @@
 	<target name="init-ivy"
 		depends="init,download-ivy"
 		unless="ivy.done">
-		<script language="javascript">
-			<![CDATA[
-				try {
-					var dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance()
-					dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-					var document = dbf.newDocumentBuilder().parse('http://plugins.jedit.org/export/mirror_list.php')
-					var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath()
-					var mirrors = xpath.evaluate('/MIRRORS/MIRROR/@ID', document, javax.xml.xpath.XPathConstants.NODESET)
-					var artifactPatterns = ''
-					for (i = 0; i < mirrors.getLength(); i++) {
-						artifactPatterns += '<artifact pattern="jar:http://'
-								    + mirrors.item(i).getTextContent()
-								    + '.dl.sourceforge.net/project/jedit-plugins/[artifact]/[revision]/[artifact]-[revision]-bin.zip!/[artifact].jar" />\n'
-					}
-					project.setUserProperty('jedit.plugins.artifact.patterns', artifactPatterns)
-				} catch(e) {
-					self.log('Error while retrieving mirror list, if plugins are not in Ivy cache, they will not be resolvable: ' + e, e, project.MSG_WARN)
-				}
-			]]>
-		</script>
-
-		<copy todir="${build.dir}"
-		      encoding="UTF-8"
-		      overwrite="true">
-			<fileset file="ivysettings.xml"/>
-			<filterset>
-				<filter token="jedit.plugins.artifact.patterns"
-					value="${jedit.plugins.artifact.patterns}"/>
-			</filterset>
-		</copy>
-
 		<property name="ivy.retrieve.pattern"
 			  value="${lib.dir}/[conf]/[artifact](-[classifier]).[ext]"/>
 		<taskdef resource="org/apache/ivy/ant/antlib.xml"
 			 classpath="${ivy.jar.file}"
 			 loaderref="ivy.loader"
 			 uri="antlib:org.apache.ivy.ant"/>
-		<ivy:settings file="${build.dir}/ivysettings.xml"/>
 	</target>
 
 	<target name="retrieve"
@@ -204,6 +167,7 @@
 			          + (beta != 99 ? "pre" + beta : "." + micro);
 			project.setUserProperty("jedit.version", version);
 			project.setUserProperty("jedit.build.number", build);
+			project.setUserProperty("jedit.build.number.no.leading.zeros", major + "." + minor + "." + beta + "." + micro);
 			project.setUserProperty("jedit.version.final", Boolean.toString(beta == 99));
 		</script>
 		<property name="dist.jar.filename"
@@ -257,7 +221,7 @@
 	</target>
 
 	<target name="compile"
-		depends="init">
+		depends="init,retrieve">
 		<mkdir dir="${classes.dir}/core"/>
 		<depend srcDir="${basedir}"
 			destDir="${classes.dir}/core"
@@ -272,8 +236,7 @@
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
 		       deprecation="${config.build.deprecation}"
-		       source="${target.java.version}"
-		       target="${target.java.version}"
+		       release="${target.java.version}"
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="false">
@@ -303,8 +266,7 @@
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
 		       deprecation="${config.build.deprecation}"
-		       source="${target.java.version}"
-		       target="${target.java.version}"
+		       release="${target.java.version}"
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="false">
@@ -347,6 +309,7 @@
 				<include name="org/gjt/sp/jedit/buffer/LineManager.java"/>
 				<include name="org/gjt/sp/jedit/buffer/PositionManager.java"/>
 				<include name="org/gjt/sp/jedit/buffer/UndoManager.java"/>
+				<include name="org/gjt/sp/jedit/buffer/WordWrap.java"/>
 
 				<include name="org/gjt/sp/jedit/bufferio/IoTask.java"/>
 
@@ -423,6 +386,7 @@
 				<include name="org/gjt/sp/jedit/JEditActionSet.java"/>
 				<include name="org/gjt/sp/jedit/JEditActionContext.java"/>
 				<include name="org/gjt/sp/jedit/JEditBeanShellAction.java"/>
+				<include name="org/gjt/sp/jedit/LargeFileMode.java"/>
 				<include name="org/gjt/sp/jedit/Mode.java"/>
 				<include name="org/gjt/sp/jedit/OperatingSystem.java"/>
 				<include name="org/gjt/sp/jedit/RegistersListener.java"/>
@@ -447,13 +411,15 @@
 				<include name="org/gjt/sp/util/ThreadUtilities.java"/>
 				<include name="org/gjt/sp/util/SyntaxUtilities.java"/>
 				<include name="org/gjt/sp/util/XMLUtilities.java"/>
+
+				<include name="org/jedit/util/CleanerService.java"/>
 			</fileset>
 		</copy>
 
 	</target>
 
 	<target name="compile-textArea"
-		depends="init,prepare-textArea">
+		depends="init,retrieve,prepare-textArea">
 		<mkdir dir="${textAreaPackage}/build"/>
 		<javac srcdir="${textAreaPackage}/src"
 		       destdir="${textAreaPackage}/build"
@@ -461,8 +427,7 @@
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
 		       deprecation="${config.build.deprecation}"
-		       source="${target.java.version}"
-		       target="${target.java.version}"
+		       release="${target.java.version}"
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="false">
@@ -547,7 +512,7 @@
 		</copy>
 		<copy todir="${jar.location}/jars">
 			<fileset dir="${lib.dir}/default-plugins">
-				<exclude name="MacOSX.jar"/>
+				<exclude name="MacOS.jar"/>
 			</fileset>
 		</copy>
 		<contrib:if>
@@ -555,7 +520,7 @@
 			<contrib:then>
 				<copy todir="${jar.location}/jars">
 					<fileset dir="${lib.dir}/default-plugins">
-						<include name="MacOSX.jar"/>
+						<include name="MacOS.jar"/>
 					</fileset>
 				</copy>
 			</contrib:then>
@@ -598,14 +563,14 @@
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-win32.jar"
 				       dest="${build.dir}/launch4j"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.11-workdir-win32/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.50-workdir-win32/"/>
 				</copy>
 			</contrib:case>
 			<contrib:case value="unix-x64">
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-linux64.jar"
 				       dest="${build.dir}/launch4j/"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.11-workdir-linux64/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.50-workdir-linux64/"/>
 				</copy>
 				<chmod dir="${lib.dir}/launch4j/bin"
 				       perm="+x"
@@ -615,7 +580,7 @@
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-linux.jar"
 				       dest="${build.dir}/launch4j/"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.11-workdir-linux/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.50-workdir-linux/"/>
 				</copy>
 				<chmod dir="${lib.dir}/launch4j/bin"
 				       perm="+x"
@@ -625,7 +590,7 @@
 				<unjar src="${lib.dir}/launch4j/launch4j-workdir-mac.jar"
 				       dest="${build.dir}/launch4j/"/>
 				<copy todir="${lib.dir}/launch4j">
-					<fileset dir="${build.dir}/launch4j/launch4j-3.5.0-workdir-mac/"/>
+					<fileset dir="${build.dir}/launch4j/launch4j-3.50-workdir-mac/"/>
 				</copy>
 				<chmod dir="${lib.dir}/launch4j/bin"
 				       perm="+x"
@@ -633,7 +598,7 @@
 				       osfamily="mac"/>
 			</contrib:case>
 			<contrib:default>
-				<fail message="Unsupported OS family (${osfamily}). If you are on Windows, *nix or MacOS, please report this as bug, if not, please report it as a feature request"/>
+				<fail message="Unsupported OS family (${osfamily}). If you are on Windows, *nix or macOS, please report this as bug, if not, please report it as a feature request"/>
 			</contrib:default>
 		</contrib:switch>
 		<taskdef name="create"
@@ -677,7 +642,9 @@
 		description="run jEdit">
 		<java jar="${jar.location}/${jar.filename}"
 		      fork="true"
-		      spawn="false">
+		      spawn="true">
+			<jvmarg value="--add-opens"/>
+			<jvmarg value="java.desktop/sun.awt.shell=ALL-UNNAMED"/>
 			<arg value="-settings=${build.dir}/settings"/>
 		</java>
 	</target>
@@ -689,6 +656,8 @@
 		      fork="true"
 		      spawn="true">
 			<jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,address=localhost:5005,timeout=60000"/>
+			<jvmarg value="--add-opens"/>
+			<jvmarg value="java.desktop/sun.awt.shell=ALL-UNNAMED"/>
 			<arg value="-settings=${build.dir}/settings"/>
 		</java>
 	</target>
@@ -697,6 +666,12 @@
 		depends="init,retrieve">
 		<unzip src="${lib.dir}/docbook/docbook-xsl-resources.zip"
 		       dest="${build.dir}/docbook-xsl/"/>
+	</target>
+
+	<target name="unpack-docbook-xml"
+		depends="init,retrieve">
+		<unzip src="${lib.dir}/docbook/docbook-xml.jar"
+		       dest="${build.dir}/docbook-xml/"/>
 	</target>
 
 	<presetdef name="dependset.build">
@@ -729,6 +704,8 @@
 					location="${build.dir}/docbook-xsl/docbook/html/chunk.xsl"/>
 				<entity publicid="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
 					location="${build.dir}/docbook-xsl/docbook/fo/docbook.xsl"/>
+				<entity publicid="-//OASIS//DTD DocBook XML V4.4//EN"
+					location="${build.dir}/docbook-xml/docbookx.dtd"/>
 			</xmlcatalog>
 			<sysproperty key="javax.xml.parsers.DocumentBuilderFactory"
 				     value="org.apache.xerces.jaxp.DocumentBuilderFactoryImpl"/>
@@ -740,7 +717,7 @@
 	</presetdef>
 
 	<target name="generate-doc-faq"
-		depends="init,retrieve,setup,unpack-docbook-xsl">
+		depends="init,retrieve,setup,unpack-docbook-xsl,unpack-docbook-xml">
 		<dependset.html>
 			<srcfileset dir="doc/FAQ"/>
 			<targetfileset dir="${jar.location}/doc/FAQ"/>
@@ -764,7 +741,7 @@
 	</target>
 
 	<target name="generate-doc-news"
-		depends="init,retrieve,setup,unpack-docbook-xsl">
+		depends="init,retrieve,setup,unpack-docbook-xsl,unpack-docbook-xml">
 		<dependset.html>
 			<srcfileset dir="doc/whatsnew"/>
 			<targetfileset dir="${jar.location}/doc/whatsnew"/>
@@ -788,7 +765,7 @@
 	</target>
 
 	<target name="generate-doc-users-guide"
-		depends="init,retrieve,setup,unpack-docbook-xsl">
+		depends="init,retrieve,setup,unpack-docbook-xsl,unpack-docbook-xml">
 		<dependset.html>
 			<srcfileset dir="doc/users-guide"/>
 			<targetfileset dir="${jar.location}/doc/users-guide"/>
@@ -851,20 +828,19 @@
 				       debuglevel="${config.build.debuglevel}"
 				       nowarn="${config.build.nowarn}"
 				       deprecation="${config.build.deprecation}"
-				       source="${target.java.version}"
-				       target="${target.java.version}"
+				       release="${target.java.version}"
 				       compiler="modern"
 				       encoding="UTF-8"
 				       includeAntRuntime="true">
 					<compilerarg line="${config.build.compilerarg}"/>
 				</javac>
 				<javadoc locale="en"
-					 additionalparam="-J-Duser.language=en "
 					 sourcepath="${basedir}"
 					 destdir="${classes.dir}/javadoc/api"
 					 packagenames="org.*"
 					 doclet="doclet.GenerateTocXML"
 					 docletpath="${classes.dir}/javadoc"
+					 additionalparam="-Xmaxwarns 2000"
 					 version="true"
 					 use="true"
 					 author="true"
@@ -915,7 +891,7 @@
 	</target>
 
 	<target name="generate-pdf-users-guide"
-		depends="init,retrieve,setup,unpack-docbook-xsl">
+		depends="init,retrieve,setup,unpack-docbook-xsl,unpack-docbook-xml">
 		<fail message="Please set the property &quot;paper.type&quot;"
 		      unless="paper.type"/>
 		<contrib:switch value="${paper.type}">
@@ -1023,8 +999,7 @@
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
 		       deprecation="${config.build.deprecation}"
-		       source="${target.java.version}"
-		       target="${target.java.version}"
+		       release="${target.java.version}"
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="false">
@@ -1055,7 +1030,7 @@
 					      startup/**
 					      ${jar.filename}"
 				    excludes="doc/api/**
-					      jars/MacOSX.jar"/>
+					      jars/MacOS.jar"/>
 		</tar>
 		<tar destfile="${dist.dir}/jedit-windows.tar.bz2"
 		     longfile="gnu"
@@ -1069,7 +1044,7 @@
 		     compression="bzip2">
 			<tarfileset id="jedit-mac"
 				    dir="${dist.dir}"
-				    includes="jars/MacOSX.jar"/>
+				    includes="jars/MacOS.jar"/>
 		</tar>
 		<tar destfile="${dist.dir}/jedit-api.tar.bz2"
 		     longfile="gnu"
@@ -1219,36 +1194,10 @@
 		</tar>
 	</target>
 
-	<target name="compile-jarbundler"
-		depends="init,retrieve">
-		<mkdir dir="${classes.dir}/jarbundler"/>
-		<depend srcDir="${basedir}"
-			destDir="${classes.dir}/jarbundler"
-			cache="${classes.dir}"/>
-		<dependset>
-			<srcfilelist files="build.xml"/>
-			<targetfileset dir="${classes.dir}/jarbundler"/>
-		</dependset>
-		<javac srcdir="${basedir}"
-		       destdir="${classes.dir}/jarbundler"
-		       includes="com/**"
-		       debug="true"
-		       debuglevel="${config.build.debuglevel}"
-		       nowarn="${config.build.nowarn}"
-		       deprecation="${config.build.deprecation}"
-		       source="1.6"
-		       target="1.6"
-		       compiler="modern"
-		       encoding="UTF-8"
-		       includeAntRuntime="true">
-			<compilerarg line="${config.build.compilerarg}"/>
-		</javac>
-	</target>
-
 	<target name="dist-mac-finish"
 		depends="init,retrieve,setup"
-		description="finish building the Mac OS X disk image (DMG-file) on Mac OS X">
-		<fail message="The disk image (DMG-file) for easy distribution on Mac OS X can only be built on Mac OS X currently">
+		description="finish building the macOS disk image (DMG-file) on macOS">
+		<fail message="The disk image (DMG-file) for easy distribution on macOS can only be built on macOS currently">
 			<condition>
 				<not>
 					<os family="mac"/>
@@ -1256,89 +1205,129 @@
 			</condition>
 		</fail>
 		<taskdef name="create"
-			 classname="com.ultramixer.jarbundler.JarBundler"
-			 classpath="${dist.dir}/classes/jarbundler"
-			 uri="antlib:com.ultramixer.jarbundler">
+			 classname="com.oracle.appbundler.AppBundlerTask"
+			 uri="antlib:com.oracle.appbundler">
+			<classpath>
+				<fileset dir="${lib.dir}/appbundler"
+					 includes="*.jar"/>
+			</classpath>
 		</taskdef>
 		<tstamp>
 			<format property="current.year"
 				pattern="yyyy"/>
 		</tstamp>
 		<mkdir dir="${dist.dir}/classes/mac"/>
-		<jarbundler:create dir="${dist.dir}/classes/mac"
+		<appbundler:create outputDirectory="${dist.dir}/classes/mac"
 				   name="jEdit"
-				   mainclass="org.gjt.sp.jedit.jEdit"
-				   jar="${dist.dir}/${jar.filename}"
-				   arguments="-background"
-				   build="${jedit.build.number}"
-				   bundleid="org.gjt.sp.jedit"
-				   developmentregion="English"
-				   extraclasspath="/System/Library/Java"
+				   displayname="jEdit"
+				   identifier="org.gjt.sp.jedit"
 				   icon="icons/icon.icns"
-				   copyright="Copyright &#169; 1998-${current.year} Contributors"
-				   jvmversion="${mac.target.java.version}"
-				   shortname="jEdit"
+				   executableName="jedit"
+				   shortversion="${jedit.version}"
+				   version="${jedit.build.number}"
 				   signature="JESP"
-				   stubfile="package-files/osx/jedit"
-				   version="${jedit.version}"
-				   antialiasedgraphics="true"
-				   antialiasedtext="true"
-				   screenmenu="true"
-				   lsapplicationcategorytype="public.app-category.developer-tools"
-				   highresolutioncapable="true">
-			<javafileset dir="${dist.dir}"
-				     includes="doc/**
-					       jars/**
-					       keymaps/**
-					       macros/**
-					       modes/**
-					       properties/**
-					       startup/**"/>
-			<documenttype name="jEdit TEXT Document"
-				      extensions="*"
-				      ostypes="TEXT ****"
-				      utis="public.text"
-				      iconfile="icons/file.icns"
-				      role="Editor"/>
-		</jarbundler:create>
-		<delete failonerror="false">
+				   copyright="Copyright &#169; 1998-${current.year} Contributors"
+				   jvmRequired="${target.java.version}"
+				   applicationCategory="public.app-category.developer-tools"
+				   highResolutionCapable="true"
+				   supportsAutomaticGraphicsSwitching="true"
+				   ignoreVerbose="true"
+				   mainclassname="org.gjt.sp.jedit.jEdit">
+			<classpath file="${dist.dir}/${jar.filename}"/>
+			<option value="-Dapple.awt.textantialiasing=true"/>
+			<option value="-Dapple.laf.useScreenMenuBar=true"/>
+			<option value="-Dapple.awt.antialiasing=true"/>
+			<argument value="-background"/>
+			<argument value="-reuseview"/>
+			<bundledocument contentTypes="public.text"
+					icon="icons/file.icns"
+					name="jEdit TEXT Document"
+					role="Editor"/>
+			<bundledocument contentTypes="public.data, public.content"
+					icon="icons/file.icns"
+					name="jEdit Document"
+					role="Editor"
+					handlerRank="Alternate"/>
+			<arch name="arm64"/>
+			<arch name="x86_64"/>
+		</appbundler:create>
+		<copy todir="${dist.dir}/classes/mac/jEdit.app/Contents/Java/"
+		      overwrite="true">
 			<fileset dir="${dist.dir}"
-				 includes="*${mac.disk.image.filename}"/>
-		</delete>
-		<exec executable="hdiutil"
-		      failonerror="true">
-			<arg value="create"/>
-			<arg value="-volname"/>
-			<arg value="jEdit"/>
-			<arg value="-srcfolder"/>
-			<arg file="${dist.dir}/classes/mac/jEdit.app"/>
-			<arg value="-srcfolder"/>
-			<arg file="package-files/osx/.background"/>
-			<arg file="${dist.dir}/orig-${mac.disk.image.filename}"/>
-		</exec>
-		<exec executable="hdiutil"
-		      failonerror="true">
-			<arg value="convert"/>
-			<arg file="${dist.dir}/orig-${mac.disk.image.filename}"/>
-			<arg value="-format"/>
-			<arg value="UDRW"/>
-			<arg value="-o"/>
-			<arg file="${dist.dir}/udrw-${mac.disk.image.filename}"/>
-		</exec>
+				   includes="doc/**
+					     jars/**
+					     keymaps/**
+					     macros/**
+					     modes/**
+					     properties/**
+					     startup/**"/>
+		</copy>
+		<copy todir="${dist.dir}/classes/mac/"
+		      overwrite="true">
+			<fileset dir="package-files/osx/"
+				 includes=".background/background.png"/>
+		</copy>
+		<!-- work-around for https://github.com/actions/runner-images/issues/7522 -->
+		<retry retrycount="3" retrydelay="1000">
+			<exec executable="hdiutil"
+				  failonerror="true">
+				<arg value="create"/>
+				<arg value="-volname"/>
+				<arg value="jEdit"/>
+				<arg value="-format"/>
+				<arg value="UDRW"/>
+				<arg value="-fs"/>
+				<arg value="HFS+"/>
+				<arg value="-srcfolder"/>
+				<arg file="${dist.dir}/classes/mac"/>
+				<arg value="-ov"/>
+				<arg file="${dist.dir}/udrw-${mac.disk.image.filename}"/>
+			</exec>
+		</retry>
+		<fail message="The mount point /Volumes/jEdit is occupied currently">
+			<condition>
+				<resourceexists>
+					<file file="/Volumes/jEdit"/>
+				</resourceexists>
+			</condition>
+		</fail>
 		<exec executable="hdiutil"
 		      failonerror="true">
 			<arg value="attach"/>
+			<arg value="-readwrite"/>
 			<arg file="${dist.dir}/udrw-${mac.disk.image.filename}"/>
 		</exec>
+		<fail message="The mount point /Volumes/jEdit is not found">
+			<condition>
+				<not>
+					<resourceexists>
+						<file file="/Volumes/jEdit"/>
+					</resourceexists>
+				</not>
+			</condition>
+		</fail>
 		<exec executable="ln"
 		      failonerror="true">
 			<arg value="-sF"/>
 			<arg file="/Applications"/>
-			<arg file="/Volumes/jEdit/"/>
+			<arg file="/Volumes/jEdit/Applications"/>
 		</exec>
-		<copy file="package-files/osx/DS_Store"
-		      tofile="/Volumes/jEdit/.DS_Store"
-		      overwrite="true"/>
+		<exec executable="osascript"
+		      failonerror="true">
+			<arg file="package-files/osx/set-background.scpt"/>
+			<arg value="jEdit"/> <!-- volumeName -->
+			<arg value="200"/> <!-- windowX -->
+			<arg value="200"/> <!-- windowY -->
+			<arg value="512"/> <!-- windowWidth -->
+			<arg value="648"/> <!-- windowHeight (image height + 28) -->
+			<arg value="130"/> <!-- iconSize -->
+			<arg value=".background:background.png"/> <!-- backgroundImage -->
+			<arg value="jEdit"/> <!-- appName -->
+			<arg value="111"/> <!-- appIconX -->
+			<arg value="192"/> <!-- appIconY -->
+			<arg value="401"/> <!-- appFolderX -->
+			<arg value="192"/> <!-- appFolderY -->
+		</exec>
 		<exec executable="hdiutil"
 		      failonerror="true">
 			<arg value="detach"/>
@@ -1353,6 +1342,7 @@
 			<arg value="UDZO"/>
 			<arg value="-imagekey"/>
 			<arg value="zlib-level=9"/>
+			<arg value="-ov"/>
 			<arg value="-o"/>
 			<arg file="${dist.dir}/${mac.disk.image.filename}"/>
 		</exec>
@@ -1363,13 +1353,7 @@
 
 	<target name="dist-mac"
 		depends="init,retrieve,setup,prepare-dist-files"
-		description="build the Mac OS X disk image (DMG-file)">
-		<antcall target="compile-jarbundler">
-			<param name="config.build.debuglevel"
-			       value="lines,source"/>
-			<param name="classes.dir"
-			       location="${dist.dir}/classes"/>
-		</antcall>
+		description="build the macOS disk image (DMG-file)">
 		<contrib:if>
 			<os family="mac"/>
 			<contrib:then>
@@ -1390,7 +1374,6 @@
 					       org/gjt/sp/jedit/jEdit.java
 					       package-files/osx/**
 					       ${config.dist.dir}/${jar.filename}
-					       ${config.dist.dir}/classes/jarbundler/**
 					       ${config.dist.dir}/doc/**
 					       ${config.dist.dir}/jars/**
 					       ${config.dist.dir}/keymaps/**
@@ -1465,10 +1448,10 @@
 					value="${jar.filename}"/>
 				<filter token="jedit.build.number"
 					value="${jedit.build.number}"/>
+				<filter token="jedit.build.number.no.leading.zeros"
+					value="${jedit.build.number.no.leading.zeros}"/>
 				<filter token="jedit.version"
 					value="${jedit.version}"/>
-				<filter token="slackware.target.java.version"
-					value="${slackware.target.java.version}"/>
 				<filter token="target.java.version"
 					value="${target.java.version}"/>
 				<filter token="win.filename"
@@ -1564,7 +1547,7 @@
 					      properties/**
 					      startup/**
 					      ${jar.filename}"
-				    excludes="jars/MacOSX.jar"
+				    excludes="jars/MacOS.jar"
 				    username="root"
 				    group="root"
 				    prefix="usr/share/jedit-${jedit.version}/"/>
@@ -1597,8 +1580,7 @@
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
 		       deprecation="${config.build.deprecation}"
-		       source="${target.java.version}"
-		       target="${target.java.version}"
+		       release="${target.java.version}"
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="true">
@@ -1623,8 +1605,7 @@
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
 		       deprecation="${config.build.deprecation}"
-		       source="${target.java.version}"
-		       target="${target.java.version}"
+		       release="${target.java.version}"
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="true">
@@ -1649,8 +1630,7 @@
 		       debuglevel="${config.build.debuglevel}"
 		       nowarn="${config.build.nowarn}"
 		       deprecation="${config.build.deprecation}"
-		       source="${target.java.version}"
-		       target="${target.java.version}"
+		       release="${target.java.version}"
 		       compiler="modern"
 		       encoding="UTF-8"
 		       includeAntRuntime="true">
@@ -1703,7 +1683,7 @@
 					   properties/**
 					   startup/**
 					   ${jar.filename}"
-				 excludes="jars/MacOSX.jar"/>
+				 excludes="jars/MacOS.jar"/>
 		</mod:calculatesize>
 		<copy todir="${dist.dir}/classes/package-files/linux/deb"
 		      encoding="UTF-8"
@@ -1765,7 +1745,7 @@
 			<datafileset file="."
 				     fullpath="usr/share/jEdit/jars/"/>
 			<datafileset dir="${dist.dir}/jars"
-				     excludes="MacOSX.jar"
+				     excludes="MacOS.jar"
 				     prefix="usr/share/jEdit/jars/"/>
 			<datafileset file="."
 				     fullpath="usr/share/man/"/>
@@ -1949,6 +1929,10 @@ Press Return key to continue...
 			import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 			import org.bouncycastle.openpgp.PGPSignatureGenerator;
 			import org.bouncycastle.openpgp.PGPSignature;
+			import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
+			import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
+			import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
+			import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 
 			if (project.getProperty("config.gpg.secring") == null)
 			{
@@ -1961,7 +1945,7 @@ Press Return key to continue...
 			try
 			{
 				keyIn = new BufferedInputStream(new FileInputStream(project.getProperty("config.gpg.secring")));
-				pgpSec = new PGPSecretKeyRingCollection(PGPUtil.getDecoderStream(keyIn));
+				pgpSec = new PGPSecretKeyRingCollection(PGPUtil.getDecoderStream(keyIn), new BcKeyFingerprintCalculator());
 				if (pgpSec == null)
 				{
 					System.out.println("Secring could not be decoded");
@@ -1983,9 +1967,9 @@ Press Return key to continue...
 					System.out.println("No signing key found");
 					return;
 				}
-				pgpPrivKey = pgpSec.extractPrivateKey(project.getProperty("config.gpg.secring.password").toCharArray(), "BC");
-				sGen = new PGPSignatureGenerator(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1, "BC");
-				sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
+				pgpPrivKey = pgpSec.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(project.getProperty("config.gpg.secring.password").toCharArray()));
+				sGen = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1));
+				sGen.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 				fIn = new BufferedInputStream(new FileInputStream(new File (project.getProperty("dist.dir"), "Release")));
 				while ((ch = fIn.read()) >= 0)
 				{
@@ -2099,7 +2083,7 @@ Press Return key to continue...
 					       ${config.dist.dir}/modes/**
 					       ${config.dist.dir}/properties/**
 					       ${config.dist.dir}/startup/**"
-				     excludes="${config.dist.dir}/jars/MacOSX.jar"
+				     excludes="${config.dist.dir}/jars/MacOS.jar"
 				     compression="bzip2"/>
 			</contrib:else>
 		</contrib:if>
