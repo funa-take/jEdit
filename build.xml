@@ -642,9 +642,11 @@
 		description="run jEdit">
 		<java jar="${jar.location}/${jar.filename}"
 		      fork="true"
-		      spawn="true">
+		      spawn="false">
 			<jvmarg value="--add-opens"/>
 			<jvmarg value="java.desktop/sun.awt.shell=ALL-UNNAMED"/>
+			<jvmarg value="--add-opens"/>
+			<jvmarg value="java.base/java.lang=ALL-UNNAMED"/>
 			<arg value="-settings=${build.dir}/settings"/>
 		</java>
 	</target>
