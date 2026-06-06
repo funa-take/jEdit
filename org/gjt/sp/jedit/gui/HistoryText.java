@@ -302,11 +302,8 @@ public class HistoryText
 		popup.addMenuKeyListener(new MenuKeyListener(){
 				@Override
 				public void menuKeyPressed(MenuKeyEvent evt){
-					if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
-						org.gjt.sp.jedit.gui.UserKey.consume(evt,0,0,0,0,true);
-						if (evt.isConsumed()){
-							return;
-						}
+					if (UserKeyDispatcher.handleMenuKey(evt)){
+						return;
 					}
 				}
 				@Override

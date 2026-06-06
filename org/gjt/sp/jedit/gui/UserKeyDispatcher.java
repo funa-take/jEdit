@@ -69,15 +69,6 @@ public class UserKeyDispatcher implements KeyEventDispatcher
 		installed = true;
 	} //}}}
 
-	//{{{ isInstalled() method
-	/**
-	 * @return Dispatcher が登録済みかどうか。
-	 */
-	public static boolean isInstalled()
-	{
-		return installed;
-	} //}}}
-
 	//{{{ dispatchKeyEvent() method
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent e)

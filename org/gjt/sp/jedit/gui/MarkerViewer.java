@@ -84,6 +84,7 @@ public class MarkerViewer extends JPanel implements ActionListener,DefaultFocusC
 		add(BorderLayout.NORTH, toolBar);
 
 		markerList = new JList<Marker>();
+		markerList.putClientProperty(UserKeyDispatcher.MODE_PROPERTY, UserKeyDispatcher.MODE_PLAIN);
 		markerList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		markerList.setCellRenderer(new Renderer());
 		markerList.addMouseListener(new MouseHandler());
@@ -309,13 +310,6 @@ public class MarkerViewer extends JPanel implements ActionListener,DefaultFocusC
 		@Override
 		public void keyPressed(KeyEvent evt)
 		{			
-			// Funa edit
-			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
-				org.gjt.sp.jedit.gui.UserKey.consume(evt,0,0,0,0,true);
-				if (evt.isConsumed()){
-					return;
-				}
-			}
 			
 			if(evt.getKeyCode() == KeyEvent.VK_SPACE
 			   || evt.getKeyCode() == KeyEvent.VK_ENTER)

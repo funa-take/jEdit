@@ -61,6 +61,7 @@ class BrowserView extends JPanel
 		parentDirectories = new ParentDirectoryList();
 		parentDirectories.addKeyListener(keyListener);
 		parentDirectories.setName("parent");
+		parentDirectories.putClientProperty(org.gjt.sp.jedit.gui.UserKeyDispatcher.MODE_PROPERTY, org.gjt.sp.jedit.gui.UserKeyDispatcher.MODE_NAV);
 		
 		parentDirectories.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		parentDirectories.setCellRenderer(new ParentDirectoryRenderer());
@@ -729,18 +730,6 @@ class BrowserView extends JPanel
 		{
 			if (evt.getID() == KeyEvent.KEY_PRESSED)
 			{
-				// Funa Edit
-				if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class") != null) {
-					org.gjt.sp.jedit.gui.UserKey.consume(evt,
-						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-						org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-						true);
-					if (evt.isConsumed()) {
-						return;
-					}
-				}
 				
 				ActionContext ac = VFSBrowser.getActionContext();
 				int row = parentDirectories.getSelectedIndex();

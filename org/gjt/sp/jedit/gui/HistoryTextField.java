@@ -238,18 +238,6 @@ public class HistoryTextField extends JTextField
 
 		if(evt.getID() == KeyEvent.KEY_PRESSED)
 		{
-			// Funa add
-			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
-				org.gjt.sp.jedit.gui.UserKey.consume(evt, 
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					true, true, true, true, true);
-				if (evt.isConsumed()){
-					return;
-				}
-			}
 			
 			
 			switch(evt.getKeyCode())

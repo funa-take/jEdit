@@ -389,13 +389,6 @@ public class CompletionPopup extends JWindow
 		@Override
 		public void keyPressed(KeyEvent e)
 		{
-			// Funa add
-			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
-				org.gjt.sp.jedit.gui.UserKey.consume(e,0,0,0,0,true);
-				if (e.isConsumed()){
-					return;
-				}
-			}
 			
 			CompletionPopup.this.keyPressed(e);
 

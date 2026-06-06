@@ -49,12 +49,11 @@ public class PasteFromListDialog extends EnhancedDialog
 		int maxItemLength =
 			jEdit.getIntegerProperty("paste-from-list.max-item-length", 1000);
 		clips = new JList<String>(model);
+		clips.putClientProperty(UserKeyDispatcher.MODE_PROPERTY, UserKeyDispatcher.MODE_PLAIN);
 		clips.setCellRenderer(new Renderer(maxItemLength));
 		clips.setVisibleRowCount(12);
 
 		clips.addMouseListener(new MouseHandler());
-		// Funa add
-		clips.addKeyListener(new KeyHandler());
 		clips.addListSelectionListener(new ListHandler());
 
 		insert = new JButton(jEdit.getProperty("common.insert"));
@@ -316,20 +315,6 @@ public class PasteFromListDialog extends EnhancedDialog
 		{
 			if(evt.getClickCount() == 2)
 				ok();
-		}
-	} //}}}
-	
-	//{{{ KeyHandler class
-	// Funa add
-	class KeyHandler extends KeyAdapter
-	{
-		public void keyPressed(KeyEvent evt){
-			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
-				org.gjt.sp.jedit.gui.UserKey.consume(evt,0,0,0,0,true);
-				if (evt.isConsumed()){
-					return;
-}
-			}
 		}
 	} //}}}
 }

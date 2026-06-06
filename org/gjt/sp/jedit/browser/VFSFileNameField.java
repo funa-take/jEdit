@@ -82,18 +82,6 @@ public class VFSFileNameField extends HistoryTextField
 	{
 		if(evt.getID() == KeyEvent.KEY_PRESSED)
 		{
-			//  Funa Edit
-			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class") != null) {
-				org.gjt.sp.jedit.gui.UserKey.consume(evt,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					true);
-				if (evt.isConsumed()) {
-					return;
-				}
-			}
 			String path = getText();
 
 			switch(evt.getKeyCode())

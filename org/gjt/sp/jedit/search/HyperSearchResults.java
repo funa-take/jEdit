@@ -124,6 +124,7 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 		resultTree.setEditable(false);
 
 		resultTree.addKeyListener(new KeyHandler());
+		resultTree.putClientProperty(org.gjt.sp.jedit.gui.UserKeyDispatcher.MODE_PROPERTY, org.gjt.sp.jedit.gui.UserKeyDispatcher.MODE_NAV);
 		resultTree.addMouseListener(new MouseHandler());
 
 		JScrollPane scrollPane = new JScrollPane(resultTree);
@@ -610,18 +611,6 @@ public class HyperSearchResults extends JPanel implements DefaultFocusComponent
 		@Override
 		public void keyPressed(KeyEvent evt)
 		{
-			// Funa add
-			if (ClassLoader.getSystemResource("org/gjt/sp/jedit/gui/UserKey.class")!=null){
-				org.gjt.sp.jedit.gui.UserKey.consume(evt,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					org.gjt.sp.jedit.gui.UserKey.ALLOW_CTRL | org.gjt.sp.jedit.gui.UserKey.ALLOW_SHIFT,
-					true);
-				if (evt.isConsumed()){
-					return;
-				}
-			}
 			switch(evt.getKeyCode())
 			{
 			case KeyEvent.VK_SPACE:
