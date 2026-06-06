@@ -1953,6 +1953,8 @@ public class GUIUtilities
 	//{{{ init() method
 	static void init()
 	{
+		org.gjt.sp.jedit.gui.UserKeyDispatcher.install();
+
 		initializeDeprecatedIcons();
 
 		// Load the icon theme but fallback on the old icons

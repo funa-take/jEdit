@@ -56,8 +56,12 @@ public class UserKey {
    *@param  blnESC          「ESCキー」に変換するかどうか
    */
   public static void consume(KeyEvent evt, int mod_up, int mod_right, int mod_down, int mod_left,
-    boolean blnUP_DOWN, boolean blnLEFT_REIGHT, boolean blnEdit, boolean blnESC, boolean blnHistory) 
+    boolean blnUP_DOWN, boolean blnLEFT_REIGHT, boolean blnEdit, boolean blnESC, boolean blnHistory)
   {
+    // UserKeyDispatcher が登録済みなら、そちらで一元的に処理されるため何もしない
+    if (UserKeyDispatcher.isInstalled()) {
+      return;
+    }
     int translateModifiers = KeyEventTranslator.translateModifiersEx(evt.getModifiersEx());
     switch (evt.getKeyCode()) {
     case KeyEvent.VK_I:
