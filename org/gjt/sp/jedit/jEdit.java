@@ -4854,6 +4854,9 @@ loop:
 		MyFocusManager()
 		{
 			setDefaultFocusTraversalPolicy(new LayoutFocusTraversalPolicy());
+			// jEdit は KFM を差し替えるため、ユーザーキー変換は
+			// この MyFocusManager 自身に登録して常に有効にする
+			addKeyEventDispatcher(new org.gjt.sp.jedit.gui.UserKeyDispatcher());
 		}
 
 		@Override

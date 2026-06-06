@@ -7,7 +7,6 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.InputEvent;
@@ -53,21 +52,6 @@ public class UserKeyDispatcher implements KeyEventDispatcher
 	private static final int RULE_PLAIN = 2;
 	/** ルール: 対象外。 */
 	private static final int RULE_NONE = -1;
-
-	private static boolean installed;
-
-	//{{{ install() method
-	/**
-	 * KeyEventDispatcher を登録する。GUI 初期化時に一度だけ呼ぶ。
-	 */
-	public static synchronized void install()
-	{
-		if (installed)
-			return;
-		KeyboardFocusManager.getCurrentKeyboardFocusManager()
-			.addKeyEventDispatcher(new UserKeyDispatcher());
-		installed = true;
-	} //}}}
 
 	//{{{ dispatchKeyEvent() method
 	@Override
