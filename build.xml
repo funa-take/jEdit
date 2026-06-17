@@ -102,7 +102,7 @@
 		depends="init,check-ivy"
 		unless="ivy.jar.present">
 		<mkdir dir="${ivy.jar.dir}"/>
-		<get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${config.ivy.version}/ivy-${config.ivy.version}.jar"
+		<get src="https://repo.maven.apache.org/maven2/org/apache/ivy/ivy/${config.ivy.version}/ivy-${config.ivy.version}.jar"
 		     dest="${ivy.jar.file}"
 		     usetimestamp="true"/>
 	</target>
@@ -167,6 +167,7 @@
 			          + (beta != 99 ? "pre" + beta : "." + micro);
 			project.setUserProperty("jedit.version", version);
 			project.setUserProperty("jedit.build.number", build);
+			project.setUserProperty("jedit.build.number.no.leading.zeros", major + "." + minor + "." + beta + "." + micro);
 			project.setUserProperty("jedit.version.final", Boolean.toString(beta == 99));
 		</script>
 		<property name="dist.jar.filename"
@@ -511,7 +512,7 @@
 		</copy>
 		<copy todir="${jar.location}/jars">
 			<fileset dir="${lib.dir}/default-plugins">
-				<exclude name="MacOSX.jar"/>
+				<exclude name="MacOS.jar"/>
 			</fileset>
 		</copy>
 		<contrib:if>
@@ -519,7 +520,7 @@
 			<contrib:then>
 				<copy todir="${jar.location}/jars">
 					<fileset dir="${lib.dir}/default-plugins">
-						<include name="MacOSX.jar"/>
+						<include name="MacOS.jar"/>
 					</fileset>
 				</copy>
 			</contrib:then>
@@ -597,7 +598,7 @@
 				       osfamily="mac"/>
 			</contrib:case>
 			<contrib:default>
-				<fail message="Unsupported OS family (${osfamily}). If you are on Windows, *nix or MacOS, please report this as bug, if not, please report it as a feature request"/>
+				<fail message="Unsupported OS family (${osfamily}). If you are on Windows, *nix or macOS, please report this as bug, if not, please report it as a feature request"/>
 			</contrib:default>
 		</contrib:switch>
 		<taskdef name="create"
@@ -642,8 +643,11 @@
 		<java jar="${jar.location}/${jar.filename}"
 		      fork="true"
 		      spawn="false">
+			<jvmarg value="--add-opens"/>
+			<jvmarg value="java.desktop/sun.awt.shell=ALL-UNNAMED"/>
+			<jvmarg value="--add-opens"/>
+			<jvmarg value="java.base/java.lang=ALL-UNNAMED"/>
 			<arg value="-settings=${build.dir}/settings"/>
-			<jvmarg value="--add-opens=java.base/java.lang=ALL-UNNAMED"/>
 		</java>
 	</target>
 
@@ -654,6 +658,8 @@
 		      fork="true"
 		      spawn="true">
 			<jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,address=localhost:5005,timeout=60000"/>
+			<jvmarg value="--add-opens"/>
+			<jvmarg value="java.desktop/sun.awt.shell=ALL-UNNAMED"/>
 			<arg value="-settings=${build.dir}/settings"/>
 		</java>
 	</target>
@@ -662,6 +668,12 @@
 		depends="init,retrieve">
 		<unzip src="${lib.dir}/docbook/docbook-xsl-resources.zip"
 		       dest="${build.dir}/docbook-xsl/"/>
+	</target>
+
+	<target name="unpack-docbook-xml"
+		depends="init,retrieve">
+		<unzip src="${lib.dir}/docbook/docbook-xml.jar"
+		       dest="${build.dir}/docbook-xml/"/>
 	</target>
 
 	<presetdef name="dependset.build">
@@ -694,6 +706,8 @@
 					location="${build.dir}/docbook-xsl/docbook/html/chunk.xsl"/>
 				<entity publicid="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
 					location="${build.dir}/docbook-xsl/docbook/fo/docbook.xsl"/>
+				<entity publicid="-//OASIS//DTD DocBook XML V4.4//EN"
+					location="${build.dir}/docbook-xml/docbookx.dtd"/>
 			</xmlcatalog>
 			<sysproperty key="javax.xml.parsers.DocumentBuilderFactory"
 				     value="org.apache.xerces.jaxp.DocumentBuilderFactoryImpl"/>
@@ -705,7 +719,7 @@
 	</presetdef>
 
 	<target name="generate-doc-faq"
-		depends="init,retrieve,setup,unpack-docbook-xsl">
+		depends="init,retrieve,setup,unpack-docbook-xsl,unpack-docbook-xml">
 		<dependset.html>
 			<srcfileset dir="doc/FAQ"/>
 			<targetfileset dir="${jar.location}/doc/FAQ"/>
@@ -729,7 +743,7 @@
 	</target>
 
 	<target name="generate-doc-news"
-		depends="init,retrieve,setup,unpack-docbook-xsl">
+		depends="init,retrieve,setup,unpack-docbook-xsl,unpack-docbook-xml">
 		<dependset.html>
 			<srcfileset dir="doc/whatsnew"/>
 			<targetfileset dir="${jar.location}/doc/whatsnew"/>
@@ -753,7 +767,7 @@
 	</target>
 
 	<target name="generate-doc-users-guide"
-		depends="init,retrieve,setup,unpack-docbook-xsl">
+		depends="init,retrieve,setup,unpack-docbook-xsl,unpack-docbook-xml">
 		<dependset.html>
 			<srcfileset dir="doc/users-guide"/>
 			<targetfileset dir="${jar.location}/doc/users-guide"/>
@@ -879,7 +893,7 @@
 	</target>
 
 	<target name="generate-pdf-users-guide"
-		depends="init,retrieve,setup,unpack-docbook-xsl">
+		depends="init,retrieve,setup,unpack-docbook-xsl,unpack-docbook-xml">
 		<fail message="Please set the property &quot;paper.type&quot;"
 		      unless="paper.type"/>
 		<contrib:switch value="${paper.type}">
@@ -1018,7 +1032,7 @@
 					      startup/**
 					      ${jar.filename}"
 				    excludes="doc/api/**
-					      jars/MacOSX.jar"/>
+					      jars/MacOS.jar"/>
 		</tar>
 		<tar destfile="${dist.dir}/jedit-windows.tar.bz2"
 		     longfile="gnu"
@@ -1032,7 +1046,7 @@
 		     compression="bzip2">
 			<tarfileset id="jedit-mac"
 				    dir="${dist.dir}"
-				    includes="jars/MacOSX.jar"/>
+				    includes="jars/MacOS.jar"/>
 		</tar>
 		<tar destfile="${dist.dir}/jedit-api.tar.bz2"
 		     longfile="gnu"
@@ -1184,8 +1198,8 @@
 
 	<target name="dist-mac-finish"
 		depends="init,retrieve,setup"
-		description="finish building the Mac OS X disk image (DMG-file) on Mac OS X">
-		<fail message="The disk image (DMG-file) for easy distribution on Mac OS X can only be built on Mac OS X currently">
+		description="finish building the macOS disk image (DMG-file) on macOS">
+		<fail message="The disk image (DMG-file) for easy distribution on macOS can only be built on macOS currently">
 			<condition>
 				<not>
 					<os family="mac"/>
@@ -1219,25 +1233,26 @@
 				   applicationCategory="public.app-category.developer-tools"
 				   highResolutionCapable="true"
 				   supportsAutomaticGraphicsSwitching="true"
+				   ignoreVerbose="true"
 				   mainclassname="org.gjt.sp.jedit.jEdit">
 			<classpath file="${dist.dir}/${jar.filename}"/>
 			<option value="-Dapple.awt.textantialiasing=true"/>
 			<option value="-Dapple.laf.useScreenMenuBar=true"/>
 			<option value="-Dapple.awt.antialiasing=true"/>
 			<argument value="-background"/>
+			<argument value="-reuseview"/>
 			<bundledocument contentTypes="public.text"
-					extensions="*"
 					icon="icons/file.icns"
 					name="jEdit TEXT Document"
 					role="Editor"/>
+			<bundledocument contentTypes="public.data, public.content"
+					icon="icons/file.icns"
+					name="jEdit Document"
+					role="Editor"
+					handlerRank="Alternate"/>
+			<arch name="arm64"/>
+			<arch name="x86_64"/>
 		</appbundler:create>
-		<!-- part of work-around for https://github.com/TheInfiniteKind/appbundler/pull/88 -->
-		<copy file="package-files/osx/jedit"
-		      todir="${dist.dir}/classes/mac/jEdit.app/Contents/MacOS/"
-		      overwrite="true"/>
-		<!-- part of work-around for https://github.com/TheInfiniteKind/appbundler/pull/88 -->
-		<chmod file="${dist.dir}/classes/mac/jEdit.app/Contents/MacOS/jedit"
-		       perm="+x"/>
 		<copy todir="${dist.dir}/classes/mac/jEdit.app/Contents/Java/"
 		      overwrite="true">
 			<fileset dir="${dist.dir}"
@@ -1249,69 +1264,87 @@
 					     properties/**
 					     startup/**"/>
 		</copy>
-		<replace file="${dist.dir}/classes/mac/jEdit.app/Contents/Info.plist"
-			 encoding="UTF-8"
-			 token="&lt;key&gt;IgnorePSN&lt;/key&gt;"
-			 value="&lt;key&gt;IgnoreVerbose&lt;/key&gt;&lt;true/&gt;&lt;key&gt;IgnorePSN&lt;/key&gt;"
-			 failonnoreplacements="true"/>
 		<copy todir="${dist.dir}/classes/mac/"
 		      overwrite="true">
 			<fileset dir="package-files/osx/"
-				 includes=".background/**"/>
+				 includes=".background/background.png"/>
 		</copy>
-		<delete failonerror="false">
-			<fileset dir="${dist.dir}"
-				 includes="*${mac.disk.image.filename}"/>
-		</delete>
-		<exec executable="hdiutil"
-		      failonerror="true">
-			<arg value="create"/>
-			<arg value="-volname"/>
-			<arg value="jEdit"/>
-			<arg value="-srcfolder"/>
-			<arg file="${dist.dir}/classes/mac"/>
-			<arg file="${dist.dir}/orig-${mac.disk.image.filename}"/>
-		</exec>
-		<exec executable="hdiutil"
-		      failonerror="true">
-			<arg value="convert"/>
-			<arg file="${dist.dir}/orig-${mac.disk.image.filename}"/>
-			<arg value="-format"/>
-			<arg value="UDRW"/>
-			<arg value="-o"/>
-			<arg file="${dist.dir}/udrw-${mac.disk.image.filename}"/>
-		</exec>
+		<!-- work-around for https://github.com/actions/runner-images/issues/7522 -->
+		<retry retrycount="3" retrydelay="1000">
+			<exec executable="hdiutil"
+				  failonerror="true">
+				<arg value="create"/>
+				<arg value="-volname"/>
+				<arg value="jEdit"/>
+				<arg value="-format"/>
+				<arg value="UDRW"/>
+				<arg value="-fs"/>
+				<arg value="HFS+"/>
+				<arg value="-srcfolder"/>
+				<arg file="${dist.dir}/classes/mac"/>
+				<arg value="-ov"/>
+				<arg file="${dist.dir}/udrw-${mac.disk.image.filename}"/>
+			</exec>
+		</retry>
+		<fail message="The mount point /Volumes/jEdit is occupied currently">
+			<condition>
+				<resourceexists>
+					<file file="/Volumes/jEdit"/>
+				</resourceexists>
+			</condition>
+		</fail>
 		<exec executable="hdiutil"
 		      failonerror="true">
 			<arg value="attach"/>
+			<arg value="-readwrite"/>
 			<arg file="${dist.dir}/udrw-${mac.disk.image.filename}"/>
 		</exec>
+		<fail message="The mount point /Volumes/jEdit is not found">
+			<condition>
+				<not>
+					<resourceexists>
+						<file file="/Volumes/jEdit"/>
+					</resourceexists>
+				</not>
+			</condition>
+		</fail>
 		<exec executable="ln"
 		      failonerror="true">
 			<arg value="-sF"/>
 			<arg file="/Applications"/>
-			<arg file="/Volumes/jEdit/"/>
+			<arg file="/Volumes/jEdit/Applications"/>
 		</exec>
-		<copy file="package-files/osx/DS_Store"
-		      tofile="/Volumes/jEdit/.DS_Store"
-		      overwrite="true"/>
+		<exec executable="osascript"
+		      failonerror="true">
+			<arg file="package-files/osx/set-background.scpt"/>
+			<arg value="jEdit"/> <!-- volumeName -->
+			<arg value="200"/> <!-- windowX -->
+			<arg value="200"/> <!-- windowY -->
+			<arg value="512"/> <!-- windowWidth -->
+			<arg value="648"/> <!-- windowHeight (image height + 28) -->
+			<arg value="130"/> <!-- iconSize -->
+			<arg value=".background:background.png"/> <!-- backgroundImage -->
+			<arg value="jEdit"/> <!-- appName -->
+			<arg value="111"/> <!-- appIconX -->
+			<arg value="192"/> <!-- appIconY -->
+			<arg value="401"/> <!-- appFolderX -->
+			<arg value="192"/> <!-- appFolderY -->
+		</exec>
 		<exec executable="hdiutil"
 		      failonerror="true">
 			<arg value="detach"/>
 			<arg file="/Volumes/jEdit"/>
 			<arg value="-force"/>
 		</exec>
-		<copy file="${dist.dir}/udrw-${mac.disk.image.filename}"
-		      tofile="${dist.dir}/udrw-copy-${mac.disk.image.filename}"
-		      overwrite="true"/>
 		<exec executable="hdiutil"
 		      failonerror="true">
 			<arg value="convert"/>
-			<arg file="${dist.dir}/udrw-copy-${mac.disk.image.filename}"/>
+			<arg file="${dist.dir}/udrw-${mac.disk.image.filename}"/>
 			<arg value="-format"/>
 			<arg value="UDZO"/>
 			<arg value="-imagekey"/>
 			<arg value="zlib-level=9"/>
+			<arg value="-ov"/>
 			<arg value="-o"/>
 			<arg file="${dist.dir}/${mac.disk.image.filename}"/>
 		</exec>
@@ -1322,7 +1355,7 @@
 
 	<target name="dist-mac"
 		depends="init,retrieve,setup,prepare-dist-files"
-		description="build the Mac OS X disk image (DMG-file)">
+		description="build the macOS disk image (DMG-file)">
 		<contrib:if>
 			<os family="mac"/>
 			<contrib:then>
@@ -1417,6 +1450,8 @@
 					value="${jar.filename}"/>
 				<filter token="jedit.build.number"
 					value="${jedit.build.number}"/>
+				<filter token="jedit.build.number.no.leading.zeros"
+					value="${jedit.build.number.no.leading.zeros}"/>
 				<filter token="jedit.version"
 					value="${jedit.version}"/>
 				<filter token="target.java.version"
@@ -1514,7 +1549,7 @@
 					      properties/**
 					      startup/**
 					      ${jar.filename}"
-				    excludes="jars/MacOSX.jar"
+				    excludes="jars/MacOS.jar"
 				    username="root"
 				    group="root"
 				    prefix="usr/share/jedit-${jedit.version}/"/>
@@ -1650,7 +1685,7 @@
 					   properties/**
 					   startup/**
 					   ${jar.filename}"
-				 excludes="jars/MacOSX.jar"/>
+				 excludes="jars/MacOS.jar"/>
 		</mod:calculatesize>
 		<copy todir="${dist.dir}/classes/package-files/linux/deb"
 		      encoding="UTF-8"
@@ -1712,7 +1747,7 @@
 			<datafileset file="."
 				     fullpath="usr/share/jEdit/jars/"/>
 			<datafileset dir="${dist.dir}/jars"
-				     excludes="MacOSX.jar"
+				     excludes="MacOS.jar"
 				     prefix="usr/share/jEdit/jars/"/>
 			<datafileset file="."
 				     fullpath="usr/share/man/"/>
@@ -2050,7 +2085,7 @@ Press Return key to continue...
 					       ${config.dist.dir}/modes/**
 					       ${config.dist.dir}/properties/**
 					       ${config.dist.dir}/startup/**"
-				     excludes="${config.dist.dir}/jars/MacOSX.jar"
+				     excludes="${config.dist.dir}/jars/MacOS.jar"
 				     compression="bzip2"/>
 			</contrib:else>
 		</contrib:if>
