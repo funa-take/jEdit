@@ -39,8 +39,24 @@ public class UserKey {
     
     return true;
   }
-  
-  
+
+
+  /**
+   *  OS によるキーコードの差異を吸収する。
+   *  macOS では JIS キーボードの「:」キーが VK_COLON ではなく
+   *  VK_QUOTE（US 配列の同一物理キー位置）として通知されるため読み替える。
+   *
+   *@param  keyCode  KeyEvent から取得したキーコード
+   *@return          変換後のキーコード
+   */
+  private static int normalizeKeyCode(int keyCode) {
+    if (OperatingSystem.isMacOS() && keyCode == KeyEvent.VK_QUOTE) {
+      return KeyEvent.VK_COLON;
+    }
+    return keyCode;
+  }
+
+
   /**
    *  ユーザー用のキー入力変換の変換を行う。
    *  例：Alt + j -> 「←キー」
@@ -59,7 +75,7 @@ public class UserKey {
     boolean blnUP_DOWN, boolean blnLEFT_REIGHT, boolean blnEdit, boolean blnESC, boolean blnHistory) 
   {
     int translateModifiers = KeyEventTranslator.translateModifiersEx(evt.getModifiersEx());
-    switch (evt.getKeyCode()) {
+    switch (normalizeKeyCode(evt.getKeyCode())) {
     case KeyEvent.VK_I:
       if (blnUP_DOWN && isConsume(translateModifiers, mod_up)) {
         // if (evt.isAltDown() && !evt.isAltGraphDown()
